@@ -1,20 +1,56 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
-import { useSelector } from "react-redux";
-import { RootState } from "@/redux/store";
 import Link from "next/link";
-import { Gamepad2, Users, Clock, ArrowLeft } from "lucide-react";
-import { useGetGameRoomsQuery } from "@/redux/features/game/GameRoomApiSlice";
+import { useRouter, useSearchParams } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
-import Image from "next/image";
+import { useSelector } from "react-redux";
+import LobbyTableCard from "@/components/lobby/LobbyTableCard";
+import { getGamePresentation } from "@/components/lobby/lobbyTheme";
 import LoadingSpinner from "@/components/loadingSpinner";
 import { getSocket } from "@/lib/wsClient";
+import { useGetGameRoomsQuery } from "@/redux/features/game/GameRoomApiSlice";
+import { RootState } from "@/redux/store";
 
 type RoomUserCountItem = {
   room_id: number;
   user_count: number;
 };
+
+function LobbyNotice({
+  ctaHref,
+  ctaLabel,
+  description,
+  title,
+}: {
+  ctaHref?: string;
+  ctaLabel?: string;
+  description: string;
+  title: string;
+}) {
+  return (
+    <div className="mt-8 rounded-[34px] border border-[#d9bc84] bg-[#f8edd7]/95 p-3 shadow-[0_24px_60px_rgba(112,69,20,0.16)]">
+      <div className="rounded-[28px] border border-[#ecd8b0] bg-[#fff8ea]/92 p-6 text-center">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-[#af7739]">
+          Lobby Notice
+        </p>
+        <h1 className="mt-3 text-[2rem] font-semibold tracking-[-0.03em] text-[#4f2709]">
+          {title}
+        </h1>
+        <p className="mt-3 text-sm leading-6 text-[#7c5128]">{description}</p>
+
+        {ctaHref && ctaLabel && (
+          <Link
+            href={ctaHref}
+            className="mt-6 inline-flex rounded-full bg-[#9b2c35] px-5 py-3 text-sm font-semibold text-[#fff8e4] shadow-[0_18px_34px_rgba(100,33,21,0.22)] transition hover:brightness-105"
+          >
+            {ctaLabel}
+          </Link>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export default function GameRoomsClient() {
   const router = useRouter();
@@ -67,11 +103,10 @@ export default function GameRoomsClient() {
       const payload = data as Partial<RoomUserCountItem>;
       if (typeof payload.room_id !== "number") return;
       if (typeof payload.user_count !== "number") return;
-      const roomId = payload.room_id;
-      const userCount = payload.user_count;
+
       setRoomUserCounts((prev) => ({
         ...prev,
-        [roomId]: userCount,
+        [payload.room_id as number]: payload.user_count as number,
       }));
     };
 
@@ -91,128 +126,123 @@ export default function GameRoomsClient() {
     return null;
   }
 
-  if (!gameId) {
-    return (
-      <div className="relative z-10 mx-auto flex min-h-[100dvh] w-full flex-col items-center px-5 py-8 text-amber-100">
-        <div className="flex w-full items-center justify-start">
-          <ArrowLeft size={18} onClick={() => router.back()} />
-        </div>
-        <div className="text-center">
-          <h1 className="text-2xl font-semibold text-amber-200">
-            Game Not Found
-          </h1>
-          <p className="mt-4 text-amber-100">
-            Please select a game from the home page.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!token) {
-    return (
-      <div className="relative z-10 mx-auto flex min-h-[100dvh] w-full flex-col items-center px-5 py-8 text-amber-100">
-        <div className="flex w-full items-center justify-start">
-          <ArrowLeft size={18} onClick={() => router.back()} />
-        </div>
-        <div className="text-center">
-          <h1 className="text-2xl font-semibold text-amber-200">
-            Login Required
-          </h1>
-          <p className="mt-4 text-amber-100">Please login to play games.</p>
-        </div>
-      </div>
-    );
-  }
-
   const rooms = roomsData?.data?.filter((room) => room.status === "open") || [];
+  const activeGame = rooms[0]?.game;
+  const presentation = activeGame
+    ? getGamePresentation(activeGame.id, activeGame.name)
+    : getGamePresentation(Number(gameId || 0), "Live Table");
   const isCoinflipGame = gameId === "2";
 
   return (
-    <div className="relative z-10 mx-auto flex min-h-[100dvh] w-full flex-col px-5 py-2 text-amber-100">
-      <div className="flex items-center justify-start">
-        <ArrowLeft size={18} onClick={() => router.back()} />
+    <div className="relative z-10 mx-auto flex min-h-full w-full flex-1 flex-col px-4 pb-28 pt-2 text-[#4f2809]">
+      <div className="flex items-center justify-between gap-3">
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[#d8bb82] bg-[#f7ebd4]/95 text-[#75471e] transition hover:bg-[#fff5e2]"
+          aria-label="Go back"
+        >
+          <ArrowLeft size={18} />
+        </button>
+
+        <div className="rounded-full border border-[#d8bb82] bg-[#f8edd5]/95 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-[#a87438]">
+          {rooms.length} Open Rooms
+        </div>
       </div>
+
       {isLoading && <LoadingSpinner />}
 
-      {error && (
-        <div className="text-center py-8">
-          <p className="text-red-400">
-            Failed to load rooms. Please try again.
-          </p>
-        </div>
+      {!gameId && (
+        <LobbyNotice
+          ctaHref="/"
+          ctaLabel="Back To Lobby"
+          description="Choose a game from the lobby first, then the room list will open with live tables."
+          title="Game Not Found"
+        />
       )}
 
-      {!isLoading && !error && rooms.length > 0 && (
+      {gameId && !token && (
+        <LobbyNotice
+          ctaHref={`/login?redirectUrl=${encodeURIComponent(`/game-rooms?game_id=${gameId}`)}`}
+          ctaLabel="Login To Continue"
+          description="This lobby only opens for signed-in players so we can sync live room counts and wallet balance."
+          title="Login Required"
+        />
+      )}
+
+      {gameId && token && (
         <>
-          <div className="mb-6 text-center">
-            <h1 className="text-3xl font-bold text-amber-200">
-              {rooms[0]?.game?.name || "Game Rooms"}
-            </h1>
+          <div className="mt-5 rounded-[34px] border border-[#d8bb82] bg-[#f8edd7]/95 p-3 shadow-[0_24px_60px_rgba(112,69,20,0.16)]">
+            <div className="rounded-[28px] border border-[#ecd8b0] bg-[#fff8ea]/92 p-5">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-[#af7739]">
+                {presentation.eyebrow}
+              </p>
+              <h1 className="mt-3 text-[2.25rem] font-semibold leading-none tracking-[-0.04em] text-[#4f2709]">
+                {activeGame?.name || "Game Rooms"}
+              </h1>
+              <p className="mt-3 text-sm leading-6 text-[#7c5128]">
+                Pick an open table, check the live player count, and move
+                directly into the next round.
+              </p>
+            </div>
           </div>
 
-          <section className="mt-6 grid grid-cols-2 gap-4">
-            {rooms.map((room) => (
-              <article
-                key={room.id}
-                className="flex flex-col items-center rounded-[32px] border border-[#EA2121] bg-[#14100b] p-4 text-center shadow-[0_20px_60px_rgba(0,0,0,0.35)]"
-              >
-                <header className="mb-3 text-base font-semibold tracking-wide text-amber-100">
-                  {room.room_name}
-                </header>
+          {error && (
+            <p className="mt-4 text-center text-sm text-[#9b2c35]">
+              Failed to load rooms. Please try again.
+            </p>
+          )}
 
-                <div className="flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-b from-amber-100/25 to-transparent ring-1 ring-amber-100/20">
-                  <div className="h-20 w-20 rounded-full bg-amber-200/20 flex items-center justify-center">
-                    {isCoinflipGame ? (
-                      <Image
-                        src="/images/coin_flip_one.webp"
-                        alt={room.room_name}
-                        width={80}
-                        height={80}
-                        className="h-16 w-16 object-contain"
-                      />
-                    ) : (
-                      <Gamepad2 size={32} className="text-amber-300" />
-                    )}
-                  </div>
-                </div>
-                <div className="mt-4 space-y-2 text-sm text-amber-100">
-                  <div className="flex items-center pl-10 gap-2 text-sm text-amber-100">
-                    <Clock size={14} className="text-amber-300" />
-                    <span>{room.game_rule?.time_per_round}s</span>
-                  </div>
-                  <div className="flex items-center pl-10 gap-2 text-sm text-amber-100">
-                    <Users size={16} />
-                    <span>{roomUserCounts[room.id] ?? 0}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-xs text-amber-100/90">
-                    <span>Min Bet: {room.game_rule?.min_bet_amount}</span>
-                    <span>Max Bet: {room.game_rule?.max_bet_amount}</span>
-                  </div>
-                </div>
-                <div className="mt-4 flex justify-center">
-                  <Link
-                    href={
-                      isCoinflipGame ? `/coin-flip-game?game_room_id=${room.id}` : "#"
-                    }
-                    className={`inline-flex items-center gap-2 rounded-full px-6 py-2 text-[#3b0500] ${
-                      isCoinflipGame
-                        ? "bg-amber-100/90 hover:bg-amber-100"
-                        : "cursor-not-allowed bg-amber-100/50"
-                    }`}
-                    aria-disabled={!isCoinflipGame}
-                    onClick={(e) => {
-                      if (isCoinflipGame) return;
-                      e.preventDefault();
-                    }}
-                  >
-                    <Gamepad2 size={16} className="text-[#3b0500]" />
-                    {isCoinflipGame ? "Play" : "Unavailable"}
-                  </Link>
-                </div>
-              </article>
-            ))}
-          </section>
+          {!isLoading && !error && rooms.length === 0 && (
+            <LobbyNotice
+              ctaHref="/"
+              ctaLabel="Explore Other Games"
+              description="There are no open tables for this game right now. Check back later or return to the main lobby."
+              title="No Open Rooms"
+            />
+          )}
+
+          {!isLoading && !error && rooms.length > 0 && (
+            <section className="mt-5 grid gap-4">
+              {rooms.map((room, index) => {
+                const playerCount = roomUserCounts[room.id] ?? 0;
+                const userLimit = room.game_rule?.user_limit ?? 0;
+                const playHref = isCoinflipGame
+                  ? `/coin-flip-game?game_room_id=${room.id}`
+                  : undefined;
+
+                return (
+                  <LobbyTableCard
+                    key={room.id}
+                    actionLabel={playHref ? "Join Room" : "Unavailable"}
+                    badge={playHref ? "Open" : "Soon"}
+                    disabled={!playHref}
+                    eyebrow={room.room_code || `Room ${room.id}`}
+                    href={playHref}
+                    imageAlt={room.room_name}
+                    imageSrc={presentation.imageSrc}
+                    stats={[
+                      {
+                        label: "Round",
+                        value: `${room.game_rule?.time_per_round ?? 0}s`,
+                      },
+                      {
+                        label: "Players",
+                        value: userLimit ? `${playerCount}/${userLimit}` : `${playerCount}`,
+                      },
+                      {
+                        label: "Bet",
+                        value: `${room.game_rule?.min_bet_amount ?? 0}-${room.game_rule?.max_bet_amount ?? 0}`,
+                      },
+                    ]}
+                    subtitle={`Enter ${room.room_name} and settle into the next live ${activeGame?.name?.toLowerCase() || "game"} round.`}
+                    themeIndex={index}
+                    title={room.room_name}
+                  />
+                );
+              })}
+            </section>
+          )}
         </>
       )}
     </div>

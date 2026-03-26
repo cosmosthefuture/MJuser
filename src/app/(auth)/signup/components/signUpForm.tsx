@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import http from "@/redux/http";
 import { useForm, SubmitHandler } from "react-hook-form";
@@ -170,168 +170,163 @@ export default function SignUpForm() {
   useEffect(() => {
     dispatch(clearToken());
   }, [dispatch]);
+
   return (
-    <div className="rounded-3xl bg-white/5 p-6 backdrop-blur-md ring-1 ring-amber-200/20 shadow-2xl shadow-amber-900/20">
-      <form
-        className="space-y-5"
-        onSubmit={handleSubmit(onSubmit)}
-        action="#"
-        method="POST"
+    <form
+      className="space-y-5"
+      onSubmit={handleSubmit(onSubmit)}
+      action="#"
+      method="POST"
+    >
+      <div className="space-y-2">
+        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#f1d58d]">
+          Name
+        </p>
+        <Input
+          id="name"
+          type="text"
+          placeholder="Name"
+          autoComplete="off"
+          variant="casino"
+          {...register("name", {
+            required: "Name is required.",
+          })}
+          error={!!errors.name}
+          hint={errors.name?.message}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#f1d58d]">
+          Phone Number
+        </p>
+        <div className="relative">
+          <Input
+            id="phone_number"
+            type="tel"
+            inputMode="numeric"
+            placeholder="Phone Number"
+            autoComplete="tel"
+            variant="casino"
+            className="pr-28"
+            {...register("phone_number", {
+              required: "Phone number is required.",
+              minLength: {
+                value: 6,
+                message: "Please enter a valid phone number.",
+              },
+            })}
+            error={!!errors.phone_number}
+            hint={errors.phone_number?.message}
+          />
+          <Button
+            type="button"
+            onClick={handleGetOtp}
+            disabled={otpLoading || loading || otpCooldown > 0}
+            className="absolute right-1.5 top-1.5 h-10 rounded-full border border-[#d8bb82] bg-[#f4e3bd] px-3 text-[10px] font-semibold tracking-[0.18em] text-[#71421f] shadow-none hover:bg-[#faedd0]"
+            variant="ghost"
+          >
+            {otpCooldown > 0 ? `${otpCooldown}s` : "GET OTP"}
+          </Button>
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#f1d58d]">
+          Agent Code (Optional)
+        </p>
+        <Input
+          id="agent_code"
+          type="text"
+          placeholder="Agent Code (Optional)"
+          autoComplete="off"
+          variant="casino"
+          {...register("agent_code")}
+          error={!!errors.agent_code}
+          hint={errors.agent_code?.message}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#f1d58d]">
+          OTP
+        </p>
+        <Input
+          id="otp"
+          type="text"
+          placeholder="OTP"
+          autoComplete="off"
+          variant="casino"
+          {...register("otp", {
+            required: "OTP is required.",
+            minLength: {
+              value: 6,
+              message: "OTP must be 6 digits.",
+            },
+            maxLength: {
+              value: 6,
+              message: "OTP must be 6 digits.",
+            },
+          })}
+          error={!!errors.otp}
+          hint={errors.otp?.message}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#f1d58d]">
+          Password
+        </p>
+        <Input
+          id="password"
+          type="password"
+          placeholder="Password"
+          autoComplete="off"
+          variant="casino"
+          {...register("password", {
+            required: "Password is required.",
+            minLength: {
+              value: 8,
+              message: "Password must be at least 8 characters long.",
+            },
+            maxLength: {
+              value: 20,
+              message: "Password must be at most 20 characters long.",
+            },
+          })}
+          error={!!errors.password}
+          hint={errors.password?.message}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#f1d58d]">
+          Confirm Password
+        </p>
+        <Input
+          id="password_confirmation"
+          type="password"
+          placeholder="Confirm Password"
+          autoComplete="off"
+          variant="casino"
+          {...register("password_confirmation", {
+            required: "Password confirmation is required.",
+            validate: (value: string) =>
+              value === watch("password") || "Passwords do not match.",
+          })}
+          error={!!errors.password_confirmation}
+          hint={errors.password_confirmation?.message}
+        />
+      </div>
+
+      <Button
+        disabled={loading}
+        type="submit"
+        className="flex h-12 w-full items-center justify-center rounded-full bg-[#9b2c35] px-5 text-base font-semibold text-[#fff8e4] shadow-[0_18px_34px_rgba(100,33,21,0.22)] transition hover:brightness-105 disabled:opacity-70"
       >
-        <div className="space-y-2">
-          <p className="text-xs uppercase tracking-[0.3em] text-amber-200/70">
-            Name
-          </p>
-          <Input
-            id="name"
-            type="text"
-            placeholder="Name"
-            autoComplete="off"
-            variant="dark"
-            {...register("name", {
-              required: "Name is required.",
-            })}
-            error={!!errors.name}
-            hint={errors.name?.message}
-          />
-        </div>
-
-        <div className="space-y-2">
-          <p className="text-xs uppercase tracking-[0.3em] text-amber-200/70">
-            Phone Number
-          </p>
-          <div className="relative">
-            <Input
-              id="phone_number"
-              type="tel"
-              inputMode="numeric"
-              placeholder="Phone Number"
-              autoComplete="tel"
-              variant="dark"
-              className="pr-28"
-              {...register("phone_number", {
-                required: "Phone number is required.",
-                minLength: {
-                  value: 6,
-                  message: "Please enter a valid phone number.",
-                },
-              })}
-              error={!!errors.phone_number}
-              hint={errors.phone_number?.message}
-            />
-            <Button
-              type="button"
-              onClick={handleGetOtp}
-              disabled={otpLoading || loading || otpCooldown > 0}
-              className="absolute top-2 right-1 h-8 w-16 rounded-xl border border-amber-200/30 bg-white/10 px-0 text-xs font-semibold text-amber-100 hover:bg-white/20 text-center"
-              variant="ghost"
-            >
-              {otpCooldown > 0 ? `${otpCooldown}s` : "GET OTP"}
-            </Button>
-          </div>
-        </div>
-        <div className="space-y-2">
-          <p className="text-xs uppercase tracking-[0.3em] text-amber-200/70">
-            Agent Code (Optional)
-          </p>
-          <Input
-            id="agent_code"
-            type="text"
-            placeholder="Agent Code (Optional)"
-            autoComplete="off"
-            variant="dark"
-            {...register("agent_code")}
-            error={!!errors.agent_code}
-            hint={errors.agent_code?.message}
-          />
-        </div>
-        <div className="space-y-2">
-          <p className="text-xs uppercase tracking-[0.3em] text-amber-200/70">
-            OTP
-          </p>
-          <Input
-            id="otp"
-            type="text"
-            placeholder="OTP"
-            autoComplete="off"
-            variant="dark"
-            {...register("otp", {
-              required: "OTP is required.",
-              minLength: {
-                value: 6,
-                message: "OTP must be 6 digits.",
-              },
-              maxLength: {
-                value: 6,
-                message: "OTP must be 6 digits.",
-              },
-            })}
-            error={!!errors.otp}
-            hint={errors.otp?.message}
-          />
-        </div>
-
-        <div className="space-y-2">
-          <p className="text-xs uppercase tracking-[0.3em] text-amber-200/70">
-            Password
-          </p>
-          <Input
-            id="password"
-            type="password"
-            placeholder="Password"
-            autoComplete="off"
-            variant="dark"
-            {...register("password", {
-              required: "Password is required.",
-              minLength: {
-                value: 8,
-                message: "Password must be at least 8 characters long.",
-              },
-              maxLength: {
-                value: 20,
-                message: "Password must be at most 20 characters long.",
-              },
-            })}
-            error={!!errors.password}
-            hint={errors.password?.message}
-          />
-        </div>
-
-        <div className="space-y-2">
-          <p className="text-xs uppercase tracking-[0.3em] text-amber-200/70">
-            Confirm Password
-          </p>
-          <Input
-            id="password_confirmation"
-            type="password"
-            placeholder="Confirm Password"
-            autoComplete="off"
-            variant="dark"
-            {...register("password_confirmation", {
-              required: "Password confirmation is required.",
-              validate: (value: string) =>
-                value === watch("password") || "Passwords do not match.",
-            })}
-            error={!!errors.password_confirmation}
-            hint={errors.password_confirmation?.message}
-          />
-        </div>
-
-        <Button
-          disabled={loading}
-          type="submit"
-          className="w-full rounded-full bg-gradient-to-r from-[#f9c86c] to-[#f5a623] py-4 text-base font-semibold text-[#3c0505] shadow-lg shadow-amber-900/40 transition hover:brightness-110 disabled:opacity-70"
-        >
-          {loading ? (
-            "Registering..."
-          ) : (
-            <span className="flex items-center justify-center gap-2">
-              Register
-            </span>
-          )}
-        </Button>
-      </form>
-    </div>
+        {loading ? "Registering..." : "Create Account"}
+      </Button>
+    </form>
   );
 }
 
