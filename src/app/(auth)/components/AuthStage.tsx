@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 
 type AuthStageProps = {
   children: React.ReactNode;
+  compactMobile?: boolean;
   eyebrow: string;
   linkHref: string;
   linkLabel: string;
@@ -19,9 +20,14 @@ type ViewportState = {
   height: number;
 };
 
+const DEFAULT_VIEWPORT: ViewportState = {
+  width: 1280,
+  height: 720,
+};
+
 function getViewportState(): ViewportState {
   if (typeof window === "undefined") {
-    return { width: 1280, height: 720 };
+    return DEFAULT_VIEWPORT;
   }
 
   return {
@@ -32,13 +38,15 @@ function getViewportState(): ViewportState {
 
 export default function AuthStage({
   children,
+  compactMobile = false,
   eyebrow,
   linkHref,
   linkLabel,
   linkPrompt,
   title,
 }: AuthStageProps) {
-  const [viewport, setViewport] = useState<ViewportState>(getViewportState);
+  const [hasMounted, setHasMounted] = useState(false);
+  const [viewport, setViewport] = useState<ViewportState>(DEFAULT_VIEWPORT);
 
   useEffect(() => {
     const updateViewport = () => {
@@ -53,6 +61,7 @@ export default function AuthStage({
       void orientationApi.lock("landscape").catch(() => undefined);
     }
 
+    setHasMounted(true);
     updateViewport();
     window.addEventListener("resize", updateViewport);
     window.addEventListener("orientationchange", updateViewport);
@@ -64,7 +73,7 @@ export default function AuthStage({
   }, []);
 
   const isPortraitPhone =
-    viewport.width < 900 && viewport.height > viewport.width;
+    hasMounted && viewport.width < 900 && viewport.height > viewport.width;
   const stageStyle = isPortraitPhone
     ? {
         width: `${viewport.height}px`,
@@ -95,7 +104,11 @@ export default function AuthStage({
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(10,20,44,0.16)_0%,rgba(10,20,44,0.08)_40%,rgba(77,39,10,0.24)_100%)]" />
 
         <div className="h-full overflow-y-auto">
-          <div className="relative z-10 mx-auto flex min-h-[100dvh] w-full max-w-sm flex-1 flex-col justify-center px-4 py-8">
+          <div
+            className={`relative z-10 mx-auto flex min-h-[10dvh] w-full max-w-[40rem] flex-1 flex-col justify-center px-4 ${
+              compactMobile ? "py-4 sm:py-8" : "py-8"
+            }`}
+          >
             <div className="relative p-0">
               <div className="relative p-0">
                 <Link
@@ -105,7 +118,11 @@ export default function AuthStage({
                   Back To Lobby
                 </Link>
 
-                <div className="mt-4 rounded-[30px] border border-[#2d5137] felt-panel p-5 text-[#fff8e1] shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_20px_40px_rgba(16,35,20,0.25)]">
+                <div
+                  className={`rounded-[30px] border border-[#2d5137] felt-panel p-5 text-[#fff8e1] shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_20px_40px_rgba(16,35,20,0.25)] ${
+                    compactMobile ? "mt-2 sm:mt-4" : "mt-4"
+                  }`}
+                >
                   <div className="rounded-[24px] border border-white/10 bg-black/10 p-5 backdrop-blur-[2px]">
                     {eyebrow ? (
                       <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-[#f1d58d]">
@@ -120,11 +137,17 @@ export default function AuthStage({
                       {title}
                     </h1>
 
-                    <div className="mt-6">{children}</div>
+                    <div className={compactMobile ? "mt-4 sm:mt-6" : "mt-6"}>
+                      {children}
+                    </div>
                   </div>
                 </div>
 
-                <div className="mt-4 flex items-center justify-between gap-3 rounded-[22px] border border-[#e7d2a8] bg-[#f4e5c3]/95 px-4 py-3 text-sm text-[#704826]">
+                <div
+                  className={`flex items-center justify-between gap-3 rounded-[22px] border border-[#e7d2a8] bg-[#f4e5c3]/95 px-4 py-3 text-sm text-[#704826] ${
+                    compactMobile ? "mt-3 sm:mt-4" : "mt-4"
+                  }`}
+                >
                   <span>{linkPrompt}</span>
                   <Link
                     href={linkHref}

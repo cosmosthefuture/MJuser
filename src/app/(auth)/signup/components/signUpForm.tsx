@@ -178,145 +178,157 @@ export default function SignUpForm() {
       action="#"
       method="POST"
     >
-      <div className="space-y-2">
-        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#f1d58d]">
-          Name
-        </p>
-        <Input
-          id="name"
-          type="text"
-          placeholder="Name"
-          autoComplete="off"
-          variant="casino"
-          {...register("name", {
-            required: "Name is required.",
-          })}
-          error={!!errors.name}
-          hint={errors.name?.message}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#f1d58d]">
-          Phone Number
-        </p>
-        <div className="relative">
-          <Input
-            id="phone_number"
-            type="tel"
-            inputMode="numeric"
-            placeholder="Phone Number"
-            autoComplete="tel"
-            variant="casino"
-            className="pr-28"
-            {...register("phone_number", {
-              required: "Phone number is required.",
-              minLength: {
-                value: 6,
-                message: "Please enter a valid phone number.",
-              },
-            })}
-            error={!!errors.phone_number}
-            hint={errors.phone_number?.message}
-          />
-          <Button
-            type="button"
-            onClick={handleGetOtp}
-            disabled={otpLoading || loading || otpCooldown > 0}
-            className="absolute right-1.5 top-1.5 h-10 rounded-full border border-[#d8bb82] bg-[#f4e3bd] px-3 text-[10px] font-semibold tracking-[0.18em] text-[#71421f] shadow-none hover:bg-[#faedd0]"
-            variant="ghost"
-          >
-            {otpCooldown > 0 ? `${otpCooldown}s` : "GET OTP"}
-          </Button>
+      <div className="space-y-3">
+        <div className="flex items-center gap-3">
+          <p className="w-32 shrink-0 text-xs font-semibold uppercase tracking-[0.18em] text-[#f1d58d]">
+            Name
+          </p>
+          <div className="flex-1">
+            <Input
+              id="name"
+              type="text"
+              placeholder="Name"
+              autoComplete="off"
+              variant="casino"
+              {...register("name", {
+                required: "Name is required.",
+              })}
+              error={!!errors.name}
+              hint={errors.name?.message}
+            />
+          </div>
         </div>
-      </div>
 
-      <div className="space-y-2">
-        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#f1d58d]">
-          Agent Code (Optional)
-        </p>
-        <Input
-          id="agent_code"
-          type="text"
-          placeholder="Agent Code (Optional)"
-          autoComplete="off"
-          variant="casino"
-          {...register("agent_code")}
-          error={!!errors.agent_code}
-          hint={errors.agent_code?.message}
-        />
-      </div>
+        <div className="flex items-center gap-3">
+          <p className="w-32 shrink-0 text-xs font-semibold uppercase tracking-[0.18em] text-[#f1d58d]">
+            Phone Number
+          </p>
+          <div className="relative flex-1">
+            <Input
+              id="phone_number"
+              type="tel"
+              inputMode="numeric"
+              placeholder="Phone Number"
+              autoComplete="tel"
+              variant="casino"
+              className="pr-28"
+              {...register("phone_number", {
+                required: "Phone number is required.",
+                minLength: {
+                  value: 6,
+                  message: "Please enter a valid phone number.",
+                },
+              })}
+              error={!!errors.phone_number}
+              hint={errors.phone_number?.message}
+            />
+            <Button
+              type="button"
+              onClick={handleGetOtp}
+              disabled={otpLoading || loading || otpCooldown > 0}
+              className="absolute right-1.5 top-1.5 h-10 rounded-full border border-[#d8bb82] bg-[#f4e3bd] px-3 text-[10px] font-semibold tracking-[0.18em] text-[#71421f] shadow-none hover:bg-[#faedd0]"
+              variant="ghost"
+            >
+              {otpCooldown > 0 ? `${otpCooldown}s` : "GET OTP"}
+            </Button>
+          </div>
+        </div>
 
-      <div className="space-y-2">
-        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#f1d58d]">
-          OTP
-        </p>
-        <Input
-          id="otp"
-          type="text"
-          placeholder="OTP"
-          autoComplete="off"
-          variant="casino"
-          {...register("otp", {
-            required: "OTP is required.",
-            minLength: {
-              value: 6,
-              message: "OTP must be 6 digits.",
-            },
-            maxLength: {
-              value: 6,
-              message: "OTP must be 6 digits.",
-            },
-          })}
-          error={!!errors.otp}
-          hint={errors.otp?.message}
-        />
-      </div>
+        <div className="flex items-center gap-3">
+          <p className="w-32 shrink-0 text-xs font-semibold uppercase tracking-[0.18em] text-[#f1d58d]">
+            Agent Code
+          </p>
+          <div className="flex-1">
+            <Input
+              id="agent_code"
+              type="text"
+              placeholder="Agent Code (Optional)"
+              autoComplete="off"
+              variant="casino"
+              {...register("agent_code")}
+              error={!!errors.agent_code}
+              hint={errors.agent_code?.message}
+            />
+          </div>
+        </div>
 
-      <div className="space-y-2">
-        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#f1d58d]">
-          Password
-        </p>
-        <Input
-          id="password"
-          type="password"
-          placeholder="Password"
-          autoComplete="off"
-          variant="casino"
-          {...register("password", {
-            required: "Password is required.",
-            minLength: {
-              value: 8,
-              message: "Password must be at least 8 characters long.",
-            },
-            maxLength: {
-              value: 20,
-              message: "Password must be at most 20 characters long.",
-            },
-          })}
-          error={!!errors.password}
-          hint={errors.password?.message}
-        />
-      </div>
+        <div className="flex items-center gap-3">
+          <p className="w-32 shrink-0 text-xs font-semibold uppercase tracking-[0.18em] text-[#f1d58d]">
+            OTP
+          </p>
+          <div className="flex-1">
+            <Input
+              id="otp"
+              type="text"
+              placeholder="OTP"
+              autoComplete="off"
+              variant="casino"
+              {...register("otp", {
+                required: "OTP is required.",
+                minLength: {
+                  value: 6,
+                  message: "OTP must be 6 digits.",
+                },
+                maxLength: {
+                  value: 6,
+                  message: "OTP must be 6 digits.",
+                },
+              })}
+              error={!!errors.otp}
+              hint={errors.otp?.message}
+            />
+          </div>
+        </div>
 
-      <div className="space-y-2">
-        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#f1d58d]">
-          Confirm Password
-        </p>
-        <Input
-          id="password_confirmation"
-          type="password"
-          placeholder="Confirm Password"
-          autoComplete="off"
-          variant="casino"
-          {...register("password_confirmation", {
-            required: "Password confirmation is required.",
-            validate: (value: string) =>
-              value === watch("password") || "Passwords do not match.",
-          })}
-          error={!!errors.password_confirmation}
-          hint={errors.password_confirmation?.message}
-        />
+        <div className="flex items-center gap-3">
+          <p className="w-32 shrink-0 text-xs font-semibold uppercase tracking-[0.18em] text-[#f1d58d]">
+            Password
+          </p>
+          <div className="flex-1">
+            <Input
+              id="password"
+              type="password"
+              placeholder="Password"
+              autoComplete="off"
+              variant="casino"
+              {...register("password", {
+                required: "Password is required.",
+                minLength: {
+                  value: 8,
+                  message: "Password must be at least 8 characters long.",
+                },
+                maxLength: {
+                  value: 20,
+                  message: "Password must be at most 20 characters long.",
+                },
+              })}
+              error={!!errors.password}
+              hint={errors.password?.message}
+            />
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <p className="w-32 shrink-0 text-xs font-semibold uppercase tracking-[0.18em] text-[#f1d58d]">
+            Confirm Pass
+          </p>
+          <div className="flex-1">
+            <Input
+              id="password_confirmation"
+              type="password"
+              placeholder="Confirm Password"
+              autoComplete="off"
+              variant="casino"
+              {...register("password_confirmation", {
+                required: "Password confirmation is required.",
+                validate: (value: string) =>
+                  value === watch("password") || "Passwords do not match.",
+              })}
+              error={!!errors.password_confirmation}
+              hint={errors.password_confirmation?.message}
+            />
+          </div>
+        </div>
       </div>
 
       <Button

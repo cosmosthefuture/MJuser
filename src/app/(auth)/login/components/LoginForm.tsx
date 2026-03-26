@@ -130,53 +130,59 @@ export default function LoginForm() {
 
   return (
     <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
-      <div className="space-y-2">
-        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#f1d58d]">
-          Phone Number
-        </p>
-        <Input
-          id="phone_number"
-          type="tel"
-          inputMode="numeric"
-          placeholder="Phone Number"
-          autoComplete="tel"
-          variant="casino"
-          {...register("phone_number", {
-            required: "Phone number is required.",
-            minLength: {
-              value: 6,
-              message: "Please enter a valid phone number.",
-            },
-          })}
-          error={!!errors.phone_number}
-          hint={errors.phone_number?.message}
-        />
-      </div>
+      <div className="space-y-3">
+        <div className="flex items-center gap-3">
+          <p className="w-28 shrink-0 text-xs font-semibold uppercase tracking-[0.18em] text-[#f1d58d]">
+            Phone Number
+          </p>
+          <div className="flex-1">
+            <Input
+              id="phone_number"
+              type="tel"
+              inputMode="numeric"
+              placeholder="Phone Number"
+              autoComplete="tel"
+              variant="casino"
+              {...register("phone_number", {
+                required: "Phone number is required.",
+                minLength: {
+                  value: 6,
+                  message: "Please enter a valid phone number.",
+                },
+              })}
+              error={!!errors.phone_number}
+              hint={errors.phone_number?.message}
+            />
+          </div>
+        </div>
 
-      <div className="space-y-2">
-        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#f1d58d]">
-          Password
-        </p>
-        <Input
-          id="password"
-          type="password"
-          placeholder="Password"
-          autoComplete="off"
-          variant="casino"
-          {...register("password", {
-            required: "Password is required.",
-            minLength: {
-              value: 8,
-              message: "Password must be at least 8 characters long.",
-            },
-            maxLength: {
-              value: 20,
-              message: "Password must be at most 20 characters long.",
-            },
-          })}
-          error={!!errors.password}
-          hint={errors.password?.message}
-        />
+        <div className="flex items-center gap-3">
+          <p className="w-28 shrink-0 text-xs font-semibold uppercase tracking-[0.18em] text-[#f1d58d]">
+            Password
+          </p>
+          <div className="flex-1">
+            <Input
+              id="password"
+              type="password"
+              placeholder="Password"
+              autoComplete="off"
+              variant="casino"
+              {...register("password", {
+                required: "Password is required.",
+                minLength: {
+                  value: 8,
+                  message: "Password must be at least 8 characters long.",
+                },
+                maxLength: {
+                  value: 20,
+                  message: "Password must be at most 20 characters long.",
+                },
+              })}
+              error={!!errors.password}
+              hint={errors.password?.message}
+            />
+          </div>
+        </div>
       </div>
 
       <Button

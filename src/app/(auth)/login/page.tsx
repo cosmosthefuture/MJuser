@@ -7,6 +7,7 @@ import LoginForm from "./components/LoginForm";
 export default function loginPage() {
   return (
     <AuthStage
+      compactMobile
       eyebrow=""
       linkHref="/signup"
       linkLabel="Register"

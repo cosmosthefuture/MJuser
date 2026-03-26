@@ -10,9 +10,14 @@ type ViewportState = {
   height: number;
 };
 
+const DEFAULT_VIEWPORT: ViewportState = {
+  width: 1280,
+  height: 720,
+};
+
 function getViewportState(): ViewportState {
   if (typeof window === "undefined") {
-    return { width: 1280, height: 720 };
+    return DEFAULT_VIEWPORT;
   }
 
   return {
@@ -22,7 +27,8 @@ function getViewportState(): ViewportState {
 }
 
 export default function GuestLanding() {
-  const [viewport, setViewport] = useState<ViewportState>(getViewportState);
+  const [hasMounted, setHasMounted] = useState(false);
+  const [viewport, setViewport] = useState<ViewportState>(DEFAULT_VIEWPORT);
 
   useEffect(() => {
     const updateViewport = () => {
@@ -37,6 +43,7 @@ export default function GuestLanding() {
       void orientationApi.lock("landscape").catch(() => undefined);
     }
 
+    setHasMounted(true);
     updateViewport();
     window.addEventListener("resize", updateViewport);
     window.addEventListener("orientationchange", updateViewport);
@@ -48,8 +55,9 @@ export default function GuestLanding() {
   }, []);
 
   const isPortraitPhone =
-    viewport.width < 900 && viewport.height > viewport.width;
-  const isMobileStage = Math.min(viewport.width, viewport.height) < 520;
+    hasMounted && viewport.width < 900 && viewport.height > viewport.width;
+  const isMobileStage =
+    hasMounted && Math.min(viewport.width, viewport.height) < 520;
 
   const stageStyle = isPortraitPhone
     ? {
