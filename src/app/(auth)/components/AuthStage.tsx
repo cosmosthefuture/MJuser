@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -63,7 +64,8 @@ export default function AuthStage({
     };
   }, []);
 
-  const isPortraitPhone = viewport.width < 900 && viewport.height > viewport.width;
+  const isPortraitPhone =
+    viewport.width < 900 && viewport.height > viewport.width;
   const stageStyle = isPortraitPhone
     ? {
         width: `${viewport.height}px`,
@@ -78,11 +80,21 @@ export default function AuthStage({
       };
 
   return (
-    <div className="fixed inset-0 z-30 overflow-hidden bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.5),transparent_36%),linear-gradient(180deg,#f6e8cb_0%,#d79a59_100%)] text-[#4e290d]">
+    <div className="fixed inset-0 z-30 overflow-hidden bg-[#08162f] text-[#4e290d]">
       <div
         className="absolute left-1/2 top-1/2 overflow-hidden"
         style={stageStyle}
       >
+        <Image
+          src="/images/blur-bg.jpg"
+          alt="Auth background"
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-center"
+        />
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(10,20,44,0.16)_0%,rgba(10,20,44,0.08)_40%,rgba(77,39,10,0.24)_100%)]" />
+
         <div className="h-full overflow-y-auto">
           <div className="relative z-10 mx-auto flex min-h-[100dvh] w-full max-w-sm flex-1 flex-col justify-center px-4 py-8">
             <div className="relative overflow-hidden rounded-[38px] border border-[#d7b376] bg-[#f8edd7]/95 p-3 shadow-[0_30px_80px_rgba(116,72,18,0.24)]">

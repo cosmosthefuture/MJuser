@@ -19,7 +19,8 @@ const LayoutWrapper: React.FC<LayoutWrapperProps> = ({ children }) => {
   const router = useRouter();
   const pathname = usePathname();
   const isHomeRoute = pathname === "/";
-  const isAuthRoute = pathname === "/login" || pathname === "/signup";
+  const isAuthRoute =
+    pathname === "/login" || pathname === "/signup" || pathname === "/register";
   // fetch latest balance on page load/refresh; result updates auth via endpoint onQueryStarted
   useGetWalletBalanceQuery(token ? undefined : skipToken);
   const [hasMounted, setHasMounted] = useState(false);

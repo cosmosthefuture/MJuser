@@ -37,7 +37,9 @@ export async function middleware(request: NextRequest) {
   const isLoggedIn = !!userInfo.token;
   if (
     isLoggedIn &&
-    (pathname.startsWith("/login") || pathname.startsWith("/signup"))
+    (pathname.startsWith("/login") ||
+      pathname.startsWith("/signup") ||
+      pathname.startsWith("/register"))
   ) {
     return NextResponse.redirect(new URL("/", request.url));
   }
@@ -45,7 +47,8 @@ export async function middleware(request: NextRequest) {
     !isLoggedIn &&
     pathname !== "/" &&
     !pathname.startsWith("/login") &&
-    !pathname.startsWith("/signup")
+    !pathname.startsWith("/signup") &&
+    !pathname.startsWith("/register")
   ) {
     const redirectPath = `${pathname}${request.nextUrl.search}`;
     return NextResponse.redirect(
