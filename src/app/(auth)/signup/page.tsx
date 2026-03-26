@@ -5,7 +5,7 @@ import SignUpForm from "./components/signUpForm";
 export default function SignUpPage() {
   return (
     <AuthStage
-      eyebrow="New Seat"
+      eyebrow=""
       linkHref="/login"
       linkLabel="Login"
       linkPrompt="Already have an account?"
