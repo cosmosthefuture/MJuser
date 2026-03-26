@@ -1,0 +1,11 @@
+.toast-error {
+  background: hsl(0, 50%, 8%) !important;
+  color: hsl(0, 100%, 85%) !important;
+  border: 1px solid hsl(0, 80%, 30%) !important;
+}
+
+.toast-success {
+  background: hsl(48, 26%, 12%) !important;
+  color: hsl(48, 100%, 91%) !important;
+  border: 1px solid hsl(48, 100%, 25%) !important;
+}
