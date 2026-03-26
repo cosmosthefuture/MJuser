@@ -1,50 +1,37 @@
 "use client";
 
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
+import { ArrowRight, LogIn } from "lucide-react";
+import { skipToken } from "@reduxjs/toolkit/query";
 import { useSelector } from "react-redux";
-import { RootState } from "@/redux/store";
 import { useEffect, useState } from "react";
-import { useGetGamesQuery } from "@/redux/features/game/GameApiSlice";
+import LobbyTableCard from "@/components/lobby/LobbyTableCard";
+import GuestLanding from "./GuestLanding";
+import {
+  getGamePresentation,
+  getStatusLabel,
+} from "@/components/lobby/lobbyTheme";
+import { RootState } from "@/redux/store";
+import { useGetGamesQuery, type Game } from "@/redux/features/game/GameApiSlice";
 
-type HomeModeCardProps = {
-  imageSrc: string;
-  alt: string;
-  href?: string;
-  disabled?: boolean;
-};
+function getLobbyGames(apiGames: Game[]) {
+  const gameMap = new Map<number, Game>();
 
-function HomeModeCard({
-  imageSrc,
-  alt,
-  href,
-  disabled = false,
-}: HomeModeCardProps) {
-  const cardContent = (
-    <div className="relative aspect-[16/10] w-full overflow-hidden md:aspect-[4/3]">
-      <Image
-        src={imageSrc}
-        alt={alt}
-        fill
-        quality={100}
-        sizes="(max-width: 767px) 88vw, (max-width: 1023px) 42vw, 28vw"
-        className="object-cover object-center p-2"
-      />
-    </div>
-  );
+  gameMap.set(1, {
+    created_at: "",
+    deleted_at: null,
+    id: 1,
+    name: "Mahjong",
+    status: "active",
+    updated_at: "",
+  });
 
-  if (disabled || !href) {
-    return <div className="opacity-70">{cardContent}</div>;
-  }
+  apiGames.forEach((game) => {
+    gameMap.set(game.id, game);
+  });
 
-  return (
-    <Link
-      href={href}
-      className="block transition hover:translate-y-[-2px] hover:brightness-110"
-    >
-      {cardContent}
-    </Link>
-  );
+  return Array.from(gameMap.values()).slice(0, 4);
 }
 
 export default function Home() {
@@ -54,19 +41,12 @@ export default function Home() {
     data: gamesData,
     isLoading,
     error,
-  } = useGetGamesQuery({ page: 1, per_page: 10 });
+  } = useGetGamesQuery(token ? { page: 1, per_page: 10 } : skipToken);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  const games = (gamesData?.data || []).filter((game) => game.id !== 1);
-  const featuredCardGame =
-    games.find((game) => game.status === "active") || games[0] || null;
-  const isCardGameActive = featuredCardGame?.status === "active";
-  const cardGameHref = featuredCardGame
-    ? `/game-rooms?game_id=${featuredCardGame.id}`
-    : "/game-rooms";
   const parsedBalance = Number(balance);
   const balanceText =
     mounted && token
@@ -75,86 +55,170 @@ export default function Home() {
         : balance || "0"
       : "0";
 
+  const lobbyGames = getLobbyGames(gamesData?.data || []);
+
+  if (!token) {
+    return <GuestLanding />;
+  }
+
   return (
-    <div className="relative isolate min-h-[100dvh] w-full overflow-hidden text-white">
-      <Image
-        src="/images/img/bg.webp"
-        alt="Neon city background"
-        fill
-        priority
-        quality={100}
-        sizes="100vw"
-        className="object-cover"
-      />
-      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(8,14,57,0.5)_0%,rgba(8,15,70,0.16)_45%,rgba(22,6,66,0.5)_100%)]" />
-      <div className="absolute inset-0 bg-gradient-to-b from-[#080d35]/10 via-transparent to-[#0b0f40]/50" />
+    <div className="relative isolate min-h-[100dvh] overflow-hidden text-[#4f2809]">
+      <div className="casino-lobby-bg absolute inset-0" />
+      <div className="absolute left-[-5rem] top-28 h-52 w-52 rounded-full bg-white/55 blur-3xl" />
+      <div className="absolute right-[-3rem] top-10 h-44 w-44 rounded-full bg-[#fff4d5]/70 blur-3xl" />
+      <div className="absolute bottom-0 left-0 right-0 h-48 bg-[linear-gradient(180deg,rgba(255,246,227,0)_0%,rgba(157,97,40,0.18)_100%)]" />
 
-      <div className="relative z-10 flex min-h-[100dvh] w-full items-stretch">
-        <div className="pointer-events-none absolute -bottom-12 left-2 w-[52vw] min-w-[180px] max-w-[280px] sm:-bottom-14 sm:left-6 sm:w-[46vw] sm:max-w-[360px] md:left-8 md:w-[42vw] md:max-w-[420px] lg:left-10 lg:w-[36vw] lg:max-w-[520px]">
-          <Image
-            src="/images/img/carton.webp"
-            alt="Mascot"
-            width={380}
-            height={657}
-            quality={100}
-            sizes="(max-width: 639px) 52vw, (max-width: 1023px) 42vw, 36vw"
-            className="h-auto w-full object-contain drop-shadow-[0_25px_45px_rgba(15,5,50,0.8)]"
-            priority
-          />
-        </div>
-
-        <div className="ml-auto flex w-full max-w-[840px] flex-col px-3 pb-6 pt-4 sm:px-6 sm:pb-8 sm:pt-6 md:px-8 md:pb-10 md:pt-8">
-          <div className="flex items-start justify-end gap-3">
-            <div className="inline-flex items-center gap-2 rounded-full border border-violet-300/35 bg-gradient-to-r from-[#5f2af7]/95 to-[#6623e7]/95 px-3 py-1.5 text-xs font-semibold text-white shadow-[0_12px_28px_rgba(42,15,110,0.45)] sm:px-4 sm:py-2 sm:text-sm md:px-5 md:py-2.5 md:text-base">
-              <span className="text-yellow-300">🪙</span>
-              <span>{balanceText}</span>
-            </div>
+      <div className="relative z-10 mx-auto flex min-h-[100dvh] w-full max-w-6xl flex-col px-4 pb-10 pt-5 sm:px-6 lg:px-10">
+        <div className="flex items-center justify-between gap-3">
+          <div className="rounded-full border border-[#dcc08a] bg-[#fff4dc]/90 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.32em] text-[#a47034] shadow-[0_12px_28px_rgba(120,74,20,0.08)]">
+            Royal Lobby
           </div>
 
-          {!token && mounted && (
-            <div className="mt-3 flex flex-wrap justify-end gap-2 sm:mt-4">
-              <Link
-                href="/login"
-                className="rounded-full border border-cyan-200/35 bg-white/10 px-4 py-2 text-xs font-semibold tracking-wide text-cyan-100 transition hover:bg-white/20"
-              >
-                Login
-              </Link>
-              <Link
-                href="/signup"
-                className="rounded-full border border-cyan-200/35 bg-white/10 px-4 py-2 text-xs font-semibold tracking-wide text-cyan-100 transition hover:bg-white/20"
-              >
-                Register
-              </Link>
-            </div>
-          )}
+          <div className="rounded-full border border-[#dcc08a] bg-[#f8ebcc]/92 px-4 py-2 text-sm font-semibold text-[#6a3d17] shadow-[0_12px_28px_rgba(120,74,20,0.08)]">
+            {balanceText} MMK
+          </div>
+        </div>
 
-          <div className="my-auto w-full max-w-[330px] self-end sm:max-w-[440px] md:max-w-[620px]">
-            <div className="grid grid-cols-1 gap-2.5 sm:gap-3 md:grid-cols-2 md:gap-4">
-              <HomeModeCard
-                href="/mahjong"
-                imageSrc="/images/img/mjlogo.png"
-                alt="Mahjong Arena"
+        <div className="mt-8 grid gap-8 lg:grid-cols-[0.94fr_1.06fr] lg:items-center">
+          <section className="relative">
+            <div className="max-w-xl">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.38em] text-[#ae7737]">
+                Table Selection
+              </p>
+              <h1 className="mt-4 text-[3rem] font-semibold leading-[0.95] tracking-[-0.05em] text-[#4d2509] sm:text-[4rem]">
+                Choose a table
+                <br />
+                built to feel live.
+              </h1>
+              <p className="mt-5 max-w-lg text-base leading-7 text-[#80522a]">
+                The lobby now follows the reference direction: warm cream
+                surfaces, bold felt tables, and clear table-first actions for
+                every mode.
+              </p>
+            </div>
+
+            <div className="mt-6 flex flex-wrap gap-3">
+              {!token && mounted ? (
+                <>
+                  <Link
+                    href="/login"
+                    className="inline-flex items-center gap-2 rounded-full bg-[#9b2c35] px-5 py-3 text-sm font-semibold text-[#fff7e4] shadow-[0_18px_36px_rgba(100,33,21,0.22)] transition hover:brightness-105"
+                  >
+                    <LogIn size={16} />
+                    Login
+                  </Link>
+                  <Link
+                    href="/signup"
+                    className="inline-flex items-center gap-2 rounded-full border border-[#d8b57d] bg-[#fff3db]/95 px-5 py-3 text-sm font-semibold text-[#704220] transition hover:bg-[#fff7e8]"
+                  >
+                    Register
+                    <ArrowRight size={16} />
+                  </Link>
+                </>
+              ) : (
+                <Link
+                  href="/wallet"
+                  className="inline-flex items-center gap-2 rounded-full bg-[#9b2c35] px-5 py-3 text-sm font-semibold text-[#fff7e4] shadow-[0_18px_36px_rgba(100,33,21,0.22)] transition hover:brightness-105"
+                >
+                  Wallet
+                  <ArrowRight size={16} />
+                </Link>
+              )}
+
+              <div className="rounded-[22px] border border-[#dcc08a] bg-[#fff4dc]/90 px-4 py-3 text-sm text-[#7a4c22] shadow-[0_14px_32px_rgba(112,69,20,0.08)]">
+                <span className="block text-[10px] font-semibold uppercase tracking-[0.28em] text-[#ab7437]">
+                  Visible Tables
+                </span>
+                <span className="mt-1 block text-lg font-semibold text-[#51290b]">
+                  {lobbyGames.length}
+                </span>
+              </div>
+            </div>
+
+            <div className="mt-8 grid grid-cols-2 gap-3 sm:max-w-md">
+              <div className="rounded-[24px] border border-[#dcc08a] bg-[#f9edd5]/92 px-4 py-4 shadow-[0_12px_30px_rgba(112,69,20,0.08)]">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-[#ad7538]">
+                  Mood
+                </p>
+                <p className="mt-2 text-sm leading-6 text-[#684120]">
+                  Cream lobby outside, rich felt tables inside.
+                </p>
+              </div>
+              <div className="rounded-[24px] border border-[#dcc08a] bg-[#f9edd5]/92 px-4 py-4 shadow-[0_12px_30px_rgba(112,69,20,0.08)]">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-[#ad7538]">
+                  Entry
+                </p>
+                <p className="mt-2 text-sm leading-6 text-[#684120]">
+                  Clear status, direct access, and room-first navigation.
+                </p>
+              </div>
+            </div>
+
+            <div className="pointer-events-none relative mt-10 hidden h-52 w-full max-w-[20rem] lg:block">
+              <Image
+                src="/images/img/carton.webp"
+                alt="Lobby mascot"
+                fill
+                sizes="320px"
+                className="object-contain object-left-bottom drop-shadow-[0_18px_30px_rgba(84,49,15,0.22)]"
+                priority
               />
-              <HomeModeCard
-                href={isCardGameActive ? cardGameHref : undefined}
-                disabled={!isCardGameActive}
-                imageSrc="/images/img/cardlogo.png"
-                alt={featuredCardGame?.name || "Card Arena"}
-              />
+            </div>
+          </section>
+
+          <section className="relative">
+            <div className="grid gap-4 sm:grid-cols-2">
+              {lobbyGames.map((game, index) => {
+                const presentation = getGamePresentation(game.id, game.name);
+                const statusLabel = getStatusLabel(game.status);
+                const disabled = game.id !== 1 && statusLabel !== "Open";
+
+                return (
+                  <LobbyTableCard
+                    key={`${game.id}-${game.name}`}
+                    actionLabel={
+                      disabled
+                        ? "Coming Soon"
+                        : game.id === 1
+                          ? "Open Mahjong"
+                          : "View Tables"
+                    }
+                    badge={statusLabel}
+                    disabled={disabled}
+                    eyebrow={presentation.eyebrow}
+                    href={disabled ? undefined : presentation.href}
+                    imageAlt={presentation.imageAlt}
+                    imageSrc={presentation.imageSrc}
+                    stats={[
+                      {
+                        label: "Format",
+                        value: presentation.eyebrow,
+                      },
+                      {
+                        label: "Access",
+                        value: statusLabel,
+                      },
+                    ]}
+                    subtitle={presentation.subtitle}
+                    themeIndex={index}
+                    title={game.name}
+                  />
+                );
+              })}
             </div>
 
             {isLoading && (
-              <p className="mt-3 text-right text-xs text-cyan-100/75">
-                Syncing game status...
+              <p className="mt-4 text-right text-sm text-[#8b6031]">
+                Refreshing live tables...
               </p>
             )}
 
             {error && (
-              <p className="mt-2 text-right text-xs text-red-200/90">
-                Couldn&apos;t sync game status.
+              <p className="mt-4 text-right text-sm text-[#9b2c35]">
+                Couldn&apos;t refresh the lobby right now.
               </p>
             )}
-          </div>
+          </section>
         </div>
       </div>
     </div>
