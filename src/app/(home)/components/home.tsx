@@ -251,14 +251,14 @@ export default function Home() {
               className={`grid items-center ${
                 isCompactStage
                   ? "grid-cols-[1.38fr_0.62fr] gap-0"
-                  : "gap-6 lg:grid-cols-[1.08fr_0.92fr]"
+                  : "gap-4 lg:grid-cols-[1.18fr_0.82fr]"
               }`}
             >
               <div
                 className={`relative mx-auto w-full ${
                   isCompactStage
                     ? "h-[26rem] max-w-[26rem]"
-                    : "h-[20rem] max-w-[20rem] sm:h-[28rem] sm:max-w-[28rem]"
+                    : "h-[24rem] max-w-[24rem] sm:h-[32rem] sm:max-w-[32rem]"
                 }`}
               >
                 <Image
@@ -273,7 +273,7 @@ export default function Home() {
 
               <div
                 className={`grid ${
-                  isCompactStage ? "grid-rows-2 gap-1" : "grid-rows-2 gap-4"
+                  isCompactStage ? "grid-rows-2 gap-1" : "grid-rows-2 gap-2"
                 }`}
               >
                 {showcaseGames.map((game) => {
@@ -283,7 +283,7 @@ export default function Home() {
                         className={`relative flex h-full items-center justify-center ${
                           isCompactStage
                             ? "min-h-[13.8rem]"
-                            : "min-h-[13rem] sm:min-h-[15rem]"
+                            : "min-h-[15rem] sm:min-h-[18rem]"
                         }`}
                       >
                         <Image
