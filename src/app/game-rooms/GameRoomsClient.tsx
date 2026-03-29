@@ -4,34 +4,19 @@ import Image from "next/image";
 import { skipToken } from "@reduxjs/toolkit/query";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import axios from "axios";
 import GuestLanding from "@/app/(home)/components/GuestLanding";
-import { Button } from "@/components/ui/button";
+import PlayerNavbar from "@/components/PlayerNavbar";
 import { useGetMahJongGameRoomsQuery } from "@/redux/features/game/GameRoomApiSlice";
-import { useLogout } from "@/redux/http";
 import { persistor, RootState } from "@/redux/store";
-import { toast } from "sonner";
 
 export default function GameRoomsClient() {
   const { token, balance } = useSelector((state: RootState) => state.auth);
-  const [isRehydrated, setIsRehydrated] = useState(
-    () => persistor.getState().bootstrapped,
-  );
-  const [isViewportReady, setIsViewportReady] = useState(
-    typeof window !== "undefined",
-  );
-  const [viewport, setViewport] = useState(() => ({
-    width:
-      typeof window !== "undefined"
-        ? (window.visualViewport?.width ?? window.innerWidth)
-        : 1280,
-    height:
-      typeof window !== "undefined"
-        ? (window.visualViewport?.height ?? window.innerHeight)
-        : 720,
-  }));
-  const logout = useLogout();
-
+  const [isRehydrated, setIsRehydrated] = useState(false);
+  const [isViewportReady, setIsViewportReady] = useState(false);
+  const [viewport, setViewport] = useState({
+    width: 1280,
+    height: 720,
+  });
   const { data: roomsData } = useGetMahJongGameRoomsQuery(
     token ? { page: 1, per_page: 10 } : skipToken,
   );
@@ -99,23 +84,22 @@ export default function GameRoomsClient() {
         transform: "translate(-50%, -50%)",
       };
 
-  const parsedBalance = Number(balance);
-  const balanceText = Number.isFinite(parsedBalance)
-    ? parsedBalance.toLocaleString()
-    : balance || "0";
-
-  async function logoutHandler() {
-    try {
-      await logout();
-      toast.success("You have been logged out successfully.");
-    } catch (error) {
-      if (axios.isAxiosError(error) && error.response?.data?.message) {
-        toast.error(`Logout failed: ${error.response.data.message}`);
-      } else {
-        toast.error("An unknown error occurred during logout.");
-      }
-    }
-  }
+  const loadingShell = (
+    <div className="fixed inset-0 overflow-hidden bg-[#1a0f0a]">
+      <div
+        className={`absolute left-1/2 top-1/2 overflow-hidden transition-opacity duration-150 ${
+          isViewportReady ? "opacity-100" : "opacity-0"
+        }`}
+        style={stageStyle}
+      >
+        <div
+          className="absolute inset-0 scale-[1.02] bg-cover bg-center blur-[2px]"
+          style={{ backgroundImage: "url('/images/game-room-bg.png')" }}
+        />
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(33,12,5,0.64)_0%,rgba(53,18,10,0.3)_38%,rgba(44,15,8,0.24)_66%,rgba(26,9,4,0.68)_100%)]" />
+      </div>
+    </div>
+  );
 
   const shell = (
     <div className="fixed inset-0 overflow-hidden bg-[#1a0f0a]">
@@ -137,41 +121,13 @@ export default function GameRoomsClient() {
           >
             {token && (
               <div
-                className={`${
+                className={`absolute z-20 ${
                   isCompactStage
-                    ? "absolute right-14 top-3 z-20 flex items-center gap-2"
-                    : "mb-4 flex items-center justify-end gap-3"
+                    ? "right-14 top-3 flex items-center gap-2"
+                    : "right-6 top-5 flex items-center gap-3"
                 }`}
               >
-                <div
-                  className={`inline-flex items-center rounded-full border border-[#b48a3b]/70 bg-[linear-gradient(180deg,rgba(37,28,17,0.94)_0%,rgba(18,14,9,0.96)_100%)] font-semibold text-[#ffe3a1] shadow-[inset_0_1px_0_rgba(255,235,178,0.1),0_10px_18px_rgba(0,0,0,0.22)] backdrop-blur-sm ${
-                    isCompactStage
-                      ? "px-3.5 py-1 text-[10px]"
-                      : "px-4.5 py-2 text-sm"
-                  }`}
-                >
-                  <span
-                    className={`mr-2 inline-flex items-center justify-center rounded-full bg-[#d3a54c] font-black text-[#2a1c0f] ${
-                      isCompactStage
-                        ? "h-4 w-4 text-[9px]"
-                        : "h-5 w-5 text-[10px]"
-                    }`}
-                  >
-                    $
-                  </span>
-                  <span className="tracking-[0.08em]">{balanceText} MMK</span>
-                </div>
-                <Button
-                  type="button"
-                  onClick={logoutHandler}
-                  className={`rounded-full border border-[#5c4a24] bg-[linear-gradient(180deg,rgba(26,24,20,0.96)_0%,rgba(12,11,9,0.98)_100%)] font-bold uppercase tracking-[0.22em] text-[#f0cd79] shadow-[inset_0_1px_0_rgba(255,235,178,0.08),0_10px_18px_rgba(0,0,0,0.24)] ${
-                    isCompactStage
-                      ? "h-7 px-3.5 text-[10px]"
-                      : "h-10 px-5 text-sm"
-                  }`}
-                >
-                  Logout
-                </Button>
+                <PlayerNavbar balance={balance} compact={isCompactStage} />
               </div>
             )}
 
@@ -216,7 +172,7 @@ export default function GameRoomsClient() {
   );
 
   if (!isRehydrated) {
-    return shell;
+    return loadingShell;
   }
 
   if (!token) {
