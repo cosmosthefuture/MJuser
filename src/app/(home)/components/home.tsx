@@ -20,6 +20,7 @@ type ShowcaseGame = {
   artworkAlt: string;
   artworkSrc: string;
   href?: string;
+  imageClassName?: string;
   title: string;
 };
 
@@ -49,6 +50,7 @@ function getShowcaseGames(apiGames: Game[]): ShowcaseGame[] {
         artworkAlt: "Mah Jong game",
         artworkSrc: "/images/img/mjlogo.png",
         href: isActive ? `/game-rooms?game_id=${game.id}` : undefined,
+        imageClassName: "-translate-x-[5%]",
         title: game.name,
       };
     }
@@ -263,20 +265,22 @@ export default function Home() {
                   src="/images/img/carton.webp"
                   alt="Lobby sticker"
                   fill
-                  sizes="(max-width: 640px) 320px, 448px"
+                  sizes="(max-width: 640px) 220px, 320px"
                   className="object-contain object-center drop-shadow-[0_24px_34px_rgba(0,0,0,0.34)]"
                   priority
                 />
               </div>
 
               <div
-                className={`flex flex-col ${isCompactStage ? "gap-1" : "gap-4"}`}
+                className={`grid ${
+                  isCompactStage ? "grid-rows-2 gap-1" : "grid-rows-2 gap-4"
+                }`}
               >
                 {showcaseGames.map((game) => {
                   const card = (
-                    <article className="relative overflow-hidden">
+                    <article className="relative h-full overflow-hidden">
                       <div
-                        className={`relative flex items-center justify-center ${
+                        className={`relative flex h-full items-center justify-center ${
                           isCompactStage
                             ? "min-h-[13.8rem]"
                             : "min-h-[13rem] sm:min-h-[15rem]"
@@ -286,8 +290,8 @@ export default function Home() {
                           src={game.artworkSrc}
                           alt={game.artworkAlt}
                           fill
-                          sizes="(max-width: 1024px) 100vw, 420px"
-                          className={`object-contain drop-shadow-[0_14px_22px_rgba(0,0,0,0.28)] ${
+                          sizes="(max-width: 640px) 180px, 280px"
+                          className={`object-contain drop-shadow-[0_14px_22px_rgba(0,0,0,0.28)] ${game.imageClassName || ""} ${
                             isCompactStage ? "p-0" : ""
                           }`}
                         />
