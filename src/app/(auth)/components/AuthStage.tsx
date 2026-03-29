@@ -94,7 +94,7 @@ export default function AuthStage({
         style={stageStyle}
       >
         <Image
-          src="/images/blur-bg.jpg"
+          src="/images/blur-bg-2.png"
           alt="Auth background"
           fill
           priority

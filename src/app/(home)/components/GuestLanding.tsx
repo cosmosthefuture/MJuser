@@ -72,6 +72,19 @@ export default function GuestLanding() {
         transform: "translate(-50%, -50%)",
       };
 
+  const loginButtonClassName =
+    "group relative inline-flex items-center justify-center overflow-hidden rounded-full border text-[#e6f8ff] transition duration-300 ease-out focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#88dcff]/30";
+  const loginButtonSurfaceClassName =
+    "absolute inset-[1px] rounded-full bg-[linear-gradient(180deg,rgba(120,244,255,0.96)_0%,rgba(39,174,226,0.98)_46%,rgba(9,107,162,0.98)_100%)]";
+  const loginButtonGlowClassName =
+    "pointer-events-none absolute inset-x-[14%] top-[8%] h-[46%] rounded-full bg-[linear-gradient(180deg,rgba(173,242,255,0.36)_0%,rgba(101,208,238,0.14)_76%,transparent_100%)] opacity-90";
+  const signUpButtonClassName =
+    "group relative inline-flex items-center justify-center overflow-hidden rounded-full border text-white transition duration-300 ease-out focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#ffd98f]/30";
+  const signUpButtonSurfaceClassName =
+    "absolute inset-[1px] rounded-full bg-[linear-gradient(180deg,rgba(255,225,145,0.98)_0%,rgba(237,170,75,0.98)_42%,rgba(179,79,25,0.98)_100%)]";
+  const signUpButtonGlowClassName =
+    "pointer-events-none absolute inset-x-[14%] top-[8%] h-[48%] rounded-full bg-[linear-gradient(180deg,rgba(255,214,133,0.42)_0%,rgba(240,164,68,0.14)_76%,transparent_100%)] opacity-95";
+
   return (
     <div className="fixed inset-0 z-0 overflow-hidden bg-[#08162f] text-white">
       <div
@@ -79,7 +92,7 @@ export default function GuestLanding() {
         style={stageStyle}
       >
         <Image
-          src="/images/blur-bg.jpg"
+          src="/images/blur-bg-2.png"
           alt="Guest landing background"
           fill
           priority
@@ -112,17 +125,29 @@ export default function GuestLanding() {
                 <Link
                   href="/login"
                   aria-label="Login"
-                  className="inline-flex min-w-[46vw] items-center justify-center rounded-full border border-[#92eaff] bg-[linear-gradient(180deg,#56ddfb_0%,#25b5e8_100%)] px-[5.2vw] py-[2.7vw] text-[4vw] font-bold text-white shadow-[inset_0_2px_0_rgba(255,255,255,0.34),0_12px_28px_rgba(17,108,146,0.34)]"
+                  className={`${loginButtonClassName} min-w-[46vw] border-[#99f1ff] bg-[#06324d] px-[0.9vw] py-[0.9vw] shadow-[0_16px_34px_rgba(4,35,61,0.5),0_0_24px_rgba(74,219,255,0.22)] hover:-translate-y-[0.35vw] hover:shadow-[0_22px_42px_rgba(4,35,61,0.58),0_0_32px_rgba(74,219,255,0.34)]`}
                 >
-                  Login
+                  <span className={loginButtonSurfaceClassName} />
+                  <span className={loginButtonGlowClassName} />
+                  <span className="absolute inset-x-[8%] bottom-[12%] h-[18%] rounded-full bg-black/18 blur-[8px]" />
+                  <span className="relative z-10 flex w-full items-center justify-center gap-[2.4vw] px-[5.2vw] py-[2.7vw] text-[4vw] font-black uppercase tracking-[0.2em] text-[#ddf6ff] [text-shadow:0_0.1em_0_rgba(7,75,112,0.66)]">
+                    <UserRound className="h-[4.2vw] w-[4.2vw] text-[#d2f3ff] drop-shadow-[0_2px_4px_rgba(0,0,0,0.28)]" />
+                    Login
+                  </span>
                 </Link>
 
                 <Link
                   href="/signup"
                   aria-label="Sign Up"
-                  className="inline-flex min-w-[46vw] items-center justify-center rounded-full border border-[#ffd18a] bg-[linear-gradient(180deg,#f2c86f_0%,#e4a446_100%)] px-[5.2vw] py-[2.7vw] text-[4vw] font-bold text-white shadow-[inset_0_2px_0_rgba(255,255,255,0.28),0_12px_28px_rgba(129,76,20,0.34)]"
+                  className={`${signUpButtonClassName} min-w-[46vw] border-[#ffd58e] bg-[#6f2f10] px-[0.9vw] py-[0.9vw] shadow-[0_18px_38px_rgba(82,39,12,0.52),0_0_26px_rgba(255,210,122,0.18)] hover:-translate-y-[0.35vw] hover:shadow-[0_24px_46px_rgba(82,39,12,0.62),0_0_34px_rgba(255,210,122,0.28)]`}
                 >
-                  Sign Up
+                  <span className={signUpButtonSurfaceClassName} />
+                  <span className={signUpButtonGlowClassName} />
+                  <span className="absolute inset-x-[8%] bottom-[12%] h-[18%] rounded-full bg-black/20 blur-[8px]" />
+                  <span className="relative z-10 flex w-full items-center justify-center gap-[2.4vw] px-[5.2vw] py-[2.7vw] text-[4vw] font-black uppercase tracking-[0.18em] text-[#ffe5b3] [text-shadow:0_0.1em_0_rgba(112,53,14,0.62)]">
+                    <Lock className="h-[4.2vw] w-[4.2vw] text-[#ffd99a] drop-shadow-[0_2px_4px_rgba(0,0,0,0.28)]" />
+                    Sign Up
+                  </span>
                 </Link>
               </div>
             </div>
@@ -148,19 +173,29 @@ export default function GuestLanding() {
                   <Link
                     href="/login"
                     aria-label="Login"
-                    className="inline-flex min-w-[13vw] items-center justify-center gap-2 rounded-full border border-[#92eaff] bg-[linear-gradient(180deg,#56ddfb_0%,#25b5e8_100%)] px-[2.3vw] py-[1.1vw] text-[1.42vw] font-bold text-white shadow-[inset_0_2px_0_rgba(255,255,255,0.34),0_12px_28px_rgba(17,108,146,0.34)]"
+                    className={`${loginButtonClassName} min-w-[13vw] gap-2 border-[#99f1ff] bg-[#06324d] px-[0.22vw] py-[0.22vw] shadow-[0_14px_30px_rgba(4,35,61,0.52),0_0_22px_rgba(74,219,255,0.22)] hover:-translate-y-[0.18vw] hover:shadow-[0_20px_38px_rgba(4,35,61,0.6),0_0_28px_rgba(74,219,255,0.3)]`}
                   >
-                    <UserRound className="h-[1.45vw] w-[1.45vw]" />
-                    Login
+                    <span className={loginButtonSurfaceClassName} />
+                    <span className={loginButtonGlowClassName} />
+                    <span className="absolute inset-x-[9%] bottom-[12%] h-[20%] rounded-full bg-black/18 blur-[7px]" />
+                    <span className="relative z-10 flex w-full items-center justify-center gap-[0.7vw] px-[2.3vw] py-[1.1vw] text-[1.42vw] font-black uppercase tracking-[0.18em] text-[#ddf6ff] [text-shadow:0_0.1em_0_rgba(7,75,112,0.66)]">
+                      <UserRound className="h-[1.45vw] w-[1.45vw] text-[#d2f3ff] drop-shadow-[0_2px_4px_rgba(0,0,0,0.28)]" />
+                      Login
+                    </span>
                   </Link>
 
                   <Link
                     href="/signup"
                     aria-label="Sign Up"
-                    className="inline-flex min-w-[13vw] items-center justify-center gap-2 rounded-full border border-[#ffd18a] bg-[linear-gradient(180deg,#f2c86f_0%,#e4a446_100%)] px-[2.3vw] py-[1.1vw] text-[1.42vw] font-bold text-white shadow-[inset_0_2px_0_rgba(255,255,255,0.28),0_12px_28px_rgba(129,76,20,0.34)]"
+                    className={`${signUpButtonClassName} min-w-[13vw] gap-2 border-[#ffd58e] bg-[#6f2f10] px-[0.22vw] py-[0.22vw] shadow-[0_16px_34px_rgba(82,39,12,0.54),0_0_24px_rgba(255,210,122,0.18)] hover:-translate-y-[0.18vw] hover:shadow-[0_22px_40px_rgba(82,39,12,0.62),0_0_30px_rgba(255,210,122,0.26)]`}
                   >
-                    <Lock className="h-[1.45vw] w-[1.45vw]" />
-                    Sign Up
+                    <span className={signUpButtonSurfaceClassName} />
+                    <span className={signUpButtonGlowClassName} />
+                    <span className="absolute inset-x-[9%] bottom-[12%] h-[20%] rounded-full bg-black/20 blur-[7px]" />
+                    <span className="relative z-10 flex w-full items-center justify-center gap-[0.7vw] px-[2.3vw] py-[1.1vw] text-[1.42vw] font-black uppercase tracking-[0.16em] text-[#ffe5b3] [text-shadow:0_0.1em_0_rgba(112,53,14,0.62)]">
+                      <Lock className="h-[1.45vw] w-[1.45vw] text-[#ffd99a] drop-shadow-[0_2px_4px_rgba(0,0,0,0.28)]" />
+                      Sign Up
+                    </span>
                   </Link>
                 </div>
 
