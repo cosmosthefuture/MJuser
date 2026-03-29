@@ -47,8 +47,12 @@ export default function AuthStage({
   linkPrompt,
   title,
 }: AuthStageProps) {
-  const [isViewportReady, setIsViewportReady] = useState(false);
-  const [viewport, setViewport] = useState<ViewportState>(DEFAULT_VIEWPORT);
+  const [isViewportReady, setIsViewportReady] = useState(
+    typeof window !== "undefined",
+  );
+  const [viewport, setViewport] = useState<ViewportState>(() =>
+    getViewportState(),
+  );
 
   useLayoutEffect(() => {
     const updateViewport = () => {
