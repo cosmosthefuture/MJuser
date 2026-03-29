@@ -127,7 +127,7 @@ export default function GameRoomsClient() {
       >
         <div
           className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: "url('/images/home-bg.png')" }}
+          style={{ backgroundImage: "url('/images/game-room-bg.png')" }}
         />
         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(33,12,5,0.64)_0%,rgba(53,18,10,0.3)_38%,rgba(44,15,8,0.24)_66%,rgba(26,9,4,0.68)_100%)]" />
 
@@ -178,10 +178,8 @@ export default function GameRoomsClient() {
             <div className="flex h-full items-center justify-center">
               {token && (
                 <div
-                  className={`grid w-full justify-center ${
-                    isCompactStage
-                      ? "grid-cols-2 gap-x-6"
-                      : "grid-cols-2 gap-x-10"
+                  className={`mx-auto flex w-fit flex-wrap items-center justify-center ${
+                    isCompactStage ? "gap-x-6" : "gap-x-10"
                   }`}
                 >
                   {(roomsData?.data || []).map((room) => (
