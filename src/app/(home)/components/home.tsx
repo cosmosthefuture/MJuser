@@ -248,15 +248,15 @@ export default function Home() {
             <div
               className={`grid items-center ${
                 isCompactStage
-                  ? "grid-cols-[1.38fr_0.62fr] gap-0"
+                  ? "grid-cols-[1.18fr_0.82fr] gap-0"
                   : "gap-4 lg:grid-cols-[1.18fr_0.82fr]"
               }`}
             >
               <div
                 className={`relative mx-auto w-full ${
                   isCompactStage
-                    ? "h-[26rem] max-w-[26rem]"
-                    : "h-[24rem] max-w-[24rem] sm:h-[32rem] sm:max-w-[32rem]"
+                    ? "mt-[11rem] h-[31rem] max-w-[31rem]"
+                    : "mt-[7rem] h-[28rem] max-w-[28rem] self-end sm:mt-[8rem] sm:h-[36rem] sm:max-w-[36rem]"
                 }`}
               >
                 <Image
@@ -264,7 +264,7 @@ export default function Home() {
                   alt="Lobby sticker"
                   fill
                   sizes="(max-width: 640px) 220px, 320px"
-                  className="object-contain object-center drop-shadow-[0_24px_34px_rgba(0,0,0,0.34)]"
+                  className="object-contain object-bottom drop-shadow-[0_24px_34px_rgba(0,0,0,0.34)]"
                   priority
                 />
               </div>
@@ -272,7 +272,7 @@ export default function Home() {
               <div
                 className={`grid ${
                   isCompactStage
-                    ? "grid-cols-2 items-center gap-0.5"
+                    ? "grid-cols-2 items-center gap-x-6 gap-y-0"
                     : "grid-cols-2 items-center gap-2"
                 }`}
               >
@@ -282,8 +282,8 @@ export default function Home() {
                       <div
                         className={`relative flex h-full items-center justify-center ${
                           isCompactStage
-                            ? "min-h-[20rem]"
-                            : "min-h-[18rem] sm:min-h-[20rem]"
+                            ? "min-h-[24rem]"
+                            : "min-h-[20rem] sm:min-h-[24rem]"
                         }`}
                       >
                         <Image
@@ -292,7 +292,7 @@ export default function Home() {
                           fill
                           sizes="(max-width: 640px) 180px, 280px"
                           className={`object-contain drop-shadow-[0_14px_22px_rgba(0,0,0,0.28)] ${game.imageClassName || ""} ${
-                            isCompactStage ? "p-0" : ""
+                            isCompactStage ? "scale-[1.12] p-0" : ""
                           }`}
                         />
                       </div>
