@@ -228,17 +228,28 @@ export default function Home() {
               }`}
             >
               <div
-                className={`rounded-full border border-white/10 bg-black/28 font-semibold text-[#ffe9ae] backdrop-blur-sm ${
-                  isCompactStage ? "px-3 py-1 text-[10px]" : "px-4 py-2 text-sm"
+                className={`inline-flex items-center rounded-full border border-[#b48a3b]/70 bg-[linear-gradient(180deg,rgba(37,28,17,0.94)_0%,rgba(18,14,9,0.96)_100%)] font-semibold text-[#ffe3a1] shadow-[inset_0_1px_0_rgba(255,235,178,0.1),0_10px_18px_rgba(0,0,0,0.22)] backdrop-blur-sm ${
+                  isCompactStage
+                    ? "px-3.5 py-1 text-[10px]"
+                    : "px-4.5 py-2 text-sm"
                 }`}
               >
-                {balanceText} MMK
+                <span
+                  className={`mr-2 inline-flex items-center justify-center rounded-full bg-[#d3a54c] font-black text-[#2a1c0f] ${
+                    isCompactStage ? "h-4 w-4 text-[9px]" : "h-5 w-5 text-[10px]"
+                  }`}
+                >
+                  $
+                </span>
+                <span className="tracking-[0.08em]">{balanceText} MMK</span>
               </div>
               <Button
                 type="button"
                 onClick={logoutHandler}
-                className={`rounded-full border border-[#8c6a2e] bg-[#2a2418] font-bold uppercase tracking-[0.18em] text-[#f3d58b] shadow-none ${
-                  isCompactStage ? "h-7 px-3 text-[10px]" : "h-10 px-5 text-sm"
+                className={`rounded-full border border-[#5c4a24] bg-[linear-gradient(180deg,rgba(26,24,20,0.96)_0%,rgba(12,11,9,0.98)_100%)] font-bold uppercase tracking-[0.22em] text-[#f0cd79] shadow-[inset_0_1px_0_rgba(255,235,178,0.08),0_10px_18px_rgba(0,0,0,0.24)] ${
+                  isCompactStage
+                    ? "h-7 px-3.5 text-[10px]"
+                    : "h-10 px-5 text-sm"
                 }`}
               >
                 Logout
