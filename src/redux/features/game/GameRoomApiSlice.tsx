@@ -37,6 +37,51 @@ export type GameRoom = {
   };
 };
 
+export type MahJongGameRoom = {
+  id: number;
+  mah_jong_game_rule_id: number;
+  game_id: number;
+  room_name: string;
+  room_code: string;
+  status: string;
+  created_by: number;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+  game: {
+    id: number;
+    name: string;
+    status: string;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+  };
+  game_rule: {
+    id: number;
+    game_id: number;
+    rule_name: string;
+    match_qty_per_round: number;
+    max_player: number;
+    bet_amount: number;
+    status: string;
+    created_by: number;
+    updated_by: number | null;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+    fees: {
+      id: number;
+      mah_jong_game_rule_id: number;
+      fee_type: string;
+      amount: number;
+      payer_type: string;
+      created_at: string;
+      updated_at: string;
+      deleted_at: string | null;
+    }[];
+  };
+};
+
 export type PlaceCoinflipBetResponse = {
   response: { status: string; message: string };
   data: [];
@@ -50,6 +95,18 @@ export type GameRoomsResponse = {
     per_page: number;
     current_page: number;
     total_pages: number;
+  };
+};
+
+export type MahJongGameRoomsResponse = {
+  response: { status: string; message: string };
+  data: MahJongGameRoom[];
+  meta: {
+    total: number;
+    per_page: number;
+    current_page: number;
+    total_pages: number;
+    cached?: boolean;
   };
 };
 
@@ -71,6 +128,14 @@ export const gameRoomApiSlice = appApi.injectEndpoints({
     >({
       query: ({ page, per_page, game_id }) =>
         `game-rooms/all?page=${page}&per_page=${per_page}&game_id=${game_id}`,
+      providesTags: ["gameRooms"],
+    }),
+    getMahJongGameRooms: build.query<
+      MahJongGameRoomsResponse,
+      { page: number; per_page: number }
+    >({
+      query: ({ page, per_page }) =>
+        `mah-jong-game-rooms/all?page=${page}&per_page=${per_page}`,
       providesTags: ["gameRooms"],
     }),
     placeCoinflipBet: build.mutation<
@@ -106,6 +171,7 @@ export const gameRoomApiSlice = appApi.injectEndpoints({
 
 export const {
   useGetGameRoomsQuery,
+  useGetMahJongGameRoomsQuery,
   usePlaceCoinflipBetMutation,
   useGetGameRoomByIdQuery,
   useGetWalletBalanceQuery,

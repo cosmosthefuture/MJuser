@@ -21,6 +21,7 @@ const LayoutWrapper: React.FC<LayoutWrapperProps> = ({ children }) => {
   const isHomeRoute = pathname === "/";
   const isAuthRoute =
     pathname === "/login" || pathname === "/signup" || pathname === "/register";
+  const isGameRoomsRoute = pathname.startsWith("/game-rooms");
   // fetch latest balance on page load/refresh; result updates auth via endpoint onQueryStarted
   useGetWalletBalanceQuery(token ? undefined : skipToken);
   const [hasMounted, setHasMounted] = useState(false);
@@ -53,7 +54,7 @@ const LayoutWrapper: React.FC<LayoutWrapperProps> = ({ children }) => {
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.45),transparent_34%),linear-gradient(180deg,rgba(255,247,225,0.45),transparent_40%)]" />
           <div className="pointer-events-none absolute left-1/2 top-[-7rem] h-56 w-56 -translate-x-1/2 rounded-full bg-white/60 blur-3xl" />
 
-          {!isAuthRoute && (
+          {!isAuthRoute && !isGameRoomsRoute && (
             <div className="relative z-10 mx-auto flex w-full flex-col px-4 pb-2 pt-5 text-[#5a3213]">
               <div className="flex items-center justify-between gap-3 rounded-[24px] border border-[#dfc390] bg-[#f9efd9]/90 px-4 py-3 shadow-[0_14px_30px_rgba(109,69,20,0.12)]">
                 <div className="min-w-0">
@@ -79,7 +80,7 @@ const LayoutWrapper: React.FC<LayoutWrapperProps> = ({ children }) => {
 
           <div className="relative z-10 flex flex-1 flex-col">{children}</div>
 
-          {!isAuthRoute && (
+          {!isAuthRoute && !isGameRoomsRoute && (
             <div className="sticky inset-x-0 bottom-0 z-20 mt-auto">
               <Footer />
             </div>

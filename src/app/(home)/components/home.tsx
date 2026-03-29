@@ -43,13 +43,11 @@ function getShowcaseGames(apiGames: Game[]): ShowcaseGame[] {
     const isMahjong =
       normalizedName.includes("mah jong") || normalizedName.includes("mahjong");
     const isShan = normalizedName.includes("shan");
-    const isActive = game.status.toLowerCase() === "active";
-
     if (isMahjong) {
       return {
         artworkAlt: "Mah Jong game",
         artworkSrc: "/images/img/mjlogo.png",
-        href: isActive ? `/game-rooms?game_id=${game.id}` : undefined,
+        href: `/game-rooms?game_id=${game.id}`,
         imageClassName: "-translate-x-[6%]",
         title: game.name,
       };
@@ -59,7 +57,7 @@ function getShowcaseGames(apiGames: Game[]): ShowcaseGame[] {
       return {
         artworkAlt: "Shan Koe Mee card game",
         artworkSrc: "/images/img/cardlogo.png",
-        href: isActive ? `/game-rooms?game_id=${game.id}` : undefined,
+        href: `/game-rooms?game_id=${game.id}`,
         title: game.name,
       };
     }
@@ -67,7 +65,7 @@ function getShowcaseGames(apiGames: Game[]): ShowcaseGame[] {
     return {
       artworkAlt: game.name,
       artworkSrc: "/images/img/cardlogo.png",
-      href: isActive ? `/game-rooms?game_id=${game.id}` : undefined,
+      href: `/game-rooms?game_id=${game.id}`,
       title: game.name,
     };
   });
