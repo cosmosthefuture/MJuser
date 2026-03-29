@@ -50,7 +50,7 @@ function getShowcaseGames(apiGames: Game[]): ShowcaseGame[] {
         artworkAlt: "Mah Jong game",
         artworkSrc: "/images/img/mjlogo.png",
         href: isActive ? `/game-rooms?game_id=${game.id}` : undefined,
-        imageClassName: "-translate-x-[5%]",
+        imageClassName: "-translate-x-[6%]",
         title: game.name,
       };
     }
@@ -221,15 +221,15 @@ export default function Home() {
             className={`w-full ${isCompactStage ? "max-w-[760px]" : "max-w-[1100px]"}`}
           >
             <div
-              className={`flex items-center justify-end ${
-                isCompactStage ? "mb-2 gap-2" : "mb-4 gap-3"
+              className={`${
+                isCompactStage
+                  ? "absolute right-14 top-3 z-20 flex items-center gap-2"
+                  : "mb-4 flex items-center justify-end gap-3"
               }`}
             >
               <div
                 className={`rounded-full border border-white/10 bg-black/28 font-semibold text-[#ffe9ae] backdrop-blur-sm ${
-                  isCompactStage
-                    ? "px-3 py-1.5 text-[11px]"
-                    : "px-4 py-2 text-sm"
+                  isCompactStage ? "px-3 py-1 text-[10px]" : "px-4 py-2 text-sm"
                 }`}
               >
                 {balanceText} MMK
@@ -238,9 +238,7 @@ export default function Home() {
                 type="button"
                 onClick={logoutHandler}
                 className={`rounded-full border border-[#8c6a2e] bg-[#2a2418] font-bold uppercase tracking-[0.18em] text-[#f3d58b] shadow-none ${
-                  isCompactStage
-                    ? "h-8 px-3.5 text-[11px]"
-                    : "h-10 px-5 text-sm"
+                  isCompactStage ? "h-7 px-3 text-[10px]" : "h-10 px-5 text-sm"
                 }`}
               >
                 Logout
@@ -273,7 +271,9 @@ export default function Home() {
 
               <div
                 className={`grid ${
-                  isCompactStage ? "grid-rows-2 gap-1" : "grid-rows-2 gap-2"
+                  isCompactStage
+                    ? "grid-cols-2 items-center gap-0.5"
+                    : "grid-cols-2 items-center gap-2"
                 }`}
               >
                 {showcaseGames.map((game) => {
@@ -282,8 +282,8 @@ export default function Home() {
                       <div
                         className={`relative flex h-full items-center justify-center ${
                           isCompactStage
-                            ? "min-h-[13.8rem]"
-                            : "min-h-[15rem] sm:min-h-[18rem]"
+                            ? "min-h-[20rem]"
+                            : "min-h-[18rem] sm:min-h-[20rem]"
                         }`}
                       >
                         <Image
