@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Lock, UserRound } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 
 type ViewportState = {
   width: number;
@@ -20,15 +20,26 @@ function getViewportState(): ViewportState {
     return DEFAULT_VIEWPORT;
   }
 
+  const visualViewport = window.visualViewport;
+
   return {
-    width: window.innerWidth,
-    height: window.innerHeight,
+    width: visualViewport?.width ?? window.innerWidth,
+    height: visualViewport?.height ?? window.innerHeight,
   };
 }
 
 export default function GuestLanding() {
-  const [hasMounted, setHasMounted] = useState(false);
+  const [isViewportReady, setIsViewportReady] = useState(false);
   const [viewport, setViewport] = useState<ViewportState>(DEFAULT_VIEWPORT);
+
+  useLayoutEffect(() => {
+    const updateViewport = () => {
+      setViewport(getViewportState());
+      setIsViewportReady(true);
+    };
+
+    updateViewport();
+  }, []);
 
   useEffect(() => {
     const updateViewport = () => {
@@ -43,21 +54,23 @@ export default function GuestLanding() {
       void orientationApi.lock("landscape").catch(() => undefined);
     }
 
-    setHasMounted(true);
     updateViewport();
     window.addEventListener("resize", updateViewport);
     window.addEventListener("orientationchange", updateViewport);
+    window.visualViewport?.addEventListener("resize", updateViewport);
+    window.visualViewport?.addEventListener("scroll", updateViewport);
 
     return () => {
       window.removeEventListener("resize", updateViewport);
       window.removeEventListener("orientationchange", updateViewport);
+      window.visualViewport?.removeEventListener("resize", updateViewport);
+      window.visualViewport?.removeEventListener("scroll", updateViewport);
     };
   }, []);
 
   const isPortraitPhone =
-    hasMounted && viewport.width < 900 && viewport.height > viewport.width;
-  const isMobileStage =
-    hasMounted && Math.min(viewport.width, viewport.height) < 520;
+    viewport.width < 900 && viewport.height > viewport.width;
+  const isMobileStage = Math.min(viewport.width, viewport.height) < 520;
 
   const stageStyle = isPortraitPhone
     ? {
@@ -88,7 +101,9 @@ export default function GuestLanding() {
   return (
     <div className="fixed inset-0 z-0 overflow-hidden bg-[#08162f] text-white">
       <div
-        className="absolute left-1/2 top-1/2 overflow-hidden bg-[#0d2858] shadow-[0_0_80px_rgba(0,0,0,0.35)]"
+        className={`absolute left-1/2 top-1/2 overflow-hidden bg-[#0d2858] shadow-[0_0_80px_rgba(0,0,0,0.35)] transition-opacity duration-150 ${
+          isViewportReady ? "opacity-100" : "opacity-0"
+        }`}
         style={stageStyle}
       >
         <Image

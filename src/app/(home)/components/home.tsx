@@ -12,7 +12,7 @@ import {
   getGamePresentation,
   getStatusLabel,
 } from "@/components/lobby/lobbyTheme";
-import { RootState } from "@/redux/store";
+import { persistor, RootState } from "@/redux/store";
 import { useGetGamesQuery, type Game } from "@/redux/features/game/GameApiSlice";
 
 function getLobbyGames(apiGames: Game[]) {
@@ -37,6 +37,9 @@ function getLobbyGames(apiGames: Game[]) {
 export default function Home() {
   const { token, balance } = useSelector((state: RootState) => state.auth);
   const [mounted, setMounted] = useState(false);
+  const [isRehydrated, setIsRehydrated] = useState(() =>
+    persistor.getState().bootstrapped,
+  );
   const {
     data: gamesData,
     isLoading,
@@ -45,6 +48,22 @@ export default function Home() {
 
   useEffect(() => {
     setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (persistor.getState().bootstrapped) {
+      setIsRehydrated(true);
+      return;
+    }
+
+    const unsubscribe = persistor.subscribe(() => {
+      if (persistor.getState().bootstrapped) {
+        setIsRehydrated(true);
+        unsubscribe();
+      }
+    });
+
+    return unsubscribe;
   }, []);
 
   const parsedBalance = Number(balance);
@@ -56,6 +75,10 @@ export default function Home() {
       : "0";
 
   const lobbyGames = getLobbyGames(gamesData?.data || []);
+
+  if (!isRehydrated) {
+    return null;
+  }
 
   if (!token) {
     return <GuestLanding />;

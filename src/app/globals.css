@@ -205,6 +205,17 @@
     caret-color: #f8e0b0;
     transition: background-color 9999s ease-in-out 0s;
   }
+
+  .auth-input-light:-webkit-autofill,
+  .auth-input-light:-webkit-autofill:hover,
+  .auth-input-light:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0px 1000px #ffffff inset;
+    box-shadow: 0 0 0px 1000px #ffffff inset;
+    background-color: #ffffff !important;
+    -webkit-text-fill-color: #4f3517;
+    caret-color: #4f3517;
+    transition: background-color 9999s ease-in-out 0s;
+  }
 }
 
 @layer utilities {

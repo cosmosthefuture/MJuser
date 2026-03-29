@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 
 type AuthStageProps = {
   children: React.ReactNode;
@@ -30,9 +30,11 @@ function getViewportState(): ViewportState {
     return DEFAULT_VIEWPORT;
   }
 
+  const visualViewport = window.visualViewport;
+
   return {
-    width: window.innerWidth,
-    height: window.innerHeight,
+    width: visualViewport?.width ?? window.innerWidth,
+    height: visualViewport?.height ?? window.innerHeight,
   };
 }
 
@@ -45,8 +47,17 @@ export default function AuthStage({
   linkPrompt,
   title,
 }: AuthStageProps) {
-  const [hasMounted, setHasMounted] = useState(false);
+  const [isViewportReady, setIsViewportReady] = useState(false);
   const [viewport, setViewport] = useState<ViewportState>(DEFAULT_VIEWPORT);
+
+  useLayoutEffect(() => {
+    const updateViewport = () => {
+      setViewport(getViewportState());
+      setIsViewportReady(true);
+    };
+
+    updateViewport();
+  }, []);
 
   useEffect(() => {
     const updateViewport = () => {
@@ -61,19 +72,23 @@ export default function AuthStage({
       void orientationApi.lock("landscape").catch(() => undefined);
     }
 
-    setHasMounted(true);
     updateViewport();
     window.addEventListener("resize", updateViewport);
     window.addEventListener("orientationchange", updateViewport);
+    window.visualViewport?.addEventListener("resize", updateViewport);
+    window.visualViewport?.addEventListener("scroll", updateViewport);
 
     return () => {
       window.removeEventListener("resize", updateViewport);
       window.removeEventListener("orientationchange", updateViewport);
+      window.visualViewport?.removeEventListener("resize", updateViewport);
+      window.visualViewport?.removeEventListener("scroll", updateViewport);
     };
   }, []);
 
   const isPortraitPhone =
-    hasMounted && viewport.width < 900 && viewport.height > viewport.width;
+    viewport.width < 900 && viewport.height > viewport.width;
+
   const stageStyle = isPortraitPhone
     ? {
         width: `${viewport.height}px`,
@@ -90,7 +105,9 @@ export default function AuthStage({
   return (
     <div className="fixed inset-0 z-30 overflow-hidden bg-[#08162f] text-[#4e290d]">
       <div
-        className="absolute left-1/2 top-1/2 overflow-hidden"
+        className={`absolute left-1/2 top-1/2 overflow-hidden transition-opacity duration-150 ${
+          isViewportReady ? "opacity-100" : "opacity-0"
+        }`}
         style={stageStyle}
       >
         <Image
@@ -101,60 +118,48 @@ export default function AuthStage({
           sizes="100vw"
           className="object-cover object-center"
         />
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(10,20,44,0.16)_0%,rgba(10,20,44,0.08)_40%,rgba(77,39,10,0.24)_100%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(18,14,6,0.4)_0%,rgba(18,14,6,0.28)_42%,rgba(18,14,6,0.48)_100%)]" />
 
         <div className="h-full overflow-y-auto">
           <div
-            className={`relative z-10 mx-auto flex min-h-[10dvh] w-full max-w-[40rem] flex-1 flex-col justify-center px-4 ${
-              compactMobile ? "py-4 sm:py-8" : "py-8"
+            className={`relative z-10 mx-auto flex min-h-full w-full max-w-[25rem] flex-1 flex-col justify-center px-4 ${
+              compactMobile ? "py-3 sm:py-6" : "py-6"
             }`}
           >
             <div className="relative p-0">
               <div className="relative p-0">
-                <Link
-                  href="/"
-                  className="inline-flex items-center rounded-full border border-[#ddbf89] bg-[#f4e3bf] px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-[#946632] transition hover:bg-[#f7ebd1]"
-                >
-                  Back To Lobby
-                </Link>
+                <div className="rounded-[28px] border border-[#3f3624] bg-[rgba(25,24,21,0.94)] p-[7px] shadow-[0_22px_48px_rgba(7,8,6,0.46)]">
+                  <div className="rounded-[22px] border border-[#d6c29a] bg-[#f8f3e8] px-4 py-4 text-[#5f4017] shadow-[0_8px_18px_rgba(86,63,25,0.06)]">
+                    <div className="mb-4 flex items-start justify-between gap-3">
+                      <div>
+                        {eyebrow ? (
+                          <p className="text-[10px] font-semibold uppercase tracking-[0.32em] text-[#9d7740]">
+                            {eyebrow}
+                          </p>
+                        ) : null}
+                        <h1 className="text-[2rem] font-semibold leading-none tracking-[-0.04em] text-[#5a3e19]">
+                          {title}
+                        </h1>
+                      </div>
+                      <div className="rounded-b-[15px] border-x border-b border-[#e0c98e] bg-[#efd694] px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7c5720]">
+                        ID / Account
+                      </div>
+                    </div>
 
-                <div
-                  className={`rounded-[30px] border border-[#2d5137] felt-panel p-5 text-[#fff8e1] shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_20px_40px_rgba(16,35,20,0.25)] ${
-                    compactMobile ? "mt-2 sm:mt-4" : "mt-4"
-                  }`}
-                >
-                  <div className="rounded-[24px] border border-white/10 bg-black/10 p-5 backdrop-blur-[2px]">
-                    {eyebrow ? (
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-[#f1d58d]">
-                        {eyebrow}
-                      </p>
-                    ) : null}
-                    <h1
-                      className={`text-[2.1rem] font-semibold leading-none tracking-[-0.03em] text-[#fff8ea] ${
-                        eyebrow ? "mt-3" : "mt-0"
-                      }`}
-                    >
-                      {title}
-                    </h1>
-
-                    <div className={compactMobile ? "mt-4 sm:mt-6" : "mt-6"}>
+                    <div className="mt-2">
                       {children}
                     </div>
-                  </div>
-                </div>
 
-                <div
-                  className={`flex items-center justify-between gap-3 rounded-[22px] border border-[#e7d2a8] bg-[#f4e5c3]/95 px-4 py-3 text-sm text-[#704826] ${
-                    compactMobile ? "mt-3 sm:mt-4" : "mt-4"
-                  }`}
-                >
-                  <span>{linkPrompt}</span>
-                  <Link
-                    href={linkHref}
-                    className="font-semibold text-[#9b2c35] transition hover:text-[#7b1e26]"
-                  >
-                    {linkLabel}
-                  </Link>
+                    <div className="mt-4 flex items-center justify-between px-1 py-1 text-[13px] text-[#6f5227]">
+                      <span className="font-medium">{linkPrompt}</span>
+                      <Link
+                        href={linkHref}
+                        className="font-semibold text-[#9f3640] transition hover:text-[#7f232d]"
+                      >
+                        {linkLabel}
+                      </Link>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
