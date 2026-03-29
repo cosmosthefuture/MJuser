@@ -126,7 +126,7 @@ export default function GameRoomsClient() {
         style={stageStyle}
       >
         <div
-          className="absolute inset-0 bg-cover bg-center"
+          className="absolute inset-0 scale-[1.02] bg-cover bg-center blur-[2px]"
           style={{ backgroundImage: "url('/images/game-room-bg.png')" }}
         />
         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(33,12,5,0.64)_0%,rgba(53,18,10,0.3)_38%,rgba(44,15,8,0.24)_66%,rgba(26,9,4,0.68)_100%)]" />
