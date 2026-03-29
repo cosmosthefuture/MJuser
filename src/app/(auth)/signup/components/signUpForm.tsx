@@ -12,85 +12,36 @@ import { fcmService } from "@/services/fcmService";
 
 type SignUpFormValues = {
   phone_number: string;
-  otp: string;
   name: string;
+  username: string;
+  email: string;
   password: string;
   password_confirmation: string;
   agent_code?: string;
 };
 type Errors = {
   phone_number?: string[];
-  otp?: string[];
   name?: string[];
+  username?: string[];
+  email?: string[];
   password?: string[];
   password_confirmation?: string[];
+  agent_code?: string[];
 };
 
 export default function SignUpForm() {
   const [loading, setLoading] = useState(false);
-  const [otpLoading, setOtpLoading] = useState(false);
-  const [otpCooldown, setOtpCooldown] = useState(0);
   const dispatch = useAppDispatch();
   const router = useRouter();
   const {
     register,
     setError,
     handleSubmit,
-    watch,
+    getValues,
     formState: { errors },
   } = useForm<SignUpFormValues>({
     reValidateMode: "onChange",
   });
-
-  const handleGetOtp = async () => {
-    const phone = watch("phone_number");
-    if (!phone || phone.length < 6) {
-      setError("phone_number", {
-        type: "manual",
-        message: "Please enter a valid phone number.",
-      });
-      return;
-    }
-    setOtpLoading(true);
-    try {
-      const response = await http.verifyPhone("/auth/verify-phone", {
-        phone_number: phone,
-      });
-      if (
-        response.status === 200 &&
-        response.data.response?.status === "success"
-      ) {
-        toast.success("OTP sent", {
-          description: response.data.response.message,
-        });
-        setOtpCooldown(120);
-      } else if (response.status === 422) {
-        const apiErrors = response.data.errors as {
-          phone_number?: string[];
-        };
-        const msg =
-          apiErrors?.phone_number?.[0] ||
-          response.data.response?.message ||
-          "Validation error";
-        setError("phone_number", { type: "manual", message: msg });
-        toast.error("Failed to send OTP", { description: msg });
-      }
-    } catch {
-      toast.error("Failed to send OTP", {
-        description: "Please try again later.",
-      });
-    } finally {
-      setOtpLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (otpCooldown <= 0) return;
-    const interval = setInterval(() => {
-      setOtpCooldown((prev) => (prev > 0 ? prev - 1 : 0));
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [otpCooldown]);
 
   const onSubmit: SubmitHandler<SignUpFormValues> = async (data) => {
     setLoading(true);
@@ -101,11 +52,12 @@ export default function SignUpForm() {
 
       const payload = {
         phone_number: data.phone_number,
-        otp: data.otp,
         name: data.name,
+        username: data.username,
+        email: data.email,
         password: data.password,
         password_confirmation: data.password_confirmation,
-        agent_code: data.agent_code,
+        ...(data.agent_code ? { agent_code: data.agent_code } : {}),
         ...(fcmToken ? { fcm_token: fcmToken } : {}),
       };
 
@@ -124,9 +76,11 @@ export default function SignUpForm() {
             ? apiErrors.password[0]
             : apiErrors.phone_number
               ? apiErrors.phone_number[0]
-              : apiErrors.otp
-                ? apiErrors.otp[0]
-                : apiErrors.name
+              : apiErrors.username
+                ? apiErrors.username[0]
+                : apiErrors.email
+                  ? apiErrors.email[0]
+                  : apiErrors.name
                   ? apiErrors.name[0]
                   : "Please check your credentials and try again.",
         });
@@ -202,9 +156,51 @@ export default function SignUpForm() {
 
         <div className="flex items-center gap-2.5">
           <p className="w-[5.25rem] shrink-0 text-[11px] font-bold uppercase tracking-[0.16em] text-[#89652e]">
+            User
+          </p>
+          <div className="flex-1">
+            <Input
+              id="username"
+              type="text"
+              placeholder="Username"
+              autoComplete="username"
+              variant="casino"
+              {...register("username", {
+                required: "Username is required.",
+              })}
+              error={!!errors.username}
+              hint={errors.username?.message}
+              className="auth-input-light h-[2.6rem] rounded-[13px] border-[#cfc0a0] bg-white px-3.5 py-2 text-[14px] font-medium text-[#4f3517] shadow-none selection:bg-[#d7a64b] selection:text-[#fffaf0] focus:border-[#b98736] focus:bg-white placeholder:text-[#c7b289]"
+            />
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2.5">
+          <p className="w-[5.25rem] shrink-0 text-[11px] font-bold uppercase tracking-[0.16em] text-[#89652e]">
+            Email
+          </p>
+          <div className="flex-1">
+            <Input
+              id="email"
+              type="email"
+              placeholder="Email"
+              autoComplete="email"
+              variant="casino"
+              {...register("email", {
+                required: "Email is required.",
+              })}
+              error={!!errors.email}
+              hint={errors.email?.message}
+              className="auth-input-light h-[2.6rem] rounded-[13px] border-[#cfc0a0] bg-white px-3.5 py-2 text-[14px] font-medium text-[#4f3517] shadow-none selection:bg-[#d7a64b] selection:text-[#fffaf0] focus:border-[#b98736] focus:bg-white placeholder:text-[#c7b289]"
+            />
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2.5">
+          <p className="w-[5.25rem] shrink-0 text-[11px] font-bold uppercase tracking-[0.16em] text-[#89652e]">
             Phone
           </p>
-          <div className="relative flex-1">
+          <div className="flex-1">
             <Input
               id="phone_number"
               type="tel"
@@ -212,7 +208,7 @@ export default function SignUpForm() {
               placeholder="Phone Number"
               autoComplete="tel"
               variant="casino"
-              className="auth-input-light h-[2.6rem] rounded-[13px] border-[#cfc0a0] bg-white px-3.5 py-2 pr-22 text-[14px] font-medium text-[#4f3517] shadow-none selection:bg-[#d7a64b] selection:text-[#fffaf0] focus:border-[#b98736] focus:bg-white placeholder:text-[#c7b289]"
+              className="auth-input-light h-[2.6rem] rounded-[13px] border-[#cfc0a0] bg-white px-3.5 py-2 text-[14px] font-medium text-[#4f3517] shadow-none selection:bg-[#d7a64b] selection:text-[#fffaf0] focus:border-[#b98736] focus:bg-white placeholder:text-[#c7b289]"
               {...register("phone_number", {
                 required: "Phone number is required.",
                 minLength: {
@@ -223,15 +219,6 @@ export default function SignUpForm() {
               error={!!errors.phone_number}
               hint={errors.phone_number?.message}
             />
-            <Button
-              type="button"
-              onClick={handleGetOtp}
-              disabled={otpLoading || loading || otpCooldown > 0}
-              className="absolute right-1.5 top-1/2 h-8 -translate-y-1/2 rounded-full border border-[#d7b378] bg-[#efe1bf] px-3 text-[10px] font-semibold tracking-[0.16em] text-[#6f4b1f] shadow-none"
-              variant="ghost"
-            >
-              {otpCooldown > 0 ? `${otpCooldown}s` : "GET OTP"}
-            </Button>
           </div>
         </div>
 
@@ -249,35 +236,6 @@ export default function SignUpForm() {
               {...register("agent_code")}
               error={!!errors.agent_code}
               hint={errors.agent_code?.message}
-              className="auth-input-light h-[2.6rem] rounded-[13px] border-[#cfc0a0] bg-white px-3.5 py-2 text-[14px] font-medium text-[#4f3517] shadow-none selection:bg-[#d7a64b] selection:text-[#fffaf0] focus:border-[#b98736] focus:bg-white placeholder:text-[#c7b289]"
-            />
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2.5">
-          <p className="w-[5.25rem] shrink-0 text-[11px] font-bold uppercase tracking-[0.16em] text-[#89652e]">
-            OTP
-          </p>
-          <div className="flex-1">
-            <Input
-              id="otp"
-              type="text"
-              placeholder="OTP"
-              autoComplete="off"
-              variant="casino"
-              {...register("otp", {
-                required: "OTP is required.",
-                minLength: {
-                  value: 6,
-                  message: "OTP must be 6 digits.",
-                },
-                maxLength: {
-                  value: 6,
-                  message: "OTP must be 6 digits.",
-                },
-              })}
-              error={!!errors.otp}
-              hint={errors.otp?.message}
               className="auth-input-light h-[2.6rem] rounded-[13px] border-[#cfc0a0] bg-white px-3.5 py-2 text-[14px] font-medium text-[#4f3517] shadow-none selection:bg-[#d7a64b] selection:text-[#fffaf0] focus:border-[#b98736] focus:bg-white placeholder:text-[#c7b289]"
             />
           </div>
@@ -326,7 +284,7 @@ export default function SignUpForm() {
               {...register("password_confirmation", {
                 required: "Password confirmation is required.",
                 validate: (value: string) =>
-                  value === watch("password") || "Passwords do not match.",
+                  value === getValues("password") || "Passwords do not match.",
               })}
               error={!!errors.password_confirmation}
               hint={errors.password_confirmation?.message}

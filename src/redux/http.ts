@@ -105,11 +105,13 @@ export const register = async (
   uri: string,
   data: {
     phone_number: string;
-    otp: string;
     name: string;
+    username: string;
+    email: string;
     password: string;
     password_confirmation: string;
     agent_code?: string;
+    fcm_token?: string;
   }
 ) => {
   try {
