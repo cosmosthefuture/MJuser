@@ -129,9 +129,9 @@ export default function LoginForm() {
   }, [dispatch]);
 
   return (
-    <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
-      <div className="space-y-3">
-        <div className="flex items-center gap-3">
+    <form className="space-y-3" onSubmit={handleSubmit(onSubmit)}>
+      <div className="space-y-2.5">
+        <div className="flex items-center gap-2.5">
           <p className="w-[5.25rem] shrink-0 text-[11px] font-bold uppercase tracking-[0.16em] text-[#89652e]">
             ID
           </p>
@@ -152,12 +152,12 @@ export default function LoginForm() {
               })}
               error={!!errors.phone_number}
               hint={errors.phone_number?.message}
-              className="auth-input-light h-[2.85rem] rounded-[14px] border-[#cfc0a0] bg-white px-4 py-2 text-[15px] font-medium text-[#4f3517] shadow-none selection:bg-[#d7a64b] selection:text-[#fffaf0] focus:border-[#b98736] focus:bg-white placeholder:text-[#c7b289]"
+              className="auth-input-light h-[2.6rem] rounded-[13px] border-[#cfc0a0] bg-white px-3.5 py-2 text-[14px] font-medium text-[#4f3517] shadow-none selection:bg-[#d7a64b] selection:text-[#fffaf0] focus:border-[#b98736] focus:bg-white placeholder:text-[#c7b289]"
             />
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
           <p className="w-[5.25rem] shrink-0 text-[11px] font-bold uppercase tracking-[0.16em] text-[#89652e]">
             Password
           </p>
@@ -181,7 +181,7 @@ export default function LoginForm() {
               })}
               error={!!errors.password}
               hint={errors.password?.message}
-              className="auth-input-light h-[2.85rem] rounded-[14px] border-[#cfc0a0] bg-white px-4 py-2 text-[15px] font-medium text-[#4f3517] shadow-none selection:bg-[#d7a64b] selection:text-[#fffaf0] focus:border-[#b98736] focus:bg-white placeholder:text-[#c7b289]"
+              className="auth-input-light h-[2.6rem] rounded-[13px] border-[#cfc0a0] bg-white px-3.5 py-2 text-[14px] font-medium text-[#4f3517] shadow-none selection:bg-[#d7a64b] selection:text-[#fffaf0] focus:border-[#b98736] focus:bg-white placeholder:text-[#c7b289]"
             />
           </div>
         </div>
@@ -190,7 +190,7 @@ export default function LoginForm() {
       <Button
         disabled={loading}
         type="submit"
-        className="mt-1 flex h-[2.9rem] w-full items-center justify-center rounded-full border border-[#8c6a2e] bg-[#2a2418] px-5 text-[15px] font-bold uppercase tracking-[0.2em] text-[#f3d58b] shadow-none transition disabled:opacity-70"
+        className="mt-1 flex h-[2.75rem] w-full items-center justify-center rounded-full border border-[#8c6a2e] bg-[#2a2418] px-5 text-[14px] font-bold uppercase tracking-[0.2em] text-[#f3d58b] shadow-none transition disabled:opacity-70"
       >
         {loading ? "Logging In..." : "Login"}
       </Button>
