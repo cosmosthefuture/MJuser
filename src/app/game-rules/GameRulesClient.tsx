@@ -126,7 +126,11 @@ export default function GameRulesClient() {
                     : "right-6 top-5 flex items-center gap-3"
                 }`}
               >
-                <PlayerNavbar balance={balance} compact={isCompactStage} />
+                <PlayerNavbar
+                  balance={balance}
+                  compact={isCompactStage}
+                  showBackButton
+                />
               </div>
             )}
 
