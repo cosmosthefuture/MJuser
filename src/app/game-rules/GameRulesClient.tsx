@@ -157,7 +157,9 @@ export default function GameRulesClient() {
                         fill
                         sizes="(max-width: 640px) 130px, 180px"
                         className={`object-contain object-center transition duration-300 group-hover:scale-[1.02] ${
-                          isCompactStage ? "scale-[0.86]" : "scale-[0.88]"
+                          isCompactStage
+                            ? "scale-[0.86] -translate-y-[12%]"
+                            : "scale-[0.88] -translate-y-[12%]"
                         }`}
                         priority
                       />
