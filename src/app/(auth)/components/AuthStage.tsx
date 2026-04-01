@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useLayoutEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 type AuthStageProps = {
   children: React.ReactNode;
@@ -47,25 +47,13 @@ export default function AuthStage({
   linkPrompt,
   title,
 }: AuthStageProps) {
-  const [isViewportReady, setIsViewportReady] = useState(
-    typeof window !== "undefined",
-  );
-  const [viewport, setViewport] = useState<ViewportState>(() =>
-    getViewportState(),
-  );
-
-  useLayoutEffect(() => {
-    const updateViewport = () => {
-      setViewport(getViewportState());
-      setIsViewportReady(true);
-    };
-
-    updateViewport();
-  }, []);
+  const [isViewportReady, setIsViewportReady] = useState(false);
+  const [viewport, setViewport] = useState<ViewportState>(DEFAULT_VIEWPORT);
 
   useEffect(() => {
     const updateViewport = () => {
       setViewport(getViewportState());
+      setIsViewportReady(true);
     };
 
     const orientationApi = screen.orientation as ScreenOrientation & {

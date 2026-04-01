@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Lock, UserRound } from "lucide-react";
-import { useEffect, useLayoutEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 type ViewportState = {
   width: number;
@@ -32,18 +32,10 @@ export default function GuestLanding() {
   const [isViewportReady, setIsViewportReady] = useState(false);
   const [viewport, setViewport] = useState<ViewportState>(DEFAULT_VIEWPORT);
 
-  useLayoutEffect(() => {
-    const updateViewport = () => {
-      setViewport(getViewportState());
-      setIsViewportReady(true);
-    };
-
-    updateViewport();
-  }, []);
-
   useEffect(() => {
     const updateViewport = () => {
       setViewport(getViewportState());
+      setIsViewportReady(true);
     };
 
     const orientationApi = screen.orientation as ScreenOrientation & {

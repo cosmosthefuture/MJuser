@@ -70,22 +70,12 @@ function getShowcaseGames(apiGames: Game[]): ShowcaseGame[] {
 
 export default function Home() {
   const { token, balance } = useSelector((state: RootState) => state.auth);
-  const [isRehydrated, setIsRehydrated] = useState(
-    () => persistor.getState().bootstrapped,
-  );
-  const [isViewportReady, setIsViewportReady] = useState(
-    typeof window !== "undefined",
-  );
-  const [viewport, setViewport] = useState(() => ({
-    width:
-      typeof window !== "undefined"
-        ? (window.visualViewport?.width ?? window.innerWidth)
-        : 1280,
-    height:
-      typeof window !== "undefined"
-        ? (window.visualViewport?.height ?? window.innerHeight)
-        : 720,
-  }));
+  const [isRehydrated, setIsRehydrated] = useState(false);
+  const [isViewportReady, setIsViewportReady] = useState(false);
+  const [viewport, setViewport] = useState({
+    width: 1280,
+    height: 720,
+  });
   const { data: gamesData } = useGetGamesQuery(
     token ? { page: 1, per_page: 10 } : skipToken,
   );
