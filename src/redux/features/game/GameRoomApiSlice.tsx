@@ -82,6 +82,39 @@ export type MahJongGameRoom = {
   };
 };
 
+export type MahJongGameRule = {
+  id: number;
+  game_id: number;
+  rule_name: string;
+  match_qty_per_round: number;
+  max_player: number;
+  bet_amount: number;
+  status: string;
+  created_by: number;
+  updated_by: number | null;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+  game: {
+    id: number;
+    name: string;
+    status: string;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+  };
+  fees: {
+    id: number;
+    mah_jong_game_rule_id: number;
+    fee_type: string;
+    amount: number;
+    payer_type: string;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+  }[];
+};
+
 export type PlaceCoinflipBetResponse = {
   response: { status: string; message: string };
   data: [];
@@ -110,6 +143,11 @@ export type MahJongGameRoomsResponse = {
   };
 };
 
+export type MahJongGameRulesResponse = {
+  response: { status: string; message: string };
+  data: MahJongGameRule[];
+};
+
 export type GameRoomDetailResponse = {
   response: { status: string; message: string };
   data: GameRoom;
@@ -136,6 +174,10 @@ export const gameRoomApiSlice = appApi.injectEndpoints({
     >({
       query: ({ page, per_page }) =>
         `mah-jong-game-rooms/all?page=${page}&per_page=${per_page}`,
+      providesTags: ["gameRooms"],
+    }),
+    getMahJongGameRules: build.query<MahJongGameRulesResponse, void>({
+      query: () => "mah-jong-game-rules/all",
       providesTags: ["gameRooms"],
     }),
     placeCoinflipBet: build.mutation<
@@ -172,6 +214,7 @@ export const gameRoomApiSlice = appApi.injectEndpoints({
 export const {
   useGetGameRoomsQuery,
   useGetMahJongGameRoomsQuery,
+  useGetMahJongGameRulesQuery,
   usePlaceCoinflipBetMutation,
   useGetGameRoomByIdQuery,
   useGetWalletBalanceQuery,
