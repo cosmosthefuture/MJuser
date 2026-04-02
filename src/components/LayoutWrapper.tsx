@@ -31,8 +31,13 @@ const LayoutWrapper: React.FC<LayoutWrapperProps> = ({ children }) => {
     setHasMounted(true);
   }, []);
 
-  // For the domino game route, use a full-screen layout without the phone frame and footer
-  if (pathname.startsWith("/domino") || pathname.startsWith("/mahjong")) {
+  // For fullscreen game views, skip the phone frame + footer wrapper
+  if (
+    pathname.startsWith("/domino") ||
+    pathname.startsWith("/mahjong") ||
+    isGameRulesRoute ||
+    isGameRoomsRoute
+  ) {
     return (
       <div className="flex h-screen w-screen items-center justify-center overflow-hidden bg-[#00251b]">
         {children}
