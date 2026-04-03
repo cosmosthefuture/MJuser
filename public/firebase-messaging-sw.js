@@ -1,18 +1,31 @@
+// // Minimal service worker for Firebase Messaging token registration.
+// // It intentionally avoids external imports to prevent network failures during registration.
+// self.addEventListener("push", (event) => {
+//   if (!event.data) return;
+//   const payload = event.data.json();
+//   const title = payload.notification?.title || "Notification";
+//   const options = {
+//     body: payload.notification?.body,
+//     icon: payload.notification?.icon,
+//     data: payload.data,
+//   };
+//   event.waitUntil(self.registration.showNotification(title, options));
+// });
 importScripts(
-  "https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"
+  "https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js",
 );
 importScripts(
-  "https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js"
+  "https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js",
 );
 
 firebase.initializeApp({
-  apiKey: "AIzaSyBwqoaRRKZQFmC9SHS12P-btED_5aD8gFE",
-  authDomain: "give-credit-development.firebaseapp.com",
-  projectId: "give-credit-development",
-  storageBucket: "give-credit-development.firebasestorage.app",
-  messagingSenderId: "421812139254",
-  appId: "1:421812139254:web:f952e34171a1efdad628d7",
-  measurementId: "G-ZQ7F7P9W37",
+  apiKey: "AIzaSyAw70nbhyIPjXdHqoNTtijo24UqcFGK4Z4",
+  authDomain: "gameproject-1888a.firebaseapp.com",
+  projectId: "gameproject-1888a",
+  storageBucket: "gameproject-1888a.firebasestorage.app",
+  messagingSenderId: "1082791119378",
+  appId: "1:1082791119378:web:f24b1cc4f0d42766afe6cb",
+  measurementId: "G-SY12EBQFEL",
 });
 
 const messaging = firebase.messaging();

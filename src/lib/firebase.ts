@@ -108,7 +108,7 @@ export async function getFCMToken(): Promise<string | null> {
       } catch (swError) {
         console.error(
           "FCM: Manual service worker registration also failed:",
-          swError
+          swError,
         );
       }
     }
@@ -128,7 +128,7 @@ async function registerServiceWorker(): Promise<ServiceWorkerRegistration | null
       "/firebase-messaging-sw.js",
       {
         scope: "/",
-      }
+      },
     );
     console.log("FCM: Service worker registered successfully");
     return registration;
