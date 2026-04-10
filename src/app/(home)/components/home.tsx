@@ -43,7 +43,7 @@ function getShowcaseGames(apiGames: Game[]): ShowcaseGame[] {
     if (isMahjong) {
       return {
         artworkAlt: "Mah Jong game",
-        artworkSrc: "/images/img/mjlogo.png",
+        artworkSrc: "/images/mj-game.webp",
         href: `/game-rules?game_id=${game.id}`,
         imageClassName: "-translate-x-[6%]",
         title: game.name,
@@ -53,7 +53,7 @@ function getShowcaseGames(apiGames: Game[]): ShowcaseGame[] {
     if (isShan) {
       return {
         artworkAlt: "Shan Koe Mee card game",
-        artworkSrc: "/images/img/cardlogo.png",
+        artworkSrc: "/images/shankoemee.webp",
         href: `/game-rules?game_id=${game.id}`,
         title: game.name,
       };
@@ -61,7 +61,7 @@ function getShowcaseGames(apiGames: Game[]): ShowcaseGame[] {
 
     return {
       artworkAlt: game.name,
-      artworkSrc: "/images/img/cardlogo.png",
+      artworkSrc: "/images/shankoemee.webp",
       href: `/game-rules?game_id=${game.id}`,
       title: game.name,
     };
@@ -153,7 +153,7 @@ export default function Home() {
         >
           <div
             className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: "url('/images/home-bg.png')" }}
+            style={{ backgroundImage: "url('/images/games-bg.webp')" }}
           />
           <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(33,12,5,0.7)_0%,rgba(53,18,10,0.38)_38%,rgba(44,15,8,0.32)_66%,rgba(26,9,4,0.72)_100%)]" />
         </div>
@@ -178,7 +178,7 @@ export default function Home() {
       >
         <div
           className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: "url('/images/home-bg.png')" }}
+          style={{ backgroundImage: "url('/images/games-bg.webp')" }}
         />
         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(33,12,5,0.7)_0%,rgba(53,18,10,0.38)_38%,rgba(44,15,8,0.32)_66%,rgba(26,9,4,0.72)_100%)]" />
 
