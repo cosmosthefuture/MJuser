@@ -107,7 +107,6 @@ export const register = async (
     phone_number: string;
     name: string;
     username: string;
-    email: string;
     password: string;
     password_confirmation: string;
     agent_code?: string;

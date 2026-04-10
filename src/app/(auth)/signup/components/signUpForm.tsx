@@ -14,7 +14,6 @@ type SignUpFormValues = {
   phone_number: string;
   name: string;
   username: string;
-  email: string;
   password: string;
   password_confirmation: string;
   agent_code?: string;
@@ -23,7 +22,6 @@ type Errors = {
   phone_number?: string[];
   name?: string[];
   username?: string[];
-  email?: string[];
   password?: string[];
   password_confirmation?: string[];
   agent_code?: string[];
@@ -54,7 +52,6 @@ export default function SignUpForm() {
         phone_number: data.phone_number,
         name: data.name,
         username: data.username,
-        email: data.email,
         password: data.password,
         password_confirmation: data.password_confirmation,
         ...(data.agent_code ? { agent_code: data.agent_code } : {}),
@@ -78,8 +75,6 @@ export default function SignUpForm() {
               ? apiErrors.phone_number[0]
               : apiErrors.username
                 ? apiErrors.username[0]
-                : apiErrors.email
-                  ? apiErrors.email[0]
                   : apiErrors.name
                   ? apiErrors.name[0]
                   : "Please check your credentials and try again.",
@@ -170,27 +165,6 @@ export default function SignUpForm() {
               })}
               error={!!errors.username}
               hint={errors.username?.message}
-              className="auth-input-light h-[2.6rem] rounded-[13px] border-[#cfc0a0] bg-white px-3.5 py-2 text-[14px] font-medium text-[#4f3517] shadow-none selection:bg-[#d7a64b] selection:text-[#fffaf0] focus:border-[#b98736] focus:bg-white placeholder:text-[#c7b289]"
-            />
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2.5">
-          <p className="w-[5.25rem] shrink-0 text-[11px] font-bold uppercase tracking-[0.16em] text-[#89652e]">
-            Email
-          </p>
-          <div className="flex-1">
-            <Input
-              id="email"
-              type="email"
-              placeholder="Email"
-              autoComplete="email"
-              variant="casino"
-              {...register("email", {
-                required: "Email is required.",
-              })}
-              error={!!errors.email}
-              hint={errors.email?.message}
               className="auth-input-light h-[2.6rem] rounded-[13px] border-[#cfc0a0] bg-white px-3.5 py-2 text-[14px] font-medium text-[#4f3517] shadow-none selection:bg-[#d7a64b] selection:text-[#fffaf0] focus:border-[#b98736] focus:bg-white placeholder:text-[#c7b289]"
             />
           </div>
