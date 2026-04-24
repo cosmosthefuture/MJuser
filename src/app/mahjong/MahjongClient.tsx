@@ -43,6 +43,8 @@ export default function MahjongClient() {
   const [joinError, setJoinError] = useState<string | null>(null);
   const [roomState, setRoomState] = useState<MahjongRoomState | null>(null);
   const [centerMessage, setCenterMessage] = useState<string | null>(null);
+  const [diceRolling, setDiceRolling] = useState(false);
+  const [diceFaces, setDiceFaces] = useState<[number, number] | null>(null);
 
   const [wall, setWall] = useState<MahjongTile[]>([]);
   const [hand, setHand] = useState<MahjongTile[]>([]);
@@ -68,6 +70,8 @@ export default function MahjongClient() {
     if (!roomId || !Number.isFinite(roomId)) return;
 
     let cancelled = false;
+    let roundToastTimer: number | null = null;
+    let diceTimer: number | null = null;
 
     const ensureSocket = async () => {
       const existing = getSocket();
@@ -133,6 +137,48 @@ export default function MahjongClient() {
         setCenterMessage(`Starting in ${remaining}`);
       };
 
+      const handleRoundStarted = () => {
+        if (cancelled) return;
+        setCenterMessage("Round started");
+        if (roundToastTimer) window.clearTimeout(roundToastTimer);
+        roundToastTimer = window.setTimeout(() => {
+          setCenterMessage((prev) => (prev === "Round started" ? null : prev));
+        }, 1400);
+      };
+
+      const handleStartRollingDice = () => {
+        if (cancelled) return;
+        setDiceRolling(true);
+        setDiceFaces([1, 1]);
+        if (diceTimer) window.clearInterval(diceTimer);
+        diceTimer = window.setInterval(() => {
+          const a = 1 + Math.floor(Math.random() * 6);
+          const b = 1 + Math.floor(Math.random() * 6);
+          setDiceFaces([a, b]);
+        }, 90);
+      };
+
+      const handleDiceRolled = (payload: unknown) => {
+        if (cancelled) return;
+        const dice =
+          typeof payload === "object" && payload !== null
+            ? (payload as { dice?: unknown }).dice
+            : undefined;
+        if (Array.isArray(dice) && dice.length >= 2) {
+          const a = Number(dice[0]);
+          const b = Number(dice[1]);
+          if (Number.isFinite(a) && Number.isFinite(b)) {
+            setDiceFaces([a, b]);
+          }
+        }
+
+        setDiceRolling(false);
+        if (diceTimer) {
+          window.clearInterval(diceTimer);
+          diceTimer = null;
+        }
+      };
+
       socket.off("mahjong:waiting_for_players", handleWaitingForPlayers);
       socket.on("mahjong:waiting_for_players", handleWaitingForPlayers);
 
@@ -141,6 +187,15 @@ export default function MahjongClient() {
 
       socket.off("mahjong:countdown", handleCountdown);
       socket.on("mahjong:countdown", handleCountdown);
+
+      socket.off("mahjong:round_started", handleRoundStarted);
+      socket.on("mahjong:round_started", handleRoundStarted);
+
+      socket.off("mahjong:start_rolling_dice", handleStartRollingDice);
+      socket.on("mahjong:start_rolling_dice", handleStartRollingDice);
+
+      socket.off("mahjong:dice_rolled", handleDiceRolled);
+      socket.on("mahjong:dice_rolled", handleDiceRolled);
 
       if (socket.connected) {
         void doJoin(socket);
@@ -153,11 +208,16 @@ export default function MahjongClient() {
 
     return () => {
       cancelled = true;
+      if (roundToastTimer) window.clearTimeout(roundToastTimer);
+      if (diceTimer) window.clearInterval(diceTimer);
       const socket = getSocket();
       socket?.off("mahjong:join_room_success", handleJoinSuccess);
       socket?.off("mahjong:waiting_for_players", handleWaitingForPlayers);
       socket?.off("mahjong:countdown_started", handleCountdownStarted);
       socket?.off("mahjong:countdown", handleCountdown);
+      socket?.off("mahjong:round_started", handleRoundStarted);
+      socket?.off("mahjong:start_rolling_dice", handleStartRollingDice);
+      socket?.off("mahjong:dice_rolled", handleDiceRolled);
     };
   }, [token, roomId]);
 
@@ -325,6 +385,8 @@ export default function MahjongClient() {
           highlightDiscard={mustDiscard}
           onDiscard={discardAt}
           centerMessage={centerMessage}
+          diceRolling={diceRolling}
+          diceFaces={diceFaces}
         />
       </div>
     </div>
