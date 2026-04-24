@@ -19,6 +19,7 @@ type Props = {
   discards: MahjongTile[];
   highlightDiscard: boolean;
   onDiscard: (index: number) => void;
+  centerMessage?: string | null;
 };
 
 extend({ Container, Graphics, Sprite, Text });
@@ -96,6 +97,7 @@ export default function MahjongPixiTable({
   discards,
   highlightDiscard,
   onDiscard,
+  centerMessage = null,
 }: Props) {
   const designWidth = 1200;
   const designHeight = 720;
@@ -356,6 +358,38 @@ export default function MahjongPixiTable({
             y={rackY - 22}
             style={labelStyle}
           />
+
+          {centerMessage ? (
+            <pixiContainer
+              x={Math.floor(designWidth / 2)}
+              y={Math.floor(tableY + tableH / 2)}
+            >
+              <pixiGraphics
+                draw={(g) => {
+                  g.clear();
+                  g.beginFill(0x000000, 0.55);
+                  g.drawRoundedRect(-220, -34, 440, 68, 18);
+                  g.endFill();
+                  g.lineStyle(2, 0xf6e3b4, 0.22);
+                  g.drawRoundedRect(-220, -34, 440, 68, 18);
+                }}
+              />
+              <pixiText
+                text={centerMessage}
+                anchor={0.5}
+                x={0}
+                y={0}
+                style={
+                  new TextStyle({
+                    fill: 0xf6e3b4,
+                    fontSize: 22,
+                    fontWeight: "700",
+                    letterSpacing: 1,
+                  })
+                }
+              />
+            </pixiContainer>
+          ) : null}
 
           {discards.map((t, i) => {
             const col = i % discardCols;

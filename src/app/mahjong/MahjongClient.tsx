@@ -42,6 +42,7 @@ export default function MahjongClient() {
 
   const [joinError, setJoinError] = useState<string | null>(null);
   const [roomState, setRoomState] = useState<MahjongRoomState | null>(null);
+  const [centerMessage, setCenterMessage] = useState<string | null>(null);
 
   const [wall, setWall] = useState<MahjongTile[]>([]);
   const [hand, setHand] = useState<MahjongTile[]>([]);
@@ -108,6 +109,14 @@ export default function MahjongClient() {
       socket.off("mahjong:join_room_success", handleJoinSuccess);
       socket.on("mahjong:join_room_success", handleJoinSuccess);
 
+      const handleWaitingForPlayers = () => {
+        if (cancelled) return;
+        setCenterMessage("Waiting for players...");
+      };
+
+      socket.off("mahjong:waiting_for_players", handleWaitingForPlayers);
+      socket.on("mahjong:waiting_for_players", handleWaitingForPlayers);
+
       if (socket.connected) {
         void doJoin(socket);
       } else {
@@ -121,6 +130,7 @@ export default function MahjongClient() {
       cancelled = true;
       const socket = getSocket();
       socket?.off("mahjong:join_room_success", handleJoinSuccess);
+      socket?.off("mahjong:waiting_for_players", handleWaitingForPlayers);
     };
   }, [token, roomId]);
 
@@ -287,6 +297,7 @@ export default function MahjongClient() {
           discards={discards}
           highlightDiscard={mustDiscard}
           onDiscard={discardAt}
+          centerMessage={centerMessage}
         />
       </div>
     </div>
