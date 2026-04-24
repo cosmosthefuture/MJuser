@@ -5,6 +5,7 @@ import { skipToken } from "@reduxjs/toolkit/query";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import GuestLanding from "@/app/(home)/components/GuestLanding";
 import PlayerNavbar from "@/components/PlayerNavbar";
 import { useGetMahJongGameRoomsQuery } from "@/redux/features/game/GameRoomApiSlice";
@@ -149,9 +150,10 @@ export default function GameRoomsClient() {
                   }`}
                 >
                   {(roomsData?.data || []).map((room) => (
-                    <div
+                    <Link
                       key={room.id}
-                      className="relative block h-full"
+                      href={`/mahjong?room_id=${room.id}`}
+                      className="relative block h-full cursor-pointer"
                       aria-label={room.room_name}
                     >
                       <div
@@ -166,11 +168,11 @@ export default function GameRoomsClient() {
                           alt={room.room_name}
                           fill
                           sizes="(max-width: 640px) 180px, 260px"
-                          className="object-contain drop-shadow-[0_18px_24px_rgba(0,0,0,0.32)]"
+                          className="object-contain drop-shadow-[0_18px_24px_rgba(0,0,0,0.32)] transition duration-200 hover:scale-[1.02]"
                           priority
                         />
                       </div>
-                    </div>
+                    </Link>
                   ))}
                 </div>
               )}
