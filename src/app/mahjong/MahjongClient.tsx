@@ -7,6 +7,7 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useSelector } from "react-redux";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   createMahjong72Deck,
   isWinningMahjong72Hand,
@@ -22,6 +23,12 @@ import { fetchWsJwtToken } from "@/lib/wsTokenApi";
 type WinType = "self_draw" | "ron";
 
 type MahjongRoomState = unknown;
+
+type RoundPlayer = {
+  userId: number;
+  name: string;
+  seatPosition: number;
+};
 
 const MahjongPixiTable = dynamic(() => import("./MahjongPixiTable"), {
   ssr: false,
@@ -39,12 +46,19 @@ export default function MahjongClient() {
   const roomIdParam = searchParams.get("room_id");
   const roomId = roomIdParam ? Number(roomIdParam) : null;
   const token = useSelector((s: RootState) => s.auth.token);
+  const authUserId = useSelector((s: RootState) =>
+    s.auth.id ? Number(s.auth.id) : null,
+  );
 
   const [joinError, setJoinError] = useState<string | null>(null);
   const [roomState, setRoomState] = useState<MahjongRoomState | null>(null);
   const [centerMessage, setCenterMessage] = useState<string | null>(null);
   const [diceRolling, setDiceRolling] = useState(false);
   const [diceFaces, setDiceFaces] = useState<[number, number] | null>(null);
+  const [roundPlayers, setRoundPlayers] = useState<RoundPlayer[]>([]);
+  const [firstPlayerHighlightId, setFirstPlayerHighlightId] = useState<
+    number | null
+  >(null);
 
   const [wall, setWall] = useState<MahjongTile[]>([]);
   const [hand, setHand] = useState<MahjongTile[]>([]);
@@ -72,6 +86,7 @@ export default function MahjongClient() {
     let cancelled = false;
     let roundToastTimer: number | null = null;
     let diceTimer: number | null = null;
+    let firstPlayerHighlightTimer: number | null = null;
 
     const ensureSocket = async () => {
       const existing = getSocket();
@@ -146,6 +161,47 @@ export default function MahjongClient() {
         }, 1400);
       };
 
+      const normalizeRoundPlayers = (players: unknown): RoundPlayer[] => {
+        if (!Array.isArray(players)) return [];
+        return players
+          .map((p) => {
+            if (typeof p !== "object" || p === null) return null;
+            const userIdRaw =
+              (p as { user_id?: unknown; userId?: unknown }).user_id ??
+              (p as { user_id?: unknown; userId?: unknown }).userId;
+            const seatRaw =
+              (p as { seat_position?: unknown; seatPosition?: unknown })
+                .seat_position ??
+              (p as { seat?: unknown }).seat ??
+              (p as { seat_position?: unknown; seatPosition?: unknown })
+                .seatPosition;
+            const nameRaw = (p as { name?: unknown }).name;
+
+            const userId = Number(userIdRaw);
+            const seatPosition = Number(seatRaw);
+            const name = typeof nameRaw === "string" ? nameRaw : "";
+
+            if (!Number.isFinite(userId) || !Number.isFinite(seatPosition))
+              return null;
+            return { userId, name, seatPosition };
+          })
+          .filter((p): p is RoundPlayer => !!p);
+      };
+
+      const handleRoundStartedPlayers = (payload: unknown) => {
+        if (cancelled) return;
+        const players =
+          typeof payload === "object" && payload !== null
+            ? (payload as { players?: unknown }).players
+            : undefined;
+        setRoundPlayers(normalizeRoundPlayers(players));
+      };
+
+      const handleUpdateRoundPlayers = (payload: unknown) => {
+        if (cancelled) return;
+        setRoundPlayers(normalizeRoundPlayers(payload));
+      };
+
       const handleStartRollingDice = () => {
         if (cancelled) return;
         setDiceRolling(true);
@@ -179,6 +235,21 @@ export default function MahjongClient() {
         }
       };
 
+      const handleFirstPlayerSelected = (payload: unknown) => {
+        if (cancelled) return;
+        if (typeof payload !== "object" || payload === null) return;
+        const userIdRaw = (payload as { user_id_to_play_first?: unknown })
+          .user_id_to_play_first;
+        const userId = Number(userIdRaw);
+        if (!Number.isFinite(userId)) return;
+
+        setFirstPlayerHighlightId(userId);
+        if (firstPlayerHighlightTimer) window.clearTimeout(firstPlayerHighlightTimer);
+        firstPlayerHighlightTimer = window.setTimeout(() => {
+          setFirstPlayerHighlightId(null);
+        }, 2200);
+      };
+
       socket.off("mahjong:waiting_for_players", handleWaitingForPlayers);
       socket.on("mahjong:waiting_for_players", handleWaitingForPlayers);
 
@@ -191,11 +262,20 @@ export default function MahjongClient() {
       socket.off("mahjong:round_started", handleRoundStarted);
       socket.on("mahjong:round_started", handleRoundStarted);
 
+      socket.off("mahjong:round_started", handleRoundStartedPlayers);
+      socket.on("mahjong:round_started", handleRoundStartedPlayers);
+
+      socket.off("mahjong:update_round_players", handleUpdateRoundPlayers);
+      socket.on("mahjong:update_round_players", handleUpdateRoundPlayers);
+
       socket.off("mahjong:start_rolling_dice", handleStartRollingDice);
       socket.on("mahjong:start_rolling_dice", handleStartRollingDice);
 
       socket.off("mahjong:dice_rolled", handleDiceRolled);
       socket.on("mahjong:dice_rolled", handleDiceRolled);
+
+      socket.off("mahjong:user_to_play_first_selected", handleFirstPlayerSelected);
+      socket.on("mahjong:user_to_play_first_selected", handleFirstPlayerSelected);
 
       if (socket.connected) {
         void doJoin(socket);
@@ -210,14 +290,21 @@ export default function MahjongClient() {
       cancelled = true;
       if (roundToastTimer) window.clearTimeout(roundToastTimer);
       if (diceTimer) window.clearInterval(diceTimer);
+      if (firstPlayerHighlightTimer) window.clearTimeout(firstPlayerHighlightTimer);
       const socket = getSocket();
       socket?.off("mahjong:join_room_success", handleJoinSuccess);
       socket?.off("mahjong:waiting_for_players", handleWaitingForPlayers);
       socket?.off("mahjong:countdown_started", handleCountdownStarted);
       socket?.off("mahjong:countdown", handleCountdown);
       socket?.off("mahjong:round_started", handleRoundStarted);
+      socket?.off("mahjong:round_started", handleRoundStartedPlayers);
+      socket?.off("mahjong:update_round_players", handleUpdateRoundPlayers);
       socket?.off("mahjong:start_rolling_dice", handleStartRollingDice);
       socket?.off("mahjong:dice_rolled", handleDiceRolled);
+      socket?.off(
+        "mahjong:user_to_play_first_selected",
+        handleFirstPlayerSelected,
+      );
     };
   }, [token, roomId]);
 
@@ -388,6 +475,93 @@ export default function MahjongClient() {
           diceRolling={diceRolling}
           diceFaces={diceFaces}
         />
+      </div>
+
+      {/* Seat overlay (HTML) */}
+      <div className="pointer-events-none absolute inset-0 z-20">
+        {(() => {
+          const authPlayer =
+            authUserId != null
+              ? roundPlayers.find((p) => p.userId === authUserId) ?? null
+              : null;
+          const fallbackAuthPlayer = authPlayer ?? roundPlayers[0] ?? null;
+          const others = roundPlayers.filter((p) => p !== fallbackAuthPlayer);
+          const seatOrder = ["right", "top", "left"] as const;
+          const seatMap: Record<
+            "bottom" | "right" | "top" | "left",
+            RoundPlayer | null
+          > = {
+            bottom: fallbackAuthPlayer,
+            right: null,
+            top: null,
+            left: null,
+          };
+
+          for (let i = 0; i < seatOrder.length; i++) {
+            seatMap[seatOrder[i]] = others[i] ?? null;
+          }
+
+          const Seat = ({
+            player,
+            position,
+          }: {
+            player: RoundPlayer | null;
+            position: "bottom" | "right" | "top" | "left";
+          }) => {
+            const base =
+              "absolute flex items-center gap-2 rounded-full border border-amber-100/20 bg-black/40 px-3 py-2 text-xs text-amber-100 shadow-[0_18px_40px_rgba(0,0,0,0.35)] backdrop-blur-sm";
+            const pos =
+              position === "bottom"
+                ? "left-1/2 bottom-6 -translate-x-1/2"
+                : position === "top"
+                  ? "left-1/2 top-6 -translate-x-1/2"
+                  : position === "left"
+                    ? "left-6 top-1/2 -translate-y-1/2"
+                    : "right-6 top-1/2 -translate-y-1/2";
+
+            const name = player?.name || "Waiting...";
+            const initials =
+              (player?.name || "")
+                .trim()
+                .split(/\s+/)
+                .slice(0, 2)
+                .map((s) => s[0]?.toUpperCase())
+                .join("") || "?";
+
+            const isHighlighted =
+              player != null && firstPlayerHighlightId != null
+                ? player.userId === firstPlayerHighlightId
+                : false;
+
+            return (
+              <div
+                className={`${base} ${pos} ${player ? "" : "opacity-70"} ${
+                  isHighlighted
+                    ? "animate-[seat-pop_0.55s_ease-in-out_5] ring-4 ring-amber-200/80 shadow-[0_0_0_14px_rgba(255,210,125,0.18),0_34px_90px_rgba(0,0,0,0.55)]"
+                    : ""
+                }`}
+              >
+                <Avatar className="size-8 border border-amber-100/20 bg-black/30">
+                  <AvatarFallback className="bg-black/30 text-amber-100 font-bold">
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="max-w-[140px] truncate font-semibold">
+                  {name}
+                </div>
+              </div>
+            );
+          };
+
+          return (
+            <>
+              <Seat player={seatMap.bottom} position="bottom" />
+              <Seat player={seatMap.right} position="right" />
+              <Seat player={seatMap.top} position="top" />
+              <Seat player={seatMap.left} position="left" />
+            </>
+          );
+        })()}
       </div>
     </div>
   );
