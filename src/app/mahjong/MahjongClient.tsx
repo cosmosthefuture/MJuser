@@ -244,7 +244,8 @@ export default function MahjongClient() {
         if (!Number.isFinite(userId)) return;
 
         setFirstPlayerHighlightId(userId);
-        if (firstPlayerHighlightTimer) window.clearTimeout(firstPlayerHighlightTimer);
+        if (firstPlayerHighlightTimer)
+          window.clearTimeout(firstPlayerHighlightTimer);
         firstPlayerHighlightTimer = window.setTimeout(() => {
           setFirstPlayerHighlightId(null);
         }, 2200);
@@ -274,8 +275,14 @@ export default function MahjongClient() {
       socket.off("mahjong:dice_rolled", handleDiceRolled);
       socket.on("mahjong:dice_rolled", handleDiceRolled);
 
-      socket.off("mahjong:user_to_play_first_selected", handleFirstPlayerSelected);
-      socket.on("mahjong:user_to_play_first_selected", handleFirstPlayerSelected);
+      socket.off(
+        "mahjong:user_to_play_first_selected",
+        handleFirstPlayerSelected,
+      );
+      socket.on(
+        "mahjong:user_to_play_first_selected",
+        handleFirstPlayerSelected,
+      );
 
       if (socket.connected) {
         void doJoin(socket);
@@ -290,21 +297,18 @@ export default function MahjongClient() {
       cancelled = true;
       if (roundToastTimer) window.clearTimeout(roundToastTimer);
       if (diceTimer) window.clearInterval(diceTimer);
-      if (firstPlayerHighlightTimer) window.clearTimeout(firstPlayerHighlightTimer);
+      if (firstPlayerHighlightTimer)
+        window.clearTimeout(firstPlayerHighlightTimer);
       const socket = getSocket();
       socket?.off("mahjong:join_room_success", handleJoinSuccess);
-      socket?.off("mahjong:waiting_for_players", handleWaitingForPlayers);
-      socket?.off("mahjong:countdown_started", handleCountdownStarted);
-      socket?.off("mahjong:countdown", handleCountdown);
-      socket?.off("mahjong:round_started", handleRoundStarted);
-      socket?.off("mahjong:round_started", handleRoundStartedPlayers);
-      socket?.off("mahjong:update_round_players", handleUpdateRoundPlayers);
-      socket?.off("mahjong:start_rolling_dice", handleStartRollingDice);
-      socket?.off("mahjong:dice_rolled", handleDiceRolled);
-      socket?.off(
-        "mahjong:user_to_play_first_selected",
-        handleFirstPlayerSelected,
-      );
+      socket?.off("mahjong:waiting_for_players");
+      socket?.off("mahjong:countdown_started");
+      socket?.off("mahjong:countdown");
+      socket?.off("mahjong:round_started");
+      socket?.off("mahjong:update_round_players");
+      socket?.off("mahjong:start_rolling_dice");
+      socket?.off("mahjong:dice_rolled");
+      socket?.off("mahjong:user_to_play_first_selected");
     };
   }, [token, roomId]);
 
@@ -480,32 +484,35 @@ export default function MahjongClient() {
       {/* Seat overlay (HTML) */}
       <div className="pointer-events-none absolute inset-0 z-20">
         {(() => {
+          if (roundPlayers.length === 0) return null;
+
           const authPlayer =
             authUserId != null
-              ? roundPlayers.find((p) => p.userId === authUserId) ?? null
+              ? (roundPlayers.find((p) => p.userId === authUserId) ?? null)
               : null;
           const fallbackAuthPlayer = authPlayer ?? roundPlayers[0] ?? null;
           const others = roundPlayers.filter((p) => p !== fallbackAuthPlayer);
           const seatOrder = ["right", "top", "left"] as const;
-          const seatMap: Record<
-            "bottom" | "right" | "top" | "left",
-            RoundPlayer | null
-          > = {
-            bottom: fallbackAuthPlayer,
-            right: null,
-            top: null,
-            left: null,
-          };
+          const seats: Array<{
+            position: "bottom" | "right" | "top" | "left";
+            player: RoundPlayer;
+          }> = [];
 
-          for (let i = 0; i < seatOrder.length; i++) {
-            seatMap[seatOrder[i]] = others[i] ?? null;
+          if (fallbackAuthPlayer) {
+            seats.push({ position: "bottom", player: fallbackAuthPlayer });
+          }
+
+          for (let i = 0; i < others.length && i < seatOrder.length; i++) {
+            const other = others[i];
+            if (!other) continue;
+            seats.push({ position: seatOrder[i], player: other });
           }
 
           const Seat = ({
             player,
             position,
           }: {
-            player: RoundPlayer | null;
+            player: RoundPlayer;
             position: "bottom" | "right" | "top" | "left";
           }) => {
             const base =
@@ -519,9 +526,9 @@ export default function MahjongClient() {
                     ? "left-6 top-1/2 -translate-y-1/2"
                     : "right-6 top-1/2 -translate-y-1/2";
 
-            const name = player?.name || "Waiting...";
+            const name = player.name;
             const initials =
-              (player?.name || "")
+              (player.name || "")
                 .trim()
                 .split(/\s+/)
                 .slice(0, 2)
@@ -535,7 +542,7 @@ export default function MahjongClient() {
 
             return (
               <div
-                className={`${base} ${pos} ${player ? "" : "opacity-70"} ${
+                className={`${base} ${pos} ${
                   isHighlighted
                     ? "animate-[seat-pop_0.55s_ease-in-out_5] ring-4 ring-amber-200/80 shadow-[0_0_0_14px_rgba(255,210,125,0.18),0_34px_90px_rgba(0,0,0,0.55)]"
                     : ""
@@ -555,10 +562,13 @@ export default function MahjongClient() {
 
           return (
             <>
-              <Seat player={seatMap.bottom} position="bottom" />
-              <Seat player={seatMap.right} position="right" />
-              <Seat player={seatMap.top} position="top" />
-              <Seat player={seatMap.left} position="left" />
+              {seats.map((seat) => (
+                <Seat
+                  key={`${seat.position}-${seat.player.userId}`}
+                  player={seat.player}
+                  position={seat.position}
+                />
+              ))}
             </>
           );
         })()}
