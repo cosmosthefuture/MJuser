@@ -1,11 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import dynamic from "next/dynamic";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import MahjongPixiTable from "./MahjongPixiTable";
+import { useSelector } from "react-redux";
 import {
   createMahjong72Deck,
   isWinningMahjong72Hand,
@@ -13,8 +14,18 @@ import {
   shuffleInPlace,
   sortTiles,
 } from "@/lib/mahjong72";
+import { fetchMahjongJoinToken } from "@/lib/mahjongRoomApi";
+import { connectSocket, getSocket } from "@/lib/wsClient";
+import type { RootState } from "@/redux/store";
+import { fetchWsJwtToken } from "@/lib/wsTokenApi";
 
 type WinType = "self_draw" | "ron";
+
+type MahjongRoomState = unknown;
+
+const MahjongPixiTable = dynamic(() => import("./MahjongPixiTable"), {
+  ssr: false,
+});
 
 function computePayout(betAmount: number, winType: WinType): number {
   if (!Number.isFinite(betAmount) || betAmount <= 0) return 0;
@@ -24,6 +35,13 @@ function computePayout(betAmount: number, winType: WinType): number {
 
 export default function MahjongClient() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const roomIdParam = searchParams.get("room_id");
+  const roomId = roomIdParam ? Number(roomIdParam) : null;
+  const token = useSelector((s: RootState) => s.auth.token);
+
+  const [joinError, setJoinError] = useState<string | null>(null);
+  const [roomState, setRoomState] = useState<MahjongRoomState | null>(null);
 
   const [wall, setWall] = useState<MahjongTile[]>([]);
   const [hand, setHand] = useState<MahjongTile[]>([]);
@@ -43,6 +61,68 @@ export default function MahjongClient() {
   const canDraw = wall.length > 0 && hand.length === 13;
   const mustDiscard = hand.length === 14;
   const canCheckWin = hand.length === 14;
+
+  useEffect(() => {
+    if (!token) return;
+    if (!roomId || !Number.isFinite(roomId)) return;
+
+    let cancelled = false;
+
+    const ensureSocket = async () => {
+      const existing = getSocket();
+      if (existing) return existing;
+
+      const wsToken = await fetchWsJwtToken();
+      if (cancelled) return null;
+      return connectSocket({ token: wsToken });
+    };
+
+    const handleJoinSuccess = (data: unknown) => {
+      if (cancelled) return;
+      setRoomState(data);
+      setJoinError(null);
+    };
+
+    const doJoin = async (socket: ReturnType<typeof getSocket>) => {
+      if (!socket) return;
+      try {
+        setJoinError(null);
+        const joinToken = await fetchMahjongJoinToken(roomId);
+        if (cancelled) return;
+        socket.emit("mahjong:join_room", {
+          roomId: String(roomId),
+          token: joinToken,
+        });
+      } catch (e) {
+        if (cancelled) return;
+        setJoinError(
+          e instanceof Error ? e.message : "Failed to join room. Please retry.",
+        );
+      }
+    };
+
+    (async () => {
+      const socket = await ensureSocket();
+      if (!socket || cancelled) return;
+
+      socket.off("mahjong:join_room_success", handleJoinSuccess);
+      socket.on("mahjong:join_room_success", handleJoinSuccess);
+
+      if (socket.connected) {
+        void doJoin(socket);
+      } else {
+        const onConnect = () => void doJoin(socket);
+        socket.once("connect", onConnect);
+        socket.connect();
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+      const socket = getSocket();
+      socket?.off("mahjong:join_room_success", handleJoinSuccess);
+    };
+  }, [token, roomId]);
 
   const startNewGame = () => {
     const deck = shuffleInPlace(createMahjong72Deck());
@@ -100,6 +180,19 @@ export default function MahjongClient() {
       </div>
 
       <div className="absolute right-4 top-4 z-20 w-[360px] rounded-2xl border border-amber-100/15 bg-black/50 p-4 shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
+        {roomId ? (
+          <div className="mb-3 rounded-xl border border-amber-100/10 bg-black/35 px-3 py-2 text-xs text-amber-100/90">
+            Room ID: {roomId}
+            {joinError ? (
+              <div className="mt-1 text-red-200">Join error: {joinError}</div>
+            ) : roomState ? (
+              <div className="mt-1 text-green-200">Joined room</div>
+            ) : (
+              <div className="mt-1 text-amber-200/80">Joining...</div>
+            )}
+          </div>
+        ) : null}
+
         <div className="flex items-center justify-between text-sm text-amber-200/90">
           <div>Wall: {wall.length}</div>
           <div>Hand: {hand.length}</div>
