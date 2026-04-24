@@ -114,8 +114,33 @@ export default function MahjongClient() {
         setCenterMessage("Waiting for players...");
       };
 
+      const handleCountdownStarted = () => {
+        if (cancelled) return;
+        setCenterMessage("Starting...");
+      };
+
+      const handleCountdown = (payload: unknown) => {
+        if (cancelled) return;
+        const remaining =
+          typeof payload === "object" && payload !== null
+            ? (payload as { remaining?: unknown }).remaining
+            : undefined;
+        if (typeof remaining !== "number") return;
+        if (remaining <= 0) {
+          setCenterMessage(null);
+          return;
+        }
+        setCenterMessage(`Starting in ${remaining}`);
+      };
+
       socket.off("mahjong:waiting_for_players", handleWaitingForPlayers);
       socket.on("mahjong:waiting_for_players", handleWaitingForPlayers);
+
+      socket.off("mahjong:countdown_started", handleCountdownStarted);
+      socket.on("mahjong:countdown_started", handleCountdownStarted);
+
+      socket.off("mahjong:countdown", handleCountdown);
+      socket.on("mahjong:countdown", handleCountdown);
 
       if (socket.connected) {
         void doJoin(socket);
@@ -131,6 +156,8 @@ export default function MahjongClient() {
       const socket = getSocket();
       socket?.off("mahjong:join_room_success", handleJoinSuccess);
       socket?.off("mahjong:waiting_for_players", handleWaitingForPlayers);
+      socket?.off("mahjong:countdown_started", handleCountdownStarted);
+      socket?.off("mahjong:countdown", handleCountdown);
     };
   }, [token, roomId]);
 
