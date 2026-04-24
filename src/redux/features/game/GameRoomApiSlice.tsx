@@ -170,10 +170,19 @@ export const gameRoomApiSlice = appApi.injectEndpoints({
     }),
     getMahJongGameRooms: build.query<
       MahJongGameRoomsResponse,
-      { page: number; per_page: number }
+      {
+        page: number;
+        per_page: number;
+        mah_jong_game_rule_id: number;
+        search?: string;
+      }
     >({
-      query: ({ page, per_page }) =>
-        `mah-jong-game-rooms/all?page=${page}&per_page=${per_page}`,
+      query: ({ page, per_page, mah_jong_game_rule_id, search }) => {
+        const searchParam = search
+          ? `&search=${encodeURIComponent(search)}`
+          : "";
+        return `mah-jong-game-rooms/all?page=${page}&per_page=${per_page}${searchParam}&mah_jong_game_rule_id=${mah_jong_game_rule_id}`;
+      },
       providesTags: ["gameRooms"],
     }),
     getMahJongGameRules: build.query<MahJongGameRulesResponse, void>({

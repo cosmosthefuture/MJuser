@@ -4,12 +4,16 @@ import Image from "next/image";
 import { skipToken } from "@reduxjs/toolkit/query";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import { useSearchParams } from "next/navigation";
 import GuestLanding from "@/app/(home)/components/GuestLanding";
 import PlayerNavbar from "@/components/PlayerNavbar";
 import { useGetMahJongGameRoomsQuery } from "@/redux/features/game/GameRoomApiSlice";
 import { persistor, RootState } from "@/redux/store";
 
 export default function GameRoomsClient() {
+  const searchParams = useSearchParams();
+  const ruleIdParam = searchParams.get("rule_id");
+  const ruleId = ruleIdParam ? Number(ruleIdParam) : null;
   const { token, balance } = useSelector((state: RootState) => state.auth);
   const [isRehydrated, setIsRehydrated] = useState(false);
   const [isViewportReady, setIsViewportReady] = useState(false);
@@ -18,7 +22,9 @@ export default function GameRoomsClient() {
     height: 720,
   });
   const { data: roomsData } = useGetMahJongGameRoomsQuery(
-    token ? { page: 1, per_page: 10 } : skipToken,
+    token && ruleId
+      ? { page: 1, per_page: 10, search: "open", mah_jong_game_rule_id: ruleId }
+      : skipToken,
   );
 
   useEffect(() => {
