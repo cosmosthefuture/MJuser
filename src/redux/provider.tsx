@@ -7,7 +7,7 @@ import { useAppSelector } from "./hook";
 import {
   connectSocket,
   disconnectSocket,
-  emitSilentRefresh,
+  emitWsRefresh,
   updateSocketAuth,
 } from "@/lib/wsClient";
 import { fetchWsJwtToken } from "@/lib/wsTokenApi";
@@ -38,15 +38,22 @@ function WsLifecycle() {
 
       const socket = connectSocket({ token: jwtToken });
 
-      const onRefreshToken = async () => {
+      const onRefreshRequired = async () => {
         const refreshed = await fetchWsJwtToken();
         if (!mounted) return;
         updateSocketAuth({ token: refreshed });
-        emitSilentRefresh({ token: refreshed });
+        emitWsRefresh({ token: refreshed });
       };
 
-      socket.off("ws:refresh_token");
-      socket.on("ws:refresh_token", onRefreshToken);
+      const onRefreshFailed = () => {
+        disconnectSocket();
+      };
+
+      socket.off("ws:refresh_required");
+      socket.on("ws:refresh_required", onRefreshRequired);
+
+      socket.off("ws:refresh_failed");
+      socket.on("ws:refresh_failed", onRefreshFailed);
     };
 
     start();

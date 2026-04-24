@@ -12,7 +12,7 @@ type JoinCoinflipRoomPayload = {
   };
 };
 
-type SilentRefreshPayload = {
+type RefreshPayload = {
   token: string;
 };
 
@@ -96,12 +96,12 @@ export function updateSocketAuth(auth: WsAuth) {
   socket.auth = auth;
 }
 
-export function emitSilentRefresh(payload: SilentRefreshPayload) {
+export function emitWsRefresh(payload: RefreshPayload) {
   if (!socket) return;
   if (isWsDebugEnabled()) {
-    console.log("[ws] emit", "ws:silent_refresh", payload);
+    console.log("[ws] emit", "ws:refresh", payload);
   }
-  socket.emit("ws:silent_refresh", payload);
+  socket.emit("ws:refresh", payload);
 }
 
 export function joinCoinflipGameRoom(payload: JoinCoinflipRoomPayload) {
