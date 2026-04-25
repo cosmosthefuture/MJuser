@@ -25,6 +25,74 @@
   }
 }
 
+@keyframes dice-spin {
+  0% {
+    transform: rotateX(0deg) rotateY(0deg);
+  }
+  100% {
+    transform: rotateX(720deg) rotateY(900deg);
+  }
+}
+
+.dice3d {
+  width: 48px;
+  height: 48px;
+}
+
+.dice3d-scene {
+  width: 48px;
+  height: 48px;
+  perspective: 400px;
+}
+
+.dice3d-cube {
+  width: 48px;
+  height: 48px;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 280ms ease-out;
+}
+
+.dice3d-rolling .dice3d-cube {
+  animation: dice-spin 420ms linear infinite;
+}
+
+.dice3d-face {
+  position: absolute;
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: rgba(246, 227, 180, 0.95);
+  border: 2px solid rgba(58, 42, 22, 0.55);
+  color: rgba(58, 42, 22, 0.95);
+  font-weight: 900;
+  font-size: 18px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 14px 28px rgba(0, 0, 0, 0.28);
+}
+
+.dice3d-face-front {
+  transform: rotateY(0deg) translateZ(24px);
+}
+.dice3d-face-back {
+  transform: rotateY(180deg) translateZ(24px);
+}
+.dice3d-face-right {
+  transform: rotateY(90deg) translateZ(24px);
+}
+.dice3d-face-left {
+  transform: rotateY(-90deg) translateZ(24px);
+}
+.dice3d-face-top {
+  transform: rotateX(90deg) translateZ(24px);
+}
+.dice3d-face-bottom {
+  transform: rotateX(-90deg) translateZ(24px);
+}
+
 @font-face {
   font-family: "Myanmar Sans Pro";
   src:

@@ -14,14 +14,11 @@ import { MahjongTile } from "@/lib/mahjong72";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 type Props = {
-  wallCount: number;
   hand: MahjongTile[];
   discards: MahjongTile[];
   highlightDiscard: boolean;
   onDiscard: (index: number) => void;
   centerMessage?: string | null;
-  diceRolling?: boolean;
-  diceFaces?: [number, number] | null;
 };
 
 extend({ Container, Graphics, Sprite, Text });
@@ -94,14 +91,11 @@ function drawMahjongBlock(
 }
 
 export default function MahjongPixiTable({
-  wallCount,
   hand,
   discards,
   highlightDiscard,
   onDiscard,
   centerMessage = null,
-  diceRolling = false,
-  diceFaces = null,
 }: Props) {
   const designWidth = 1200;
   const designHeight = 720;
@@ -336,25 +330,7 @@ export default function MahjongPixiTable({
             }}
           />
 
-          <pixiGraphics
-            draw={(g) => {
-              g.clear();
-              const cx = Math.floor(designWidth / 2);
-              const cy = Math.floor(tableY + tableH / 2);
-              g.beginFill(0xd8b27a);
-              g.drawRoundedRect(cx - 80, cy - 55, 160, 110, 10);
-              g.endFill();
-              g.lineStyle(3, 0x7a4b12, 1);
-              g.drawRoundedRect(cx - 80, cy - 55, 160, 110, 10);
-            }}
-          />
-
-          <pixiText
-            text={`Draw Pile: ${wallCount}`}
-            x={Math.floor(designWidth / 2) - 60}
-            y={Math.floor(tableY + tableH / 2) - 10}
-            style={labelStyle}
-          />
+          {/* Center "Draw Pile" panel hidden for now (dice uses center space). */}
 
           <pixiText
             text={highlightDiscard ? "Click a tile to discard" : ""}
@@ -392,54 +368,6 @@ export default function MahjongPixiTable({
                   })
                 }
               />
-            </pixiContainer>
-          ) : null}
-
-          {diceRolling || diceFaces ? (
-            <pixiContainer
-              x={Math.floor(designWidth / 2)}
-              y={Math.floor(tableY + tableH / 2) + 84}
-            >
-              <pixiGraphics
-                draw={(g) => {
-                  g.clear();
-                  g.beginFill(0x000000, 0.42);
-                  g.drawRoundedRect(-120, -34, 240, 68, 18);
-                  g.endFill();
-                }}
-              />
-
-              {[0, 1].map((i) => {
-                const face = diceFaces ? diceFaces[i] : 1;
-                const x = i === 0 ? -44 : 20;
-                return (
-                  <pixiContainer key={`dice-${i}`} x={x} y={-18}>
-                    <pixiGraphics
-                      draw={(g) => {
-                        g.clear();
-                        g.beginFill(0xf6e3b4, 0.95);
-                        g.drawRoundedRect(0, 0, 44, 44, 10);
-                        g.endFill();
-                        g.lineStyle(2, 0x3a2a16, 0.55);
-                        g.drawRoundedRect(0, 0, 44, 44, 10);
-                      }}
-                    />
-                    <pixiText
-                      text={String(face)}
-                      x={22}
-                      y={22}
-                      anchor={0.5}
-                      style={
-                        new TextStyle({
-                          fill: 0x3a2a16,
-                          fontSize: 22,
-                          fontWeight: "800",
-                        })
-                      }
-                    />
-                  </pixiContainer>
-                );
-              })}
             </pixiContainer>
           ) : null}
 

@@ -470,19 +470,32 @@ export default function MahjongClient() {
 
       <div className="absolute inset-0 z-10 flex items-center justify-center">
         <MahjongPixiTable
-          wallCount={wall.length}
           hand={hand}
           discards={discards}
           highlightDiscard={mustDiscard}
           onDiscard={discardAt}
           centerMessage={centerMessage}
-          diceRolling={diceRolling}
-          diceFaces={diceFaces}
         />
       </div>
 
-      {/* Seat overlay (HTML) */}
+      {/* Overlays (HTML) */}
       <div className="pointer-events-none absolute inset-0 z-20">
+        {(diceRolling || diceFaces) ? (
+          <div
+            className="absolute left-1/2 top-1/2"
+            style={{
+              transform: "translate(-50%, -50%) translateY(-70px)",
+            }}
+          >
+            <div className="rounded-[18px] bg-black/35 px-4 py-3 shadow-[0_22px_70px_rgba(0,0,0,0.45)] backdrop-blur-sm ring-1 ring-amber-100/10">
+              <div className="flex items-center gap-4">
+                <Dice3D face={diceFaces?.[0] ?? 1} rolling={diceRolling} />
+                <Dice3D face={diceFaces?.[1] ?? 1} rolling={diceRolling} />
+              </div>
+            </div>
+          </div>
+        ) : null}
+
         {(() => {
           if (roundPlayers.length === 0) return null;
 
@@ -575,4 +588,47 @@ export default function MahjongClient() {
       </div>
     </div>
   );
+}
+
+function Dice3D({ face, rolling }: { face: number; rolling: boolean }) {
+  const clamped = Math.min(6, Math.max(1, Math.floor(face)));
+  const rotation = getDiceRotation(clamped);
+
+  return (
+    <div className={`dice3d ${rolling ? "dice3d-rolling" : ""}`}>
+      <div className="dice3d-scene">
+        <div
+          className="dice3d-cube"
+          style={rolling ? undefined : { transform: rotation }}
+        >
+          <div className="dice3d-face dice3d-face-front">1</div>
+          <div className="dice3d-face dice3d-face-right">2</div>
+          <div className="dice3d-face dice3d-face-top">3</div>
+          <div className="dice3d-face dice3d-face-bottom">4</div>
+          <div className="dice3d-face dice3d-face-left">5</div>
+          <div className="dice3d-face dice3d-face-back">6</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function getDiceRotation(face: number) {
+  // Rotate cube so that `face` is facing the camera.
+  switch (face) {
+    case 1:
+      return "rotateX(0deg) rotateY(0deg)";
+    case 2:
+      return "rotateX(0deg) rotateY(-90deg)";
+    case 3:
+      return "rotateX(90deg) rotateY(0deg)";
+    case 4:
+      return "rotateX(-90deg) rotateY(0deg)";
+    case 5:
+      return "rotateX(0deg) rotateY(90deg)";
+    case 6:
+      return "rotateX(0deg) rotateY(180deg)";
+    default:
+      return "rotateX(0deg) rotateY(0deg)";
+  }
 }
