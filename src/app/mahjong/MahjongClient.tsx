@@ -276,11 +276,11 @@ export default function MahjongClient() {
       socket.on("mahjong:dice_rolled", handleDiceRolled);
 
       socket.off(
-        "mahjong:user_to_play_first_selected",
+        "mahjong:user_to_play",
         handleFirstPlayerSelected,
       );
       socket.on(
-        "mahjong:user_to_play_first_selected",
+        "mahjong:user_to_play",
         handleFirstPlayerSelected,
       );
 
@@ -308,7 +308,7 @@ export default function MahjongClient() {
       socket?.off("mahjong:update_round_players");
       socket?.off("mahjong:start_rolling_dice");
       socket?.off("mahjong:dice_rolled");
-      socket?.off("mahjong:user_to_play_first_selected");
+      socket?.off("mahjong:user_to_play");
     };
   }, [token, roomId]);
 
