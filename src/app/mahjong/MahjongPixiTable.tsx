@@ -423,88 +423,128 @@ export default function MahjongPixiTable({
             );
           })}
 
-          <pixiGraphics
-            draw={(g) => {
-              g.clear();
-              const back = 0x0e5a35;
-              const edge = 0x06311e;
+	          <pixiGraphics
+	            draw={(g) => {
+	              g.clear();
+	              const back = 0x0e5a35;
+	              const edge = 0x06311e;
+	              const showTop = sides.size === 0 || sides.has("top");
+	              const showLeft = sides.size === 0 || sides.has("left");
+	              const showRight = sides.size === 0 || sides.has("right");
+	              // No small wall blocks for the auth user's side (bottom).
+	              const showBottom = false;
 
-              const topCount = 16;
-              const smallW = 26;
-              const smallH = 34;
-              const topStartX = Math.floor(
-                designWidth / 2 - (topCount * smallW + (topCount - 1) * 2) / 2,
-              );
-              const topY = tableY + 18;
+	              const topCount = 16;
+	              const smallW = 26;
+	              const smallH = 34;
+	              const topStartX = Math.floor(
+	                designWidth / 2 - (topCount * smallW + (topCount - 1) * 2) / 2,
+	              );
+	              const topY = tableY + 18;
+	              const bottomY = tableY + tableH - 18 - smallH;
 
-              g.beginFill(back);
-              for (let i = 0; i < topCount; i++) {
-                g.drawRoundedRect(
-                  topStartX + i * (smallW + 2),
-                  topY,
-                  smallW,
-                  smallH,
-                  4,
-                );
-              }
-              g.endFill();
+	              g.beginFill(back);
+	              if (showTop) {
+	                for (let i = 0; i < topCount; i++) {
+	                  g.drawRoundedRect(
+	                    topStartX + i * (smallW + 2),
+	                    topY,
+	                    smallW,
+	                    smallH,
+	                    4,
+	                  );
+	                }
+	              }
+	              if (showBottom) {
+	                for (let i = 0; i < topCount; i++) {
+	                  g.drawRoundedRect(
+	                    topStartX + i * (smallW + 2),
+	                    bottomY,
+	                    smallW,
+	                    smallH,
+	                    4,
+	                  );
+	                }
+	              }
+	              g.endFill();
 
-              const sideCount = 14;
-              const sideXLeft = tableX + 18;
-              const sideXRight = tableX + tableW - 18 - smallH;
+	              const sideCount = 14;
+	              const sideXLeft = tableX + 18;
+	              const sideXRight = tableX + tableW - 18 - smallH;
               const sideStartY = Math.floor(
                 tableY +
                   tableH / 2 -
                   (sideCount * smallW + (sideCount - 1) * 2) / 2,
               );
 
-              g.beginFill(back);
-              for (let i = 0; i < sideCount; i++) {
-                g.drawRoundedRect(
-                  sideXLeft,
-                  sideStartY + i * (smallW + 2),
-                  smallH,
-                  smallW,
-                  4,
-                );
-                g.drawRoundedRect(
-                  sideXRight,
-                  sideStartY + i * (smallW + 2),
-                  smallH,
-                  smallW,
-                  4,
-                );
-              }
-              g.endFill();
+	              g.beginFill(back);
+	              for (let i = 0; i < sideCount; i++) {
+	                if (showLeft) {
+	                  g.drawRoundedRect(
+	                    sideXLeft,
+	                    sideStartY + i * (smallW + 2),
+	                    smallH,
+	                    smallW,
+	                    4,
+	                  );
+	                }
+	                if (showRight) {
+	                  g.drawRoundedRect(
+	                    sideXRight,
+	                    sideStartY + i * (smallW + 2),
+	                    smallH,
+	                    smallW,
+	                    4,
+	                  );
+	                }
+	              }
+	              g.endFill();
 
-              g.lineStyle(2, edge, 1);
-              for (let i = 0; i < topCount; i++) {
-                g.drawRoundedRect(
-                  topStartX + i * (smallW + 2),
-                  topY,
-                  smallW,
-                  smallH,
-                  4,
-                );
-              }
-              for (let i = 0; i < sideCount; i++) {
-                g.drawRoundedRect(
-                  sideXLeft,
-                  sideStartY + i * (smallW + 2),
-                  smallH,
-                  smallW,
-                  4,
-                );
-                g.drawRoundedRect(
-                  sideXRight,
-                  sideStartY + i * (smallW + 2),
-                  smallH,
-                  smallW,
-                  4,
-                );
-              }
-            }}
-          />
+	              g.lineStyle(2, edge, 1);
+	              if (showTop) {
+	                for (let i = 0; i < topCount; i++) {
+	                  g.drawRoundedRect(
+	                    topStartX + i * (smallW + 2),
+	                    topY,
+	                    smallW,
+	                    smallH,
+	                    4,
+	                  );
+	                }
+	              }
+	              if (showBottom) {
+	                for (let i = 0; i < topCount; i++) {
+	                  g.drawRoundedRect(
+	                    topStartX + i * (smallW + 2),
+	                    bottomY,
+	                    smallW,
+	                    smallH,
+	                    4,
+	                  );
+	                }
+	              }
+	              for (let i = 0; i < sideCount; i++) {
+	                if (showLeft) {
+	                  g.drawRoundedRect(
+	                    sideXLeft,
+	                    sideStartY + i * (smallW + 2),
+	                    smallH,
+	                    smallW,
+	                    4,
+	                  );
+	                }
+	                if (showRight) {
+	                  g.drawRoundedRect(
+	                    sideXRight,
+	                    sideStartY + i * (smallW + 2),
+	                    smallH,
+	                    smallW,
+	                    4,
+	                  );
+	                }
+	              }
+	            }}
+	          />
 
           {hand.map((t, idx) => {
             const x = handStartX + idx * (tileW + gap);
