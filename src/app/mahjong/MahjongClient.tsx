@@ -55,7 +55,6 @@ export default function MahjongClient() {
   const [,] = useState<MahjongTile[]>([]);
   const [hand, setHand] = useState<MahjongTile[]>([]);
   const [discards, setDiscards] = useState<MahjongTile[]>([]);
-  const mustDiscard = hand.length === 14;
 
   useEffect(() => {
     if (!token) return;
@@ -289,6 +288,8 @@ export default function MahjongClient() {
           // Preserve server order for now.
           setHand(nextHand);
         }
+        // Reset discards when a new initial state arrives.
+        setDiscards([]);
       };
 
       const handleStartShuffling = () => {
@@ -415,13 +416,6 @@ export default function MahjongClient() {
     setActiveSides(sides);
   }, [roundPlayers, authUserId]);
 
-  const discardAt = (idx: number) => {
-    if (!mustDiscard) return;
-    const tile = hand[idx];
-    setHand(hand.filter((_, i) => i !== idx));
-    if (tile) setDiscards((prev) => [...prev, tile]);
-  };
-
   return (
     <div className="relative w-screen h-screen overflow-hidden text-amber-100">
       <div className="absolute inset-0 bg-[#00251b]" />
@@ -461,8 +455,7 @@ export default function MahjongClient() {
         <MahjongPixiTable
           hand={hand}
           discards={discards}
-          highlightDiscard={mustDiscard}
-          onDiscard={discardAt}
+          highlightDiscard={false}
           centerMessage={centerMessage}
           activeSides={activeSides}
           opponentHandCounts={opponentHandCounts}

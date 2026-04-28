@@ -17,7 +17,6 @@ type Props = {
   hand: MahjongTile[];
   discards: MahjongTile[];
   highlightDiscard: boolean;
-  onDiscard: (index: number) => void;
   centerMessage?: string | null;
   // Which sides should be visible (matches avatar placement logic).
   activeSides?: Array<"bottom" | "right" | "top" | "left">;
@@ -98,7 +97,6 @@ export default function MahjongPixiTable({
   hand,
   discards,
   highlightDiscard,
-  onDiscard,
   centerMessage = null,
   activeSides,
   opponentHandCounts,
@@ -585,12 +583,7 @@ export default function MahjongPixiTable({
                 key={`${t.suit}-${t.rank}-${idx}`}
                 x={x}
                 y={y}
-                eventMode={highlightDiscard ? "static" : "none"}
-                cursor={highlightDiscard ? "pointer" : "default"}
-                onPointerTap={() => {
-                  if (!highlightDiscard) return;
-                  onDiscard(idx);
-                }}
+                eventMode="none"
               >
                 <pixiGraphics
                   draw={(g) => {
