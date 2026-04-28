@@ -30,8 +30,8 @@ const labelStyle = new TextStyle({
 });
 
 function tileSpriteFileName(t: MahjongTile): string {
-  if (t.suit === "dots") return `Pin${t.rank}.png`;
-  return `Sou${t.rank}.png`;
+  if (t.suit === "dots") return `dot${t.rank}.png`;
+  return `bamboo${t.rank}.png`;
 }
 
 function drawMahjongBlock(
@@ -176,8 +176,8 @@ export default function MahjongPixiTable({
   const rackW = tableW + 36;
 
   // Tile images folder (under Next.js public/):
-  // public/images/MahjongRegular/Pin1.png ... Pin9.png
-  // public/images/MahjongRegular/Sou1.png ... Sou9.png
+  // public/images/MahjongRegular/dot1.png ... dot9.png
+  // public/images/MahjongRegular/bamboo1.png ... bamboo9.png
   const tileSpriteBasePath = "/images/MahjongRegular";
 
   const neededSpritePaths = useMemo(() => {
