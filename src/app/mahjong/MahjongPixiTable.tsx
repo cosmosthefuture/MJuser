@@ -19,6 +19,8 @@ type Props = {
   highlightDiscard: boolean;
   onDiscard: (index: number) => void;
   centerMessage?: string | null;
+  // Which sides should be visible (matches avatar placement logic).
+  activeSides?: Array<"bottom" | "right" | "top" | "left">;
 };
 
 extend({ Container, Graphics, Sprite, Text });
@@ -96,6 +98,7 @@ export default function MahjongPixiTable({
   highlightDiscard,
   onDiscard,
   centerMessage = null,
+  activeSides,
 }: Props) {
   const designWidth = 1200;
   const designHeight = 720;
@@ -179,6 +182,7 @@ export default function MahjongPixiTable({
   // public/images/MahjongRegular/dot1.png ... dot9.png
   // public/images/MahjongRegular/bamboo1.png ... bamboo9.png
   const tileSpriteBasePath = "/images/MahjongRegular";
+  const sides = useMemo(() => new Set(activeSides ?? []), [activeSides]);
 
   const neededSpritePaths = useMemo(() => {
     const paths = new Set<string>();
@@ -267,45 +271,58 @@ export default function MahjongPixiTable({
               const wall = 0x0a6a3a;
               const back = 0x1a120c;
 
-              g.beginFill(wall);
-              g.drawRoundedRect(
-                tableX + 24,
-                tableY + 10,
-                tableW - 48,
-                wallThickness,
-                8,
-              );
-              g.endFill();
+              const showTop = sides.size === 0 || sides.has("top");
+              const showLeft = sides.size === 0 || sides.has("left");
+              const showRight = sides.size === 0 || sides.has("right");
+              const showBottom = sides.size === 0 || sides.has("bottom");
 
-              g.beginFill(wall);
-              g.drawRoundedRect(
-                tableX + 10,
-                tableY + 24,
-                wallThickness,
-                tableH - 48,
-                8,
-              );
-              g.endFill();
+              if (showTop) {
+                g.beginFill(wall);
+                g.drawRoundedRect(
+                  tableX + 24,
+                  tableY + 10,
+                  tableW - 48,
+                  wallThickness,
+                  8,
+                );
+                g.endFill();
+              }
 
-              g.beginFill(wall);
-              g.drawRoundedRect(
-                tableX + tableW - wallThickness - 10,
-                tableY + 24,
-                wallThickness,
-                tableH - 48,
-                8,
-              );
-              g.endFill();
+              if (showLeft) {
+                g.beginFill(wall);
+                g.drawRoundedRect(
+                  tableX + 10,
+                  tableY + 24,
+                  wallThickness,
+                  tableH - 48,
+                  8,
+                );
+                g.endFill();
+              }
 
-              g.beginFill(wall);
-              g.drawRoundedRect(
-                tableX + 24,
-                tableY + tableH - wallThickness - 10,
-                tableW - 48,
-                wallThickness,
-                8,
-              );
-              g.endFill();
+              if (showRight) {
+                g.beginFill(wall);
+                g.drawRoundedRect(
+                  tableX + tableW - wallThickness - 10,
+                  tableY + 24,
+                  wallThickness,
+                  tableH - 48,
+                  8,
+                );
+                g.endFill();
+              }
+
+              if (showBottom) {
+                g.beginFill(wall);
+                g.drawRoundedRect(
+                  tableX + 24,
+                  tableY + tableH - wallThickness - 10,
+                  tableW - 48,
+                  wallThickness,
+                  8,
+                );
+                g.endFill();
+              }
 
               g.beginFill(felt);
               g.drawRoundedRect(

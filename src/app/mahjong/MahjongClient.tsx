@@ -59,6 +59,9 @@ export default function MahjongClient() {
   const [firstPlayerHighlightId, setFirstPlayerHighlightId] = useState<
     number | null
   >(null);
+  const [activeSides, setActiveSides] = useState<
+    Array<"bottom" | "right" | "top" | "left">
+  >([]);
 
   const [wall, setWall] = useState<MahjongTile[]>([]);
   const [hand, setHand] = useState<MahjongTile[]>([]);
@@ -235,12 +238,64 @@ export default function MahjongClient() {
         }
       };
 
+      const handleInitialHandState = (payload: unknown) => {
+        if (cancelled) return;
+        if (!Array.isArray(payload)) return;
+
+        // Use the seated player count to decide which wall sides to render.
+        // (Avatars use the same bottom->right->top->left order.)
+        const count = payload.length;
+        if (count >= 1) {
+          const sides: Array<"bottom" | "right" | "top" | "left"> = ["bottom"];
+          if (count >= 2) sides.push("right");
+          if (count >= 3) sides.push("top");
+          if (count >= 4) sides.push("left");
+          setActiveSides(sides);
+        }
+
+        const self = payload.find(
+          (p) => typeof p === "object" && p !== null && (p as { isSelf?: unknown }).isSelf === true,
+        ) as
+          | {
+              tiles?: unknown;
+              tileCount?: unknown;
+              seat_position?: unknown;
+              seatPosition?: unknown;
+            }
+          | undefined;
+
+        const tilesRaw = self?.tiles;
+        if (!Array.isArray(tilesRaw)) return;
+
+        const nextHand: MahjongTile[] = [];
+        for (const t of tilesRaw) {
+          if (typeof t !== "object" || t === null) continue;
+          const typeRaw = (t as { type?: unknown }).type;
+          const numberRaw = (t as { number?: unknown }).number;
+          if (typeRaw === "hidden") continue;
+
+          const rank = Number(numberRaw);
+          if (!Number.isFinite(rank) || rank < 1 || rank > 9) continue;
+
+          // WS uses "dot" | "bamboo". Our internal suit uses "dots" | "bamboo".
+          const suit: MahjongTile["suit"] | null =
+            typeRaw === "bamboo" ? "bamboo" : typeRaw === "dot" ? "dots" : null;
+          if (!suit) continue;
+
+          nextHand.push({ suit, rank });
+        }
+
+        if (nextHand.length > 0) {
+          // Preserve server order for now.
+          setHand(nextHand);
+        }
+      };
+
       const handleStartShuffling = () => {
         if (cancelled) return;
         // Visible cue for the "start shuffling" server event.
         setCenterMessage("Shuffling Tiles");
         // Lightweight debug log for parity with example client snippet.
-        // eslint-disable-next-line no-console
         console.log("Shuffling Tiles");
       };
 
@@ -298,6 +353,9 @@ export default function MahjongClient() {
       socket.off("mahjong:dice_rolled", handleDiceRolled);
       socket.on("mahjong:dice_rolled", handleDiceRolled);
 
+      socket.off("mahjong:initial_hand_state", handleInitialHandState);
+      socket.on("mahjong:initial_hand_state", handleInitialHandState);
+
       socket.off("mahjong:start_shuffling", handleStartShuffling);
       socket.on("mahjong:start_shuffling", handleStartShuffling);
 
@@ -334,10 +392,28 @@ export default function MahjongClient() {
       socket?.off("mahjong:update_round_players");
       socket?.off("mahjong:start_rolling_dice");
       socket?.off("mahjong:dice_rolled");
+      socket?.off("mahjong:initial_hand_state");
       socket?.off("mahjong:start_shuffling");
       socket?.off("mahjong:user_to_play");
     };
   }, [token, roomId]);
+
+  useEffect(() => {
+    if (roundPlayers.length === 0) return;
+    const authPlayer =
+      authUserId != null
+        ? (roundPlayers.find((p) => p.userId === authUserId) ?? null)
+        : null;
+    const self = authPlayer ?? roundPlayers[0] ?? null;
+    const others = self ? roundPlayers.filter((p) => p !== self) : [];
+
+    const sides: Array<"bottom" | "right" | "top" | "left"> = [];
+    if (self) sides.push("bottom");
+    if (others.length >= 1) sides.push("right");
+    if (others.length >= 2) sides.push("top");
+    if (others.length >= 3) sides.push("left");
+    setActiveSides(sides);
+  }, [roundPlayers, authUserId]);
 
   const startNewGame = () => {
     const deck = shuffleInPlace(createMahjong72Deck());
@@ -502,6 +578,7 @@ export default function MahjongClient() {
           highlightDiscard={mustDiscard}
           onDiscard={discardAt}
           centerMessage={centerMessage}
+          activeSides={activeSides}
         />
       </div>
 
