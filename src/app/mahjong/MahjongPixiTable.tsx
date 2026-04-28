@@ -221,8 +221,8 @@ export default function MahjongPixiTable({
     };
   }, [neededSpritePaths, textures]);
 
-  const handTotalW = hand.length * tileW + Math.max(0, hand.length - 1) * gap;
-  const handStartX = Math.max(24, Math.floor((designWidth - handTotalW) / 2));
+  // Keep the auth user's hand left-aligned in the rack.
+  const handStartX = Math.max(24, rackX + 36);
 
   const discardCols = 10;
   const discardGap = 6;
