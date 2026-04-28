@@ -235,19 +235,42 @@ export default function MahjongClient() {
         }
       };
 
+      const handleStartShuffling = () => {
+        if (cancelled) return;
+        // Visible cue for the "start shuffling" server event.
+        setCenterMessage("Shuffling Tiles");
+        // Lightweight debug log for parity with example client snippet.
+        // eslint-disable-next-line no-console
+        console.log("Shuffling Tiles");
+      };
+
       const handleFirstPlayerSelected = (payload: unknown) => {
         if (cancelled) return;
         if (typeof payload !== "object" || payload === null) return;
-        const userIdRaw = (payload as { user_id_to_play_first?: unknown })
-          .user_id_to_play_first;
+        const p = payload as {
+          user_id?: unknown;
+          userId?: unknown;
+          user_id_to_play_first?: unknown;
+          user_name?: unknown;
+          userName?: unknown;
+        };
+        // Server now sends `{ user_id, user_name }`, but keep backward-compat with older payloads.
+        const userIdRaw = p.user_id ?? p.userId ?? p.user_id_to_play_first;
         const userId = Number(userIdRaw);
         if (!Number.isFinite(userId)) return;
 
         setFirstPlayerHighlightId(userId);
+        const nameRaw = p.user_name ?? p.userName;
+        if (typeof nameRaw === "string" && nameRaw.trim()) {
+          setCenterMessage(`${nameRaw} to play first`);
+        } else {
+          setCenterMessage("User to play first selected");
+        }
         if (firstPlayerHighlightTimer)
           window.clearTimeout(firstPlayerHighlightTimer);
         firstPlayerHighlightTimer = window.setTimeout(() => {
           setFirstPlayerHighlightId(null);
+          setCenterMessage(null);
         }, 2200);
       };
 
@@ -274,6 +297,9 @@ export default function MahjongClient() {
 
       socket.off("mahjong:dice_rolled", handleDiceRolled);
       socket.on("mahjong:dice_rolled", handleDiceRolled);
+
+      socket.off("mahjong:start_shuffling", handleStartShuffling);
+      socket.on("mahjong:start_shuffling", handleStartShuffling);
 
       socket.off(
         "mahjong:user_to_play",
@@ -308,6 +334,7 @@ export default function MahjongClient() {
       socket?.off("mahjong:update_round_players");
       socket?.off("mahjong:start_rolling_dice");
       socket?.off("mahjong:dice_rolled");
+      socket?.off("mahjong:start_shuffling");
       socket?.off("mahjong:user_to_play");
     };
   }, [token, roomId]);
@@ -613,22 +640,22 @@ function Dice3D({ face, rolling }: { face: number; rolling: boolean }) {
   );
 }
 
-function getDiceRotation(face: number) {
-  // Rotate cube so that `face` is facing the camera.
-  switch (face) {
-    case 1:
-      return "rotateX(0deg) rotateY(0deg)";
-    case 2:
-      return "rotateX(0deg) rotateY(-90deg)";
-    case 3:
-      return "rotateX(90deg) rotateY(0deg)";
-    case 4:
-      return "rotateX(-90deg) rotateY(0deg)";
-    case 5:
-      return "rotateX(0deg) rotateY(90deg)";
-    case 6:
-      return "rotateX(0deg) rotateY(180deg)";
-    default:
+  function getDiceRotation(face: number) {
+    // Rotate cube so that `face` is facing the camera.
+    switch (face) {
+      case 1:
+        return "rotateX(0deg) rotateY(0deg)";
+      case 2:
+        return "rotateX(0deg) rotateY(-90deg)";
+      case 3:
+        return "rotateX(-90deg) rotateY(0deg)";
+      case 4:
+        return "rotateX(90deg) rotateY(0deg)";
+      case 5:
+        return "rotateX(0deg) rotateY(90deg)";
+      case 6:
+        return "rotateX(0deg) rotateY(180deg)";
+      default:
       return "rotateX(0deg) rotateY(0deg)";
   }
 }
