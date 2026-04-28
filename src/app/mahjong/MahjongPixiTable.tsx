@@ -21,6 +21,8 @@ type Props = {
   centerMessage?: string | null;
   // Which sides should be visible (matches avatar placement logic).
   activeSides?: Array<"bottom" | "right" | "top" | "left">;
+  // Hidden-hand sizes for non-self players (used for wall block counts).
+  opponentHandCounts?: Partial<Record<"right" | "top" | "left", number>>;
 };
 
 extend({ Container, Graphics, Sprite, Text });
@@ -99,6 +101,7 @@ export default function MahjongPixiTable({
   onDiscard,
   centerMessage = null,
   activeSides,
+  opponentHandCounts,
 }: Props) {
   const designWidth = 1200;
   const designHeight = 720;
@@ -183,6 +186,14 @@ export default function MahjongPixiTable({
   // public/images/MahjongRegular/bamboo1.png ... bamboo9.png
   const tileSpriteBasePath = "/images/MahjongRegular";
   const sides = useMemo(() => new Set(activeSides ?? []), [activeSides]);
+  const counts = useMemo(
+    () => ({
+      right: opponentHandCounts?.right,
+      top: opponentHandCounts?.top,
+      left: opponentHandCounts?.left,
+    }),
+    [opponentHandCounts],
+  );
 
   const neededSpritePaths = useMemo(() => {
     const paths = new Set<string>();
@@ -434,7 +445,7 @@ export default function MahjongPixiTable({
 	              // No small wall blocks for the auth user's side (bottom).
 	              const showBottom = false;
 
-	              const topCount = 16;
+	              const topCount = counts.top ?? 16;
 	              const smallW = 26;
 	              const smallH = 34;
 	              const topStartX = Math.floor(
@@ -468,18 +479,23 @@ export default function MahjongPixiTable({
 	              }
 	              g.endFill();
 
-	              const sideCount = 14;
+	              const sideCountLeft = counts.left ?? 14;
+	              const sideCountRight = counts.right ?? 14;
+	              const sideCount = Math.max(sideCountLeft, sideCountRight);
 	              const sideXLeft = tableX + 18;
 	              const sideXRight = tableX + tableW - 18 - smallH;
-              const sideStartY = Math.floor(
-                tableY +
-                  tableH / 2 -
-                  (sideCount * smallW + (sideCount - 1) * 2) / 2,
-              );
+	              const sideStartY = Math.floor(
+	                tableY +
+	                  tableH / 2 -
+	                  (sideCount * smallW + (sideCount - 1) * 2) / 2,
+	              );
 
 	              g.beginFill(back);
 	              for (let i = 0; i < sideCount; i++) {
 	                if (showLeft) {
+	                  if (i >= sideCountLeft) {
+	                    // no-op
+	                  } else {
 	                  g.drawRoundedRect(
 	                    sideXLeft,
 	                    sideStartY + i * (smallW + 2),
@@ -487,8 +503,12 @@ export default function MahjongPixiTable({
 	                    smallW,
 	                    4,
 	                  );
+	                  }
 	                }
 	                if (showRight) {
+	                  if (i >= sideCountRight) {
+	                    // no-op
+	                  } else {
 	                  g.drawRoundedRect(
 	                    sideXRight,
 	                    sideStartY + i * (smallW + 2),
@@ -496,6 +516,7 @@ export default function MahjongPixiTable({
 	                    smallW,
 	                    4,
 	                  );
+	                  }
 	                }
 	              }
 	              g.endFill();
@@ -525,6 +546,7 @@ export default function MahjongPixiTable({
 	              }
 	              for (let i = 0; i < sideCount; i++) {
 	                if (showLeft) {
+	                  if (i < sideCountLeft) {
 	                  g.drawRoundedRect(
 	                    sideXLeft,
 	                    sideStartY + i * (smallW + 2),
@@ -532,8 +554,10 @@ export default function MahjongPixiTable({
 	                    smallW,
 	                    4,
 	                  );
+	                  }
 	                }
 	                if (showRight) {
+	                  if (i < sideCountRight) {
 	                  g.drawRoundedRect(
 	                    sideXRight,
 	                    sideStartY + i * (smallW + 2),
@@ -541,6 +565,7 @@ export default function MahjongPixiTable({
 	                    smallW,
 	                    4,
 	                  );
+	                  }
 	                }
 	              }
 	            }}

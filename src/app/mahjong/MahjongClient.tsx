@@ -48,6 +48,9 @@ export default function MahjongClient() {
   const [activeSides, setActiveSides] = useState<
     Array<"bottom" | "right" | "top" | "left">
   >([]);
+  const [opponentHandCounts, setOpponentHandCounts] = useState<
+    Partial<Record<"right" | "top" | "left", number>>
+  >({});
 
   const [,] = useState<MahjongTile[]>([]);
   const [hand, setHand] = useState<MahjongTile[]>([]);
@@ -224,6 +227,31 @@ export default function MahjongClient() {
           if (count >= 4) sides.push("left");
           setActiveSides(sides);
         }
+
+        // Map non-self players' tileCount to the corresponding side so the small
+        // wall blocks match the hidden hand size (commonly 13).
+        const nextOpponentCounts: Partial<Record<"right" | "top" | "left", number>> =
+          {};
+        for (const p of payload) {
+          if (typeof p !== "object" || p === null) continue;
+          if ((p as { isSelf?: unknown }).isSelf === true) continue;
+          const seatRaw =
+            (p as { seat_position?: unknown; seatPosition?: unknown })
+              .seat_position ?? (p as { seat_position?: unknown; seatPosition?: unknown }).seatPosition;
+          const seat = Number(seatRaw);
+          const tilesRaw = (p as { tiles?: unknown }).tiles;
+          const tileCountFromTiles = Array.isArray(tilesRaw) ? tilesRaw.length : NaN;
+          const tileCountRaw = (p as { tileCount?: unknown }).tileCount;
+          const tileCountFromField = Number(tileCountRaw);
+          const tileCount = Number.isFinite(tileCountFromTiles)
+            ? tileCountFromTiles
+            : tileCountFromField;
+          if (!Number.isFinite(tileCount) || tileCount <= 0) continue;
+          if (seat === 2) nextOpponentCounts.right = tileCount;
+          if (seat === 3) nextOpponentCounts.top = tileCount;
+          if (seat === 4) nextOpponentCounts.left = tileCount;
+        }
+        setOpponentHandCounts(nextOpponentCounts);
 
         const self = payload.find(
           (p) => typeof p === "object" && p !== null && (p as { isSelf?: unknown }).isSelf === true,
@@ -437,6 +465,7 @@ export default function MahjongClient() {
           onDiscard={discardAt}
           centerMessage={centerMessage}
           activeSides={activeSides}
+          opponentHandCounts={opponentHandCounts}
         />
       </div>
 
