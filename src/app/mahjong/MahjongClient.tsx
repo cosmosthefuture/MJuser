@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
+import Image from "next/image";
 import { ArrowLeft } from "lucide-react";
 import { useSelector } from "react-redux";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -20,6 +21,27 @@ type RoundPlayer = {
   userId: number;
   name: string;
   seatPosition: number;
+};
+
+type WsTile = {
+  id: number | null;
+  type: "dot" | "bamboo" | "hidden" | string;
+  number: number | null;
+  copy_no: number | null;
+};
+
+type WinnerRevealPayload = {
+  winner_user_id?: unknown;
+  winner_userid?: unknown;
+  winnerUserId?: unknown;
+  winner_user_name?: unknown;
+  winner_username?: unknown;
+  winnerUserName?: unknown;
+  name?: unknown;
+  handTiles?: unknown;
+  chow?: unknown;
+  pong?: unknown;
+  kong?: unknown;
 };
 
 const MahjongPixiTable = dynamic(() => import("./MahjongPixiTable"), {
@@ -46,6 +68,11 @@ export default function MahjongClient() {
     userId: number;
     remaining: number;
     duration: number;
+  } | null>(null);
+  const [winnerReveal, setWinnerReveal] = useState<{
+    winnerUserId: number;
+    winnerName: string;
+    tiles: MahjongTile[];
   } | null>(null);
   const [roundPlayers, setRoundPlayers] = useState<RoundPlayer[]>([]);
   const [firstPlayerHighlightId, setFirstPlayerHighlightId] = useState<
@@ -293,12 +320,55 @@ export default function MahjongClient() {
         console.log("THIS ROUND IS DRAW. NO WINNER");
       };
 
+      const handleWinnerReveal = (payload: unknown) => {
+        if (cancelled) return;
+        if (!Array.isArray(payload) || payload.length === 0) return;
+        const first = payload[0];
+        if (typeof first !== "object" || first === null) return;
+        const p = first as WinnerRevealPayload;
+        const winnerUserIdRaw =
+          p.winner_user_id ??
+          p.winner_userid ??
+          p.winnerUserId;
+        const winnerUserId = Number(winnerUserIdRaw);
+        if (!Number.isFinite(winnerUserId)) return;
+
+        const winnerNameRaw =
+          p.winner_user_name ??
+          p.winner_username ??
+          p.winnerUserName ??
+          p.name;
+        const winnerName =
+          typeof winnerNameRaw === "string" && winnerNameRaw.trim()
+            ? winnerNameRaw
+            : `User ${winnerUserId}`;
+
+        const tilesRaw = p.handTiles;
+        const tiles: MahjongTile[] = [];
+        if (Array.isArray(tilesRaw)) {
+          for (const t of tilesRaw as WsTile[]) {
+            if (typeof t !== "object" || t === null) continue;
+            if (t.type === "hidden") continue;
+            const rank = Number(t.number);
+            if (!Number.isFinite(rank) || rank < 1 || rank > 9) continue;
+            const suit: MahjongTile["suit"] | null =
+              t.type === "bamboo" ? "bamboo" : t.type === "dot" ? "dots" : null;
+            if (!suit) continue;
+            tiles.push({ suit, rank });
+          }
+        }
+
+        setTurnCountdown(null);
+        setWinnerReveal({ winnerUserId, winnerName, tiles });
+      };
+
       const handleInitialHandState = (payload: unknown) => {
         if (cancelled) return;
         if (!Array.isArray(payload)) return;
 
         // Clear transient "Shuffling Tiles" message once hands arrive.
         setCenterMessage(null);
+        setWinnerReveal(null);
 
         // Once hands are dealt, hide dice overlay and show draw pile box.
         setDiceRolling(false);
@@ -484,6 +554,9 @@ export default function MahjongClient() {
       socket.off("mahjong:draw_round", handleDrawRound);
       socket.on("mahjong:draw_round", handleDrawRound);
 
+      socket.off("mahjong:winner_reveal", handleWinnerReveal);
+      socket.on("mahjong:winner_reveal", handleWinnerReveal);
+
       socket.off("mahjong:initial_hand_state", handleInitialHandState);
       socket.on("mahjong:initial_hand_state", handleInitialHandState);
 
@@ -528,6 +601,7 @@ export default function MahjongClient() {
       socket?.off("mahjong:turn_countdown");
       socket?.off("mahjong:turn_countdown_finished");
       socket?.off("mahjong:draw_round");
+      socket?.off("mahjong:winner_reveal");
       socket?.off("mahjong:initial_hand_state");
       socket?.off("mahjong:start_shuffling");
       socket?.off("mahjong:user_to_play");
@@ -715,6 +789,53 @@ export default function MahjongClient() {
           );
         })()}
       </div>
+
+      {winnerReveal ? (
+        <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/70 p-4">
+          <div className="pointer-events-auto w-full max-w-[760px] rounded-2xl border border-amber-100/15 bg-black/75 p-5 shadow-[0_25px_80px_rgba(0,0,0,0.55)] backdrop-blur-sm">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <div className="text-lg font-bold text-amber-200">
+                  Winner Reveal
+                </div>
+                <div className="mt-1 text-sm text-amber-100/90">
+                  {winnerReveal.winnerName}
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setWinnerReveal(null)}
+                className="rounded-full border border-amber-100/15 bg-black/40 px-3 py-1.5 text-sm text-amber-100 hover:bg-black/60"
+              >
+                Close
+              </button>
+            </div>
+
+            <div className="mt-4 flex flex-wrap gap-2">
+              {winnerReveal.tiles.map((t, idx) => {
+                const src =
+                  t.suit === "bamboo"
+                    ? `/images/MahjongRegular/bamboo${t.rank}.png`
+                    : `/images/MahjongRegular/dot${t.rank}.png`;
+                return (
+                  <div
+                    key={`${t.suit}-${t.rank}-${idx}`}
+                    className="rounded-lg bg-black/25 p-1"
+                  >
+                    <Image
+                      src={src}
+                      alt={`${t.suit}-${t.rank}`}
+                      width={52}
+                      height={72}
+                      className="h-[72px] w-[52px] rounded-md bg-white/90 object-contain"
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
