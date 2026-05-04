@@ -116,6 +116,7 @@ export default function MahjongPixiTable({
   });
 
   const [textures, setTextures] = useState<Record<string, Texture>>({});
+  const [hoveredHandIdx, setHoveredHandIdx] = useState<number | null>(null);
 
   useEffect(() => {
     if (!containerRef.current || typeof window === "undefined") return;
@@ -569,22 +570,30 @@ export default function MahjongPixiTable({
 	            }}
 	          />
 
-          {hand.map((t, idx) => {
-            const x = handStartX + idx * (tileW + gap);
-            const y = rackY + 16;
-            const handDepthX = 4;
-            const handDepthY = 4;
+	          {hand.map((t, idx) => {
+	            const x = handStartX + idx * (tileW + gap);
+	            const baseY = rackY + 16;
+	            const isHovered = hoveredHandIdx === idx;
+	            const y = baseY + (isHovered ? -10 : 0);
+	            const handDepthX = 4;
+	            const handDepthY = 4;
 
             const spritePath = `${tileSpriteBasePath}/${tileSpriteFileName(t)}`;
             const tex = textures[spritePath];
 
             return (
-              <pixiContainer
-                key={`${t.suit}-${t.rank}-${idx}`}
-                x={x}
-                y={y}
-                eventMode="none"
-              >
+	              <pixiContainer
+	                key={`${t.suit}-${t.rank}-${idx}`}
+	                x={x}
+	                y={y}
+	                scale={isHovered ? 1.06 : 1}
+	                eventMode="static"
+	                cursor="default"
+	                onPointerOver={() => setHoveredHandIdx(idx)}
+	                onPointerOut={() =>
+	                  setHoveredHandIdx((prev) => (prev === idx ? null : prev))
+	                }
+	              >
                 <pixiGraphics
                   draw={(g) => {
                     drawMahjongBlock(g, {
