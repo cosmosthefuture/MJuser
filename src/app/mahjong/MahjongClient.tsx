@@ -78,8 +78,33 @@ export default function MahjongClient() {
     tiles: MahjongTile[];
   } | null>(null);
   const [kongDecision, setKongDecision] = useState<{
-    groups: Array<{ tileKey: string; tiles: MahjongTile[] }>;
+    groups: Array<{
+      kongKey: string;
+      displayKey: string;
+      tiles: MahjongTile[];
+    }>;
   } | null>(null);
+
+  const emitAcceptKong = (kongKey: string) => {
+    const socket = getSocket();
+    if (!socket) return;
+    if (roomId == null || authUserId == null) return;
+    socket.emit("mahjong:accept_kong", {
+      roomId: String(roomId),
+      userId: authUserId,
+      kongKey,
+    });
+  };
+
+  const emitPassKong = () => {
+    const socket = getSocket();
+    if (!socket) return;
+    if (roomId == null || authUserId == null) return;
+    socket.emit("mahjong:pass_kong", {
+      roomId: String(roomId),
+      userId: authUserId,
+    });
+  };
 
   useEffect(() => {
     if (process.env.NODE_ENV === "production") return;
@@ -135,7 +160,8 @@ export default function MahjongClient() {
 
       setKongDecision({
         groups: payload.groups.map((g) => ({
-          tileKey: g.tileKey,
+          kongKey: g.tileKey,
+          displayKey: g.tileKey.replace(/_/g, " "),
           tiles: g.tiles.map((t) => ({
             suit: t.type === "bamboo" ? "bamboo" : "dots",
             rank: t.number,
@@ -449,13 +475,17 @@ export default function MahjongClient() {
 
         const groupsRaw = (p as { groups?: unknown }).groups;
         if (!Array.isArray(groupsRaw)) return;
-        const groups: Array<{ tileKey: string; tiles: MahjongTile[] }> = [];
+        const groups: Array<{
+          kongKey: string;
+          displayKey: string;
+          tiles: MahjongTile[];
+        }> = [];
 
         for (const g of groupsRaw) {
           if (typeof g !== "object" || g === null) continue;
           const tileKeyRaw = (g as { tileKey?: unknown }).tileKey;
-          const tileKey =
-            typeof tileKeyRaw === "string" ? tileKeyRaw.replace(/_/g, " ") : "";
+          const kongKey = typeof tileKeyRaw === "string" ? tileKeyRaw : "";
+          const displayKey = kongKey ? kongKey.replace(/_/g, " ") : "";
           const tilesRaw = (g as { tiles?: unknown }).tiles;
           if (!Array.isArray(tilesRaw)) continue;
           const tiles: MahjongTile[] = [];
@@ -473,7 +503,7 @@ export default function MahjongClient() {
             if (!suit) continue;
             tiles.push({ suit, rank });
           }
-          if (tiles.length > 0) groups.push({ tileKey, tiles });
+          if (tiles.length > 0) groups.push({ kongKey, displayKey, tiles });
         }
 
         if (groups.length === 0) return;
@@ -970,7 +1000,7 @@ export default function MahjongClient() {
                     <button
                       type="button"
                       onClick={() => {
-                        console.log("Kong accepted", g.tileKey);
+                        emitAcceptKong(g.kongKey);
                         setKongDecision(null);
                       }}
                       className="rounded-full bg-amber-100/90 px-4 py-2 text-xs font-semibold text-[#3b0500] hover:bg-amber-100"
@@ -980,7 +1010,7 @@ export default function MahjongClient() {
                     <button
                       type="button"
                       onClick={() => {
-                        console.log("Kong passed", g.tileKey);
+                        emitPassKong();
                         setKongDecision(null);
                       }}
                       className="rounded-full border border-amber-100/15 bg-black/40 px-4 py-2 text-xs font-semibold text-amber-100 hover:bg-black/60"
