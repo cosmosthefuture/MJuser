@@ -49,6 +49,11 @@ type CanKongPayload = {
   groups?: unknown;
 };
 
+type CanPongPayload = {
+  canPong?: unknown;
+  groups?: unknown;
+};
+
 const MahjongPixiTable = dynamic(() => import("./MahjongPixiTable"), {
   ssr: false,
 });
@@ -82,6 +87,13 @@ export default function MahjongClient() {
   const [kongDecision, setKongDecision] = useState<{
     groups: Array<{
       kongKey: string;
+      displayKey: string;
+      tiles: MahjongTile[];
+    }>;
+  } | null>(null);
+  const [pongDecision, setPongDecision] = useState<{
+    groups: Array<{
+      pongKey: string;
       displayKey: string;
       tiles: MahjongTile[];
     }>;
@@ -188,6 +200,37 @@ export default function MahjongClient() {
       });
     };
 
+    // Dev-only helper for testing the pong bar from the browser console:
+    // `globalThis.__mj_triggerCanInterruptPong()`
+    (
+      globalThis as unknown as { __mj_triggerCanInterruptPong?: () => void }
+    ).__mj_triggerCanInterruptPong = () => {
+      const payload = {
+        canPong: true,
+        groups: [
+          {
+            tileKey: "bamboo_1",
+            tiles: [
+              { id: 8881, type: "bamboo", number: 1, copy_no: 1 },
+              { id: 8882, type: "bamboo", number: 1, copy_no: 2 },
+              { id: 8883, type: "bamboo", number: 1, copy_no: 3 },
+            ],
+          },
+        ],
+      };
+      console.log("[dev] trigger mahjong:can_interrupt_pong", payload);
+      setPongDecision({
+        groups: payload.groups.map((g) => ({
+          pongKey: g.tileKey,
+          displayKey: g.tileKey.replace(/_/g, " "),
+          tiles: g.tiles.map((t) => ({
+            suit: t.type === "bamboo" ? "bamboo" : "dots",
+            rank: t.number,
+          })),
+        })),
+      });
+    };
+
     return () => {
       delete (
         globalThis as unknown as { __mj_triggerWinnerReveal?: () => void }
@@ -195,6 +238,9 @@ export default function MahjongClient() {
       delete (
         globalThis as unknown as { __mj_triggerCanKong?: () => void }
       ).__mj_triggerCanKong;
+      delete (
+        globalThis as unknown as { __mj_triggerCanInterruptPong?: () => void }
+      ).__mj_triggerCanInterruptPong;
     };
   }, [authUserId]);
   const [roundPlayers, setRoundPlayers] = useState<RoundPlayer[]>([]);
@@ -529,6 +575,54 @@ export default function MahjongClient() {
         setKongDecision({ groups });
       };
 
+      const handleCanPong = (payload: unknown) => {
+        if (cancelled) return;
+        if (typeof payload !== "object" || payload === null) return;
+        const p = payload as CanPongPayload;
+        const canPong = Boolean((p as { canPong?: unknown }).canPong);
+        if (!canPong) {
+          setPongDecision(null);
+          return;
+        }
+
+        const groupsRaw = (p as { groups?: unknown }).groups;
+        if (!Array.isArray(groupsRaw)) return;
+        const groups: Array<{
+          pongKey: string;
+          displayKey: string;
+          tiles: MahjongTile[];
+        }> = [];
+
+        for (const g of groupsRaw) {
+          if (typeof g !== "object" || g === null) continue;
+          const tileKeyRaw = (g as { tileKey?: unknown }).tileKey;
+          const pongKey = typeof tileKeyRaw === "string" ? tileKeyRaw : "";
+          const displayKey = pongKey ? pongKey.replace(/_/g, " ") : "";
+          const tilesRaw = (g as { tiles?: unknown }).tiles;
+          if (!Array.isArray(tilesRaw)) continue;
+          const tiles: MahjongTile[] = [];
+          for (const t of tilesRaw as WsTile[]) {
+            if (typeof t !== "object" || t === null) continue;
+            if (t.type === "hidden") continue;
+            const rank = Number(t.number);
+            if (!Number.isFinite(rank) || rank < 1 || rank > 9) continue;
+            const suit: MahjongTile["suit"] | null =
+              t.type === "bamboo"
+                ? "bamboo"
+                : t.type === "dot"
+                  ? "dots"
+                  : null;
+            if (!suit) continue;
+            tiles.push({ suit, rank });
+          }
+          if (tiles.length > 0) groups.push({ pongKey, displayKey, tiles });
+        }
+
+        if (groups.length === 0) return;
+        console.log("⛔ Can Pong");
+        setPongDecision({ groups });
+      };
+
       const handleInitialHandState = (payload: unknown) => {
         if (cancelled) return;
         if (!Array.isArray(payload)) return;
@@ -537,6 +631,7 @@ export default function MahjongClient() {
         setCenterMessage(null);
         setWinnerReveal(null);
         setKongDecision(null);
+        setPongDecision(null);
 
         // Once hands are dealt, hide dice overlay and show draw pile box.
         setDiceRolling(false);
@@ -736,6 +831,12 @@ export default function MahjongClient() {
       socket.off("mahjong:can_kong", handleCanKong);
       socket.on("mahjong:can_kong", handleCanKong);
 
+      socket.off("mahjong:can_interrupt_kong", handleCanKong);
+      socket.on("mahjong:can_interrupt_kong", handleCanKong);
+
+      socket.off("mahjong:can_interrupt_pong", handleCanPong);
+      socket.on("mahjong:can_interrupt_pong", handleCanPong);
+
       socket.off("mahjong:initial_hand_state", handleInitialHandState);
       socket.on("mahjong:initial_hand_state", handleInitialHandState);
 
@@ -776,6 +877,8 @@ export default function MahjongClient() {
       socket?.off("mahjong:draw_round");
       socket?.off("mahjong:winner_reveal");
       socket?.off("mahjong:can_kong");
+      socket?.off("mahjong:can_interrupt_kong");
+      socket?.off("mahjong:can_interrupt_pong");
       socket?.off("mahjong:initial_hand_state");
       socket?.off("mahjong:start_shuffling");
       socket?.off("mahjong:user_to_play");
@@ -1034,6 +1137,52 @@ export default function MahjongClient() {
                       onClick={() => {
                         emitPassKong();
                         setKongDecision(null);
+                      }}
+                      className="rounded-full border border-amber-100/15 bg-black/40 px-4 py-2 text-xs font-semibold text-amber-100 hover:bg-black/60"
+                    >
+                      Pass
+                    </button>
+                  </div>
+                </>
+              );
+            })()}
+          </div>
+        </div>
+      ) : null}
+
+      {pongDecision ? (
+        <div className="pointer-events-none absolute inset-0 z-30">
+          <div className="pointer-events-auto absolute left-1/2 -translate-x-1/2 bottom-[118px] flex items-center gap-3 rounded-2xl border border-amber-100/15 bg-black/55 px-4 py-3 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-sm">
+            {(() => {
+              const g = pongDecision.groups[0];
+              if (!g) return null;
+              return (
+                <>
+                  <div className="flex items-center gap-2">
+                    {g.tiles.slice(0, 3).map((t, ti) => (
+                      <MahjongTileCard
+                        key={`${t.suit}-${t.rank}-${ti}`}
+                        tile={t}
+                        size="xs"
+                      />
+                    ))}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        console.log("Pong accepted", g.pongKey);
+                        setPongDecision(null);
+                      }}
+                      className="rounded-full bg-amber-100/90 px-4 py-2 text-xs font-semibold text-[#3b0500] hover:bg-amber-100"
+                    >
+                      Accept
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        console.log("Pong passed", g.pongKey);
+                        setPongDecision(null);
                       }}
                       className="rounded-full border border-amber-100/15 bg-black/40 px-4 py-2 text-xs font-semibold text-amber-100 hover:bg-black/60"
                     >
