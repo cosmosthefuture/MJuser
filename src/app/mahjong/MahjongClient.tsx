@@ -93,6 +93,7 @@ export default function MahjongClient() {
     }>;
   } | null>(null);
   const [pongDecision, setPongDecision] = useState<{
+    kind: "interrupt_pong" | "normal_pong";
     groups: Array<{
       pongKey: string;
       displayKey: string;
@@ -180,11 +181,22 @@ export default function MahjongClient() {
     });
   };
 
-  const emitPassInterruptPong = () => {
+  const emitAcceptNormalPong = (pongKey: string) => {
     const socket = getSocket();
     if (!socket) return;
     if (roomId == null || authUserId == null) return;
-    socket.emit("mahjong:pass_interrupt_pong", {
+    socket.emit("mahjong:accept_normal_pong", {
+      roomId: String(roomId),
+      userId: authUserId,
+      pongKey,
+    });
+  };
+
+  const emitPassNormalPong = () => {
+    const socket = getSocket();
+    if (!socket) return;
+    if (roomId == null || authUserId == null) return;
+    socket.emit("mahjong:pass_normal_pong", {
       roomId: String(roomId),
       userId: authUserId,
     });
@@ -636,7 +648,10 @@ export default function MahjongClient() {
       const handleCanNormalKong = (payload: unknown) =>
         applyCanKong(payload, "normal_kong");
 
-      const handleCanPong = (payload: unknown) => {
+      const applyCanPong = (
+        payload: unknown,
+        kind: "interrupt_pong" | "normal_pong",
+      ) => {
         if (cancelled) return;
         if (typeof payload !== "object" || payload === null) return;
         const p = payload as CanPongPayload;
@@ -677,8 +692,14 @@ export default function MahjongClient() {
 
         if (groups.length === 0) return;
         console.log("⛔ Can Pong");
-        setPongDecision({ groups });
+        setPongDecision({ kind, groups });
       };
+
+      const handleCanInterruptPong = (payload: unknown) =>
+        applyCanPong(payload, "interrupt_pong");
+
+      const handleCanNormalPong = (payload: unknown) =>
+        applyCanPong(payload, "normal_pong");
 
       const handleInitialHandState = (payload: unknown) => {
         if (cancelled) return;
@@ -894,8 +915,11 @@ export default function MahjongClient() {
       socket.off("mahjong:can_normal_kong", handleCanNormalKong);
       socket.on("mahjong:can_normal_kong", handleCanNormalKong);
 
-      socket.off("mahjong:can_interrupt_pong", handleCanPong);
-      socket.on("mahjong:can_interrupt_pong", handleCanPong);
+      socket.off("mahjong:can_interrupt_pong", handleCanInterruptPong);
+      socket.on("mahjong:can_interrupt_pong", handleCanInterruptPong);
+
+      socket.off("mahjong:can_normal_pong", handleCanNormalPong);
+      socket.on("mahjong:can_normal_pong", handleCanNormalPong);
 
       socket.off("mahjong:initial_hand_state", handleInitialHandState);
       socket.on("mahjong:initial_hand_state", handleInitialHandState);
@@ -940,6 +964,7 @@ export default function MahjongClient() {
       socket?.off("mahjong:can_interrupt_kong");
       socket?.off("mahjong:can_normal_kong");
       socket?.off("mahjong:can_interrupt_pong");
+      socket?.off("mahjong:can_normal_pong");
       socket?.off("mahjong:initial_hand_state");
       socket?.off("mahjong:start_shuffling");
       socket?.off("mahjong:user_to_play");
@@ -1242,7 +1267,11 @@ export default function MahjongClient() {
                     <button
                       type="button"
                       onClick={() => {
-                        emitAcceptInterruptPong(g.pongKey);
+                        if (pongDecision.kind === "normal_pong") {
+                          emitAcceptNormalPong(g.pongKey);
+                        } else {
+                          emitAcceptInterruptPong(g.pongKey);
+                        }
                         setPongDecision(null);
                       }}
                       className="rounded-full bg-amber-100/90 px-4 py-2 text-xs font-semibold text-[#3b0500] hover:bg-amber-100"
@@ -1252,7 +1281,9 @@ export default function MahjongClient() {
                     <button
                       type="button"
                       onClick={() => {
-                        emitPassInterruptPong();
+                        if (pongDecision.kind === "normal_pong") {
+                          emitPassNormalPong();
+                        }
                         setPongDecision(null);
                       }}
                       className="rounded-full border border-amber-100/15 bg-black/40 px-4 py-2 text-xs font-semibold text-amber-100 hover:bg-black/60"
