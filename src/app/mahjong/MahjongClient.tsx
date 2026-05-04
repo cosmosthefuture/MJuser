@@ -85,7 +85,7 @@ export default function MahjongClient() {
     tiles: MahjongTile[];
   } | null>(null);
   const [kongDecision, setKongDecision] = useState<{
-    kind: "kong" | "interrupt_kong";
+    kind: "kong" | "interrupt_kong" | "normal_kong";
     groups: Array<{
       kongKey: string;
       displayKey: string;
@@ -116,6 +116,27 @@ export default function MahjongClient() {
     if (!socket) return;
     if (roomId == null || authUserId == null) return;
     socket.emit("mahjong:pass_kong", {
+      roomId: String(roomId),
+      userId: authUserId,
+    });
+  };
+
+  const emitAcceptNormalKong = (kongKey: string) => {
+    const socket = getSocket();
+    if (!socket) return;
+    if (roomId == null || authUserId == null) return;
+    socket.emit("mahjong:accept_normal_kong", {
+      roomId: String(roomId),
+      userId: authUserId,
+      kongKey,
+    });
+  };
+
+  const emitPassNormalKong = () => {
+    const socket = getSocket();
+    if (!socket) return;
+    if (roomId == null || authUserId == null) return;
+    socket.emit("mahjong:pass_normal_kong", {
       roomId: String(roomId),
       userId: authUserId,
     });
@@ -269,9 +290,8 @@ export default function MahjongClient() {
       delete (
         globalThis as unknown as { __mj_triggerWinnerReveal?: () => void }
       ).__mj_triggerWinnerReveal;
-      delete (
-        globalThis as unknown as { __mj_triggerCanKong?: () => void }
-      ).__mj_triggerCanKong;
+      delete (globalThis as unknown as { __mj_triggerCanKong?: () => void })
+        .__mj_triggerCanKong;
       delete (
         globalThis as unknown as { __mj_triggerCanInterruptPong?: () => void }
       ).__mj_triggerCanInterruptPong;
@@ -563,7 +583,7 @@ export default function MahjongClient() {
 
       const applyCanKong = (
         payload: unknown,
-        kind: "kong" | "interrupt_kong",
+        kind: "kong" | "interrupt_kong" | "normal_kong",
       ) => {
         if (cancelled) return;
         if (typeof payload !== "object" || payload === null) return;
@@ -596,11 +616,7 @@ export default function MahjongClient() {
             const rank = Number(t.number);
             if (!Number.isFinite(rank) || rank < 1 || rank > 9) continue;
             const suit: MahjongTile["suit"] | null =
-              t.type === "bamboo"
-                ? "bamboo"
-                : t.type === "dot"
-                  ? "dots"
-                  : null;
+              t.type === "bamboo" ? "bamboo" : t.type === "dot" ? "dots" : null;
             if (!suit) continue;
             tiles.push({ suit, rank });
           }
@@ -616,6 +632,9 @@ export default function MahjongClient() {
 
       const handleCanInterruptKong = (payload: unknown) =>
         applyCanKong(payload, "interrupt_kong");
+
+      const handleCanNormalKong = (payload: unknown) =>
+        applyCanKong(payload, "normal_kong");
 
       const handleCanPong = (payload: unknown) => {
         if (cancelled) return;
@@ -649,11 +668,7 @@ export default function MahjongClient() {
             const rank = Number(t.number);
             if (!Number.isFinite(rank) || rank < 1 || rank > 9) continue;
             const suit: MahjongTile["suit"] | null =
-              t.type === "bamboo"
-                ? "bamboo"
-                : t.type === "dot"
-                  ? "dots"
-                  : null;
+              t.type === "bamboo" ? "bamboo" : t.type === "dot" ? "dots" : null;
             if (!suit) continue;
             tiles.push({ suit, rank });
           }
@@ -876,6 +891,9 @@ export default function MahjongClient() {
       socket.off("mahjong:can_interrupt_kong", handleCanInterruptKong);
       socket.on("mahjong:can_interrupt_kong", handleCanInterruptKong);
 
+      socket.off("mahjong:can_normal_kong", handleCanNormalKong);
+      socket.on("mahjong:can_normal_kong", handleCanNormalKong);
+
       socket.off("mahjong:can_interrupt_pong", handleCanPong);
       socket.on("mahjong:can_interrupt_pong", handleCanPong);
 
@@ -920,6 +938,7 @@ export default function MahjongClient() {
       socket?.off("mahjong:winner_reveal");
       socket?.off("mahjong:can_kong");
       socket?.off("mahjong:can_interrupt_kong");
+      socket?.off("mahjong:can_normal_kong");
       socket?.off("mahjong:can_interrupt_pong");
       socket?.off("mahjong:initial_hand_state");
       socket?.off("mahjong:start_shuffling");
@@ -1169,6 +1188,8 @@ export default function MahjongClient() {
                       onClick={() => {
                         if (kongDecision.kind === "interrupt_kong") {
                           emitAcceptInterruptKong(g.kongKey);
+                        } else if (kongDecision.kind === "normal_kong") {
+                          emitAcceptNormalKong(g.kongKey);
                         } else {
                           emitAcceptKong(g.kongKey);
                         }
@@ -1183,6 +1204,8 @@ export default function MahjongClient() {
                       onClick={() => {
                         if (kongDecision.kind === "kong") {
                           emitPassKong();
+                        } else if (kongDecision.kind === "normal_kong") {
+                          emitPassNormalKong();
                         }
                         setKongDecision(null);
                       }}
