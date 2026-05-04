@@ -42,6 +42,11 @@ type WinnerRevealPayload = {
   kong?: unknown;
 };
 
+type CanKongPayload = {
+  canKong?: unknown;
+  groups?: unknown;
+};
+
 const MahjongPixiTable = dynamic(() => import("./MahjongPixiTable"), {
   ssr: false,
 });
@@ -71,6 +76,9 @@ export default function MahjongClient() {
     winnerUserId: number;
     winnerName: string;
     tiles: MahjongTile[];
+  } | null>(null);
+  const [kongDecision, setKongDecision] = useState<{
+    groups: Array<{ tileKey: string; tiles: MahjongTile[] }>;
   } | null>(null);
 
   useEffect(() => {
@@ -393,6 +401,49 @@ export default function MahjongClient() {
         setWinnerReveal({ winnerUserId, winnerName, tiles });
       };
 
+      const handleCanKong = (payload: unknown) => {
+        if (cancelled) return;
+        if (typeof payload !== "object" || payload === null) return;
+        const p = payload as CanKongPayload;
+        const canKong = Boolean((p as { canKong?: unknown }).canKong);
+        if (!canKong) {
+          setKongDecision(null);
+          return;
+        }
+
+        const groupsRaw = (p as { groups?: unknown }).groups;
+        if (!Array.isArray(groupsRaw)) return;
+        const groups: Array<{ tileKey: string; tiles: MahjongTile[] }> = [];
+
+        for (const g of groupsRaw) {
+          if (typeof g !== "object" || g === null) continue;
+          const tileKeyRaw = (g as { tileKey?: unknown }).tileKey;
+          const tileKey = typeof tileKeyRaw === "string" ? tileKeyRaw : "";
+          const tilesRaw = (g as { tiles?: unknown }).tiles;
+          if (!Array.isArray(tilesRaw)) continue;
+          const tiles: MahjongTile[] = [];
+          for (const t of tilesRaw as WsTile[]) {
+            if (typeof t !== "object" || t === null) continue;
+            if (t.type === "hidden") continue;
+            const rank = Number(t.number);
+            if (!Number.isFinite(rank) || rank < 1 || rank > 9) continue;
+            const suit: MahjongTile["suit"] | null =
+              t.type === "bamboo"
+                ? "bamboo"
+                : t.type === "dot"
+                  ? "dots"
+                  : null;
+            if (!suit) continue;
+            tiles.push({ suit, rank });
+          }
+          if (tiles.length > 0) groups.push({ tileKey, tiles });
+        }
+
+        if (groups.length === 0) return;
+        console.log("⛔ Can Kong");
+        setKongDecision({ groups });
+      };
+
       const handleInitialHandState = (payload: unknown) => {
         if (cancelled) return;
         if (!Array.isArray(payload)) return;
@@ -400,6 +451,7 @@ export default function MahjongClient() {
         // Clear transient "Shuffling Tiles" message once hands arrive.
         setCenterMessage(null);
         setWinnerReveal(null);
+        setKongDecision(null);
 
         // Once hands are dealt, hide dice overlay and show draw pile box.
         setDiceRolling(false);
@@ -593,6 +645,9 @@ export default function MahjongClient() {
       socket.off("mahjong:winner_reveal", handleWinnerReveal);
       socket.on("mahjong:winner_reveal", handleWinnerReveal);
 
+      socket.off("mahjong:can_kong", handleCanKong);
+      socket.on("mahjong:can_kong", handleCanKong);
+
       socket.off("mahjong:initial_hand_state", handleInitialHandState);
       socket.on("mahjong:initial_hand_state", handleInitialHandState);
 
@@ -632,6 +687,7 @@ export default function MahjongClient() {
       socket?.off("mahjong:turn_countdown_finished");
       socket?.off("mahjong:draw_round");
       socket?.off("mahjong:winner_reveal");
+      socket?.off("mahjong:can_kong");
       socket?.off("mahjong:initial_hand_state");
       socket?.off("mahjong:start_shuffling");
       socket?.off("mahjong:user_to_play");
@@ -851,6 +907,72 @@ export default function MahjongClient() {
                   </div>
                 );
               })}
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {kongDecision ? (
+        <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/70 p-4">
+          <div className="pointer-events-auto w-full max-w-[760px] rounded-2xl border border-amber-100/15 bg-black/75 p-5 shadow-[0_25px_80px_rgba(0,0,0,0.55)] backdrop-blur-sm">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <div className="text-lg font-bold text-amber-200">Can Kong</div>
+                <div className="mt-1 text-sm text-amber-100/80">
+                  Choose Accept or Pass
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setKongDecision(null)}
+                className="rounded-full border border-amber-100/15 bg-black/40 px-3 py-1.5 text-sm text-amber-100 hover:bg-black/60"
+              >
+                Close
+              </button>
+            </div>
+
+            <div className="mt-4 space-y-4">
+              {kongDecision.groups.map((g, gi) => (
+                <div
+                  key={`${g.tileKey}-${gi}`}
+                  className="rounded-xl border border-amber-100/10 bg-black/35 p-3"
+                >
+                  <div className="text-sm font-semibold text-amber-100/90">
+                    {g.tileKey || `Group ${gi + 1}`}
+                  </div>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {g.tiles.map((t, ti) => (
+                      <MahjongTileCard
+                        key={`${t.suit}-${t.rank}-${ti}`}
+                        tile={t}
+                        size="sm"
+                      />
+                    ))}
+                  </div>
+                  <div className="mt-3 flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        console.log("Kong accepted", g.tileKey);
+                        setKongDecision(null);
+                      }}
+                      className="rounded-full bg-amber-100/90 px-4 py-2 text-sm font-semibold text-[#3b0500] hover:bg-amber-100"
+                    >
+                      Accept
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        console.log("Kong passed", g.tileKey);
+                        setKongDecision(null);
+                      }}
+                      className="rounded-full border border-amber-100/15 bg-black/40 px-4 py-2 text-sm font-semibold text-amber-100 hover:bg-black/60"
+                    >
+                      Pass
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
