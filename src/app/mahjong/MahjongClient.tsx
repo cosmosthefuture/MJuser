@@ -780,6 +780,21 @@ export default function MahjongClient() {
       const handleCanNormalPong = (payload: unknown) =>
         applyCanPong(payload, "normal_pong");
 
+      const handleRemoveKongDecision = () => {
+        if (cancelled) return;
+        setKongDecision(null);
+      };
+
+      const handleRemovePongDecision = () => {
+        if (cancelled) return;
+        setPongDecision(null);
+      };
+
+      const handleRemoveChowDecision = () => {
+        if (cancelled) return;
+        setChowDecision(null);
+      };
+
       const applyCanChow = (payload: unknown) => {
         if (cancelled) return;
         if (typeof payload !== "object" || payload === null) return;
@@ -1048,6 +1063,15 @@ export default function MahjongClient() {
       socket.off("mahjong:can_normal_chow", applyCanChow);
       socket.on("mahjong:can_normal_chow", applyCanChow);
 
+      socket.off("mahjong:remove_kong_decision", handleRemoveKongDecision);
+      socket.on("mahjong:remove_kong_decision", handleRemoveKongDecision);
+
+      socket.off("mahjong:remove_pong_decision", handleRemovePongDecision);
+      socket.on("mahjong:remove_pong_decision", handleRemovePongDecision);
+
+      socket.off("mahjong:remove_chow_decision", handleRemoveChowDecision);
+      socket.on("mahjong:remove_chow_decision", handleRemoveChowDecision);
+
       socket.off("mahjong:initial_hand_state", handleInitialHandState);
       socket.on("mahjong:initial_hand_state", handleInitialHandState);
 
@@ -1093,6 +1117,9 @@ export default function MahjongClient() {
       socket?.off("mahjong:can_interrupt_pong");
       socket?.off("mahjong:can_normal_pong");
       socket?.off("mahjong:can_normal_chow");
+      socket?.off("mahjong:remove_kong_decision");
+      socket?.off("mahjong:remove_pong_decision");
+      socket?.off("mahjong:remove_chow_decision");
       socket?.off("mahjong:initial_hand_state");
       socket?.off("mahjong:start_shuffling");
       socket?.off("mahjong:user_to_play");
