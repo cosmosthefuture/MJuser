@@ -181,7 +181,7 @@ export default function MahjongPixiTable({
 
   const tileW = 58;
   const tileH = 80;
-  const gap = 8;
+  const gap = 6;
 
   const rackH = 110;
   const rackY = designHeight - rackH - 18;
@@ -637,11 +637,11 @@ export default function MahjongPixiTable({
             }}
           />
 
-	          {hand.map((t, idx) => {
-	            const x = handStartX + idx * (tileW + gap);
-	            const baseY = rackY + 16;
-	            const isHovered = hoveredHandIdx === idx;
-	            const y = baseY + (isHovered ? -10 : 0);
+          {hand.map((t, idx) => {
+            const x = handStartX + idx * (tileW + gap);
+            const baseY = rackY + 16;
+            const isHovered = hoveredHandIdx === idx;
+            const y = baseY + (isHovered ? -10 : 0);
             const handDepthX = 4;
             const handDepthY = 4;
 
@@ -649,25 +649,25 @@ export default function MahjongPixiTable({
             const tex = textures[spritePath];
 
             return (
-	              <pixiContainer
-	                key={`${t.suit}-${t.rank}-${idx}`}
-	                x={x}
-	                y={y}
-	                scale={isHovered ? 1.06 : 1}
-	                eventMode="static"
-	                cursor="default"
-	                onPointerTap={(e) => {
-	                  const detail = (e as unknown as { detail?: number }).detail;
-	                  if (detail !== 2) return;
-	                  const tileId = (t as { id?: number }).id;
-	                  if (typeof tileId !== "number") return;
-	                  onDoubleClickTile?.(tileId);
-	                }}
-	                onPointerOver={() => setHoveredHandIdx(idx)}
-	                onPointerOut={() =>
-	                  setHoveredHandIdx((prev) => (prev === idx ? null : prev))
-	                }
-	              >
+              <pixiContainer
+                key={`${t.suit}-${t.rank}-${idx}`}
+                x={x}
+                y={y}
+                scale={isHovered ? 1.06 : 1}
+                eventMode="static"
+                cursor="default"
+                onPointerTap={(e: unknown) => {
+                  const detail = (e as unknown as { detail?: number }).detail;
+                  if (detail !== 2) return;
+                  const tileId = (t as { id?: number }).id;
+                  if (typeof tileId !== "number") return;
+                  onDoubleClickTile?.(tileId);
+                }}
+                onPointerOver={() => setHoveredHandIdx(idx)}
+                onPointerOut={() =>
+                  setHoveredHandIdx((prev) => (prev === idx ? null : prev))
+                }
+              >
                 <pixiGraphics
                   draw={(g) => {
                     drawMahjongBlock(g, {
