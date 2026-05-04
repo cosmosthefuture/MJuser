@@ -20,6 +20,7 @@ type Props = {
   centerMessage?: string | null;
   showDrawPile?: boolean;
   drawPileCount?: number | null;
+  lastDiscardTile?: MahjongTile | null;
   // Which sides should be visible (matches avatar placement logic).
   activeSides?: Array<"bottom" | "right" | "top" | "left">;
   // Hidden-hand sizes for non-self players (used for wall block counts).
@@ -102,6 +103,7 @@ export default function MahjongPixiTable({
   centerMessage = null,
   showDrawPile = false,
   drawPileCount = null,
+  lastDiscardTile = null,
   activeSides,
   opponentHandCounts,
 }: Props) {
@@ -382,9 +384,43 @@ export default function MahjongPixiTable({
                     : "Draw Pile"
                 }
                 x={Math.floor(designWidth / 2) - 60}
-                y={Math.floor(tableY + tableH / 2) - 10}
+                y={Math.floor(tableY + tableH / 2) - 50}
                 style={labelStyle}
               />
+              {lastDiscardTile
+                ? (() => {
+                    const spritePath = `${tileSpriteBasePath}/${tileSpriteFileName(
+                      lastDiscardTile,
+                    )}`;
+                    const tex = textures[spritePath];
+                    if (!tex) return null;
+                    const cx = Math.floor(designWidth / 2);
+                    const cy = Math.floor(tableY + tableH / 2);
+                    return (
+                      <pixiContainer x={cx - 23} y={cy - 10}>
+                        <pixiGraphics
+                          draw={(g) => {
+                            drawMahjongBlock(g, {
+                              width: 46,
+                              height: 64,
+                              depthX: 4,
+                              depthY: 4,
+                              faceColor: 0xe7e8eb,
+                              borderColor: 0xb8bcc3,
+                            });
+                          }}
+                        />
+                        <pixiSprite
+                          texture={tex}
+                          x={4}
+                          y={5}
+                          width={46 - 4 - 8}
+                          height={64 - 4 - 10}
+                        />
+                      </pixiContainer>
+                    );
+                  })()
+                : null}
             </>
           ) : null}
 
@@ -462,167 +498,167 @@ export default function MahjongPixiTable({
             );
           })}
 
-	          <pixiGraphics
-	            draw={(g) => {
-	              g.clear();
-	              const back = 0x0e5a35;
-	              const edge = 0x06311e;
-	              const showTop = sides.size === 0 || sides.has("top");
-	              const showLeft = sides.size === 0 || sides.has("left");
-	              const showRight = sides.size === 0 || sides.has("right");
-	              // No small wall blocks for the auth user's side (bottom).
-	              const showBottom = false;
+          <pixiGraphics
+            draw={(g) => {
+              g.clear();
+              const back = 0x0e5a35;
+              const edge = 0x06311e;
+              const showTop = sides.size === 0 || sides.has("top");
+              const showLeft = sides.size === 0 || sides.has("left");
+              const showRight = sides.size === 0 || sides.has("right");
+              // No small wall blocks for the auth user's side (bottom).
+              const showBottom = false;
 
-	              const topCount = counts.top ?? 16;
-	              const smallW = 26;
-	              const smallH = 34;
-	              const topStartX = Math.floor(
-	                designWidth / 2 - (topCount * smallW + (topCount - 1) * 2) / 2,
-	              );
-	              const topY = tableY + 18;
-	              const bottomY = tableY + tableH - 18 - smallH;
+              const topCount = counts.top ?? 16;
+              const smallW = 26;
+              const smallH = 34;
+              const topStartX = Math.floor(
+                designWidth / 2 - (topCount * smallW + (topCount - 1) * 2) / 2,
+              );
+              const topY = tableY + 18;
+              const bottomY = tableY + tableH - 18 - smallH;
 
-	              g.beginFill(back);
-	              if (showTop) {
-	                for (let i = 0; i < topCount; i++) {
-	                  g.drawRoundedRect(
-	                    topStartX + i * (smallW + 2),
-	                    topY,
-	                    smallW,
-	                    smallH,
-	                    4,
-	                  );
-	                }
-	              }
-	              if (showBottom) {
-	                for (let i = 0; i < topCount; i++) {
-	                  g.drawRoundedRect(
-	                    topStartX + i * (smallW + 2),
-	                    bottomY,
-	                    smallW,
-	                    smallH,
-	                    4,
-	                  );
-	                }
-	              }
-	              g.endFill();
+              g.beginFill(back);
+              if (showTop) {
+                for (let i = 0; i < topCount; i++) {
+                  g.drawRoundedRect(
+                    topStartX + i * (smallW + 2),
+                    topY,
+                    smallW,
+                    smallH,
+                    4,
+                  );
+                }
+              }
+              if (showBottom) {
+                for (let i = 0; i < topCount; i++) {
+                  g.drawRoundedRect(
+                    topStartX + i * (smallW + 2),
+                    bottomY,
+                    smallW,
+                    smallH,
+                    4,
+                  );
+                }
+              }
+              g.endFill();
 
-	              const sideCountLeft = counts.left ?? 14;
-	              const sideCountRight = counts.right ?? 14;
-	              const sideCount = Math.max(sideCountLeft, sideCountRight);
-	              const sideXLeft = tableX + 18;
-	              const sideXRight = tableX + tableW - 18 - smallH;
-	              const sideStartY = Math.floor(
-	                tableY +
-	                  tableH / 2 -
-	                  (sideCount * smallW + (sideCount - 1) * 2) / 2,
-	              );
+              const sideCountLeft = counts.left ?? 14;
+              const sideCountRight = counts.right ?? 14;
+              const sideCount = Math.max(sideCountLeft, sideCountRight);
+              const sideXLeft = tableX + 18;
+              const sideXRight = tableX + tableW - 18 - smallH;
+              const sideStartY = Math.floor(
+                tableY +
+                  tableH / 2 -
+                  (sideCount * smallW + (sideCount - 1) * 2) / 2,
+              );
 
-	              g.beginFill(back);
-	              for (let i = 0; i < sideCount; i++) {
-	                if (showLeft) {
-	                  if (i >= sideCountLeft) {
-	                    // no-op
-	                  } else {
-	                  g.drawRoundedRect(
-	                    sideXLeft,
-	                    sideStartY + i * (smallW + 2),
-	                    smallH,
-	                    smallW,
-	                    4,
-	                  );
-	                  }
-	                }
-	                if (showRight) {
-	                  if (i >= sideCountRight) {
-	                    // no-op
-	                  } else {
-	                  g.drawRoundedRect(
-	                    sideXRight,
-	                    sideStartY + i * (smallW + 2),
-	                    smallH,
-	                    smallW,
-	                    4,
-	                  );
-	                  }
-	                }
-	              }
-	              g.endFill();
+              g.beginFill(back);
+              for (let i = 0; i < sideCount; i++) {
+                if (showLeft) {
+                  if (i >= sideCountLeft) {
+                    // no-op
+                  } else {
+                    g.drawRoundedRect(
+                      sideXLeft,
+                      sideStartY + i * (smallW + 2),
+                      smallH,
+                      smallW,
+                      4,
+                    );
+                  }
+                }
+                if (showRight) {
+                  if (i >= sideCountRight) {
+                    // no-op
+                  } else {
+                    g.drawRoundedRect(
+                      sideXRight,
+                      sideStartY + i * (smallW + 2),
+                      smallH,
+                      smallW,
+                      4,
+                    );
+                  }
+                }
+              }
+              g.endFill();
 
-	              g.lineStyle(2, edge, 1);
-	              if (showTop) {
-	                for (let i = 0; i < topCount; i++) {
-	                  g.drawRoundedRect(
-	                    topStartX + i * (smallW + 2),
-	                    topY,
-	                    smallW,
-	                    smallH,
-	                    4,
-	                  );
-	                }
-	              }
-	              if (showBottom) {
-	                for (let i = 0; i < topCount; i++) {
-	                  g.drawRoundedRect(
-	                    topStartX + i * (smallW + 2),
-	                    bottomY,
-	                    smallW,
-	                    smallH,
-	                    4,
-	                  );
-	                }
-	              }
-	              for (let i = 0; i < sideCount; i++) {
-	                if (showLeft) {
-	                  if (i < sideCountLeft) {
-	                  g.drawRoundedRect(
-	                    sideXLeft,
-	                    sideStartY + i * (smallW + 2),
-	                    smallH,
-	                    smallW,
-	                    4,
-	                  );
-	                  }
-	                }
-	                if (showRight) {
-	                  if (i < sideCountRight) {
-	                  g.drawRoundedRect(
-	                    sideXRight,
-	                    sideStartY + i * (smallW + 2),
-	                    smallH,
-	                    smallW,
-	                    4,
-	                  );
-	                  }
-	                }
-	              }
-	            }}
-	          />
+              g.lineStyle(2, edge, 1);
+              if (showTop) {
+                for (let i = 0; i < topCount; i++) {
+                  g.drawRoundedRect(
+                    topStartX + i * (smallW + 2),
+                    topY,
+                    smallW,
+                    smallH,
+                    4,
+                  );
+                }
+              }
+              if (showBottom) {
+                for (let i = 0; i < topCount; i++) {
+                  g.drawRoundedRect(
+                    topStartX + i * (smallW + 2),
+                    bottomY,
+                    smallW,
+                    smallH,
+                    4,
+                  );
+                }
+              }
+              for (let i = 0; i < sideCount; i++) {
+                if (showLeft) {
+                  if (i < sideCountLeft) {
+                    g.drawRoundedRect(
+                      sideXLeft,
+                      sideStartY + i * (smallW + 2),
+                      smallH,
+                      smallW,
+                      4,
+                    );
+                  }
+                }
+                if (showRight) {
+                  if (i < sideCountRight) {
+                    g.drawRoundedRect(
+                      sideXRight,
+                      sideStartY + i * (smallW + 2),
+                      smallH,
+                      smallW,
+                      4,
+                    );
+                  }
+                }
+              }
+            }}
+          />
 
-	          {hand.map((t, idx) => {
-	            const x = handStartX + idx * (tileW + gap);
-	            const baseY = rackY + 16;
-	            const isHovered = hoveredHandIdx === idx;
-	            const y = baseY + (isHovered ? -10 : 0);
-	            const handDepthX = 4;
-	            const handDepthY = 4;
+          {hand.map((t, idx) => {
+            const x = handStartX + idx * (tileW + gap);
+            const baseY = rackY + 16;
+            const isHovered = hoveredHandIdx === idx;
+            const y = baseY + (isHovered ? -10 : 0);
+            const handDepthX = 4;
+            const handDepthY = 4;
 
             const spritePath = `${tileSpriteBasePath}/${tileSpriteFileName(t)}`;
             const tex = textures[spritePath];
 
             return (
-	              <pixiContainer
-	                key={`${t.suit}-${t.rank}-${idx}`}
-	                x={x}
-	                y={y}
-	                scale={isHovered ? 1.06 : 1}
-	                eventMode="static"
-	                cursor="default"
-	                onPointerOver={() => setHoveredHandIdx(idx)}
-	                onPointerOut={() =>
-	                  setHoveredHandIdx((prev) => (prev === idx ? null : prev))
-	                }
-	              >
+              <pixiContainer
+                key={`${t.suit}-${t.rank}-${idx}`}
+                x={x}
+                y={y}
+                scale={isHovered ? 1.06 : 1}
+                eventMode="static"
+                cursor="default"
+                onPointerOver={() => setHoveredHandIdx(idx)}
+                onPointerOut={() =>
+                  setHoveredHandIdx((prev) => (prev === idx ? null : prev))
+                }
+              >
                 <pixiGraphics
                   draw={(g) => {
                     drawMahjongBlock(g, {

@@ -62,6 +62,9 @@ export default function MahjongClient() {
   const [hand, setHand] = useState<MahjongTile[]>([]);
   const [discards, setDiscards] = useState<MahjongTile[]>([]);
   const [drawPileCount, setDrawPileCount] = useState<number | null>(null);
+  const [lastDiscardTile, setLastDiscardTile] = useState<MahjongTile | null>(
+    null,
+  );
 
   useEffect(() => {
     if (!token) return;
@@ -294,6 +297,9 @@ export default function MahjongClient() {
         if (cancelled) return;
         if (!Array.isArray(payload)) return;
 
+        // Clear transient "Shuffling Tiles" message once hands arrive.
+        setCenterMessage(null);
+
         // Once hands are dealt, hide dice overlay and show draw pile box.
         setDiceRolling(false);
         setDiceFaces(null);
@@ -334,6 +340,33 @@ export default function MahjongClient() {
           if (seat === 4) nextOpponentCounts.left = tileCount;
         }
         setOpponentHandCounts(nextOpponentCounts);
+
+        // Track last discarded tile (for the draw pile panel).
+        const first = payload[0];
+        if (typeof first === "object" && first !== null) {
+          const lastDiscardRaw = (first as { last_discard_tile?: unknown })
+            .last_discard_tile;
+          if (typeof lastDiscardRaw === "object" && lastDiscardRaw !== null) {
+            const typeRaw = (lastDiscardRaw as { type?: unknown }).type;
+            const numberRaw = (lastDiscardRaw as { number?: unknown }).number;
+            const rank = Number(numberRaw);
+            const suit: MahjongTile["suit"] | null =
+              typeRaw === "bamboo"
+                ? "bamboo"
+                : typeRaw === "dot"
+                  ? "dots"
+                  : null;
+            if (suit && Number.isFinite(rank) && rank >= 1 && rank <= 9) {
+              setLastDiscardTile({ suit, rank });
+            } else {
+              setLastDiscardTile(null);
+            }
+          } else {
+            setLastDiscardTile(null);
+          }
+        } else {
+          setLastDiscardTile(null);
+        }
 
         const self = payload.find(
           (p) => typeof p === "object" && p !== null && (p as { isSelf?: unknown }).isSelf === true,
@@ -561,6 +594,7 @@ export default function MahjongClient() {
           centerMessage={centerMessage}
           showDrawPile={showDrawPile}
           drawPileCount={drawPileCount}
+          lastDiscardTile={lastDiscardTile}
           activeSides={activeSides}
           opponentHandCounts={opponentHandCounts}
         />
