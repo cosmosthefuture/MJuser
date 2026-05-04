@@ -18,6 +18,8 @@ type Props = {
   discards: MahjongTile[];
   highlightDiscard: boolean;
   centerMessage?: string | null;
+  showDrawPile?: boolean;
+  drawPileCount?: number | null;
   // Which sides should be visible (matches avatar placement logic).
   activeSides?: Array<"bottom" | "right" | "top" | "left">;
   // Hidden-hand sizes for non-self players (used for wall block counts).
@@ -98,6 +100,8 @@ export default function MahjongPixiTable({
   discards,
   highlightDiscard,
   centerMessage = null,
+  showDrawPile = false,
+  drawPileCount = null,
   activeSides,
   opponentHandCounts,
 }: Props) {
@@ -357,7 +361,32 @@ export default function MahjongPixiTable({
             }}
           />
 
-          {/* Center "Draw Pile" panel hidden for now (dice uses center space). */}
+          {showDrawPile ? (
+            <>
+              <pixiGraphics
+                draw={(g) => {
+                  g.clear();
+                  const cx = Math.floor(designWidth / 2);
+                  const cy = Math.floor(tableY + tableH / 2);
+                  g.beginFill(0xd8b27a);
+                  g.drawRoundedRect(cx - 80, cy - 55, 160, 110, 10);
+                  g.endFill();
+                  g.lineStyle(3, 0x7a4b12, 1);
+                  g.drawRoundedRect(cx - 80, cy - 55, 160, 110, 10);
+                }}
+              />
+              <pixiText
+                text={
+                  drawPileCount != null
+                    ? `Draw Pile: ${drawPileCount}`
+                    : "Draw Pile"
+                }
+                x={Math.floor(designWidth / 2) - 60}
+                y={Math.floor(tableY + tableH / 2) - 10}
+                style={labelStyle}
+              />
+            </>
+          ) : null}
 
           <pixiText
             text={highlightDiscard ? "Click a tile to discard" : ""}

@@ -41,6 +41,7 @@ export default function MahjongClient() {
   const [centerMessage, setCenterMessage] = useState<string | null>(null);
   const [diceRolling, setDiceRolling] = useState(false);
   const [diceFaces, setDiceFaces] = useState<[number, number] | null>(null);
+  const [showDrawPile, setShowDrawPile] = useState(false);
   const [roundPlayers, setRoundPlayers] = useState<RoundPlayer[]>([]);
   const [firstPlayerHighlightId, setFirstPlayerHighlightId] = useState<
     number | null
@@ -55,6 +56,7 @@ export default function MahjongClient() {
   const [,] = useState<MahjongTile[]>([]);
   const [hand, setHand] = useState<MahjongTile[]>([]);
   const [discards, setDiscards] = useState<MahjongTile[]>([]);
+  const [drawPileCount, setDrawPileCount] = useState<number | null>(null);
 
   useEffect(() => {
     if (!token) return;
@@ -181,6 +183,7 @@ export default function MahjongClient() {
 
       const handleStartRollingDice = () => {
         if (cancelled) return;
+        setShowDrawPile(false);
         setDiceRolling(true);
         setDiceFaces([1, 1]);
         if (diceTimer) window.clearInterval(diceTimer);
@@ -212,9 +215,26 @@ export default function MahjongClient() {
         }
       };
 
+      const handleWallCountUpdated = (payload: unknown) => {
+        if (cancelled) return;
+        if (typeof payload !== "object" || payload === null) return;
+        const wallCountRaw =
+          (payload as { wallCount?: unknown; newWallCount?: unknown }).wallCount ??
+          (payload as { wallCount?: unknown; newWallCount?: unknown })
+            .newWallCount;
+        const wallCount = Number(wallCountRaw);
+        if (!Number.isFinite(wallCount) || wallCount < 0) return;
+        setDrawPileCount(wallCount);
+      };
+
       const handleInitialHandState = (payload: unknown) => {
         if (cancelled) return;
         if (!Array.isArray(payload)) return;
+
+        // Once hands are dealt, hide dice overlay and show draw pile box.
+        setDiceRolling(false);
+        setDiceFaces(null);
+        setShowDrawPile(true);
 
         // Use the seated player count to decide which wall sides to render.
         // (Avatars use the same bottom->right->top->left order.)
@@ -354,6 +374,9 @@ export default function MahjongClient() {
       socket.off("mahjong:dice_rolled", handleDiceRolled);
       socket.on("mahjong:dice_rolled", handleDiceRolled);
 
+      socket.off("mahjong:wall_count_updated", handleWallCountUpdated);
+      socket.on("mahjong:wall_count_updated", handleWallCountUpdated);
+
       socket.off("mahjong:initial_hand_state", handleInitialHandState);
       socket.on("mahjong:initial_hand_state", handleInitialHandState);
 
@@ -393,6 +416,7 @@ export default function MahjongClient() {
       socket?.off("mahjong:update_round_players");
       socket?.off("mahjong:start_rolling_dice");
       socket?.off("mahjong:dice_rolled");
+      socket?.off("mahjong:wall_count_updated");
       socket?.off("mahjong:initial_hand_state");
       socket?.off("mahjong:start_shuffling");
       socket?.off("mahjong:user_to_play");
@@ -457,6 +481,8 @@ export default function MahjongClient() {
           discards={discards}
           highlightDiscard={false}
           centerMessage={centerMessage}
+          showDrawPile={showDrawPile}
+          drawPileCount={drawPileCount}
           activeSides={activeSides}
           opponentHandCounts={opponentHandCounts}
         />
