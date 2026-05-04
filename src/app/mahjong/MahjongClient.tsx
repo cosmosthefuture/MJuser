@@ -447,6 +447,13 @@ export default function MahjongClient() {
 
   const [,] = useState<MahjongTile[]>([]);
   const [hand, setHand] = useState<ClientTile[]>([]);
+  const [selfMelds, setSelfMelds] = useState<
+    Array<{
+      kind: "pong" | "chow" | "kong";
+      meldKey: string;
+      tiles: Array<MahjongTile & { id: number }>;
+    }>
+  >([]);
   const [discards, setDiscards] = useState<MahjongTile[]>([]);
   const [drawPileCount, setDrawPileCount] = useState<number | null>(null);
   const [lastDiscardTile, setLastDiscardTile] = useState<MahjongTile | null>(
@@ -977,11 +984,94 @@ export default function MahjongClient() {
         ) as
           | {
               tiles?: unknown;
+              pong?: unknown;
+              chow?: unknown;
+              kong?: unknown;
               tileCount?: unknown;
               seat_position?: unknown;
               seatPosition?: unknown;
             }
           | undefined;
+
+        const normalizeMeldTiles = (
+          tiles: unknown,
+        ): Array<MahjongTile & { id: number }> => {
+          if (!Array.isArray(tiles)) return [];
+          const out: Array<MahjongTile & { id: number }> = [];
+          for (const t of tiles) {
+            if (typeof t !== "object" || t === null) continue;
+            const typeRaw = (t as { type?: unknown }).type;
+            const numberRaw = (t as { number?: unknown }).number;
+            const idRaw = (t as { id?: unknown }).id;
+            if (typeRaw === "hidden") continue;
+            const rank = Number(numberRaw);
+            const id = Number(idRaw);
+            if (!Number.isFinite(rank) || rank < 1 || rank > 9) continue;
+            if (!Number.isFinite(id)) continue;
+            const suit: MahjongTile["suit"] | null =
+              typeRaw === "bamboo"
+                ? "bamboo"
+                : typeRaw === "dot"
+                  ? "dots"
+                  : null;
+            if (!suit) continue;
+            out.push({ id, suit, rank });
+          }
+          return out;
+        };
+
+        const nextMelds: Array<{
+          kind: "pong" | "chow" | "kong";
+          meldKey: string;
+          tiles: Array<MahjongTile & { id: number }>;
+        }> = [];
+
+        const pongRaw = self?.pong;
+        if (Array.isArray(pongRaw)) {
+          for (const g of pongRaw) {
+            if (typeof g !== "object" || g === null) continue;
+            const keyRaw =
+              (g as { pong_key?: unknown; pongKey?: unknown }).pong_key ??
+              (g as { pong_key?: unknown; pongKey?: unknown }).pongKey ??
+              (g as { tileKey?: unknown }).tileKey;
+            const meldKey = typeof keyRaw === "string" ? keyRaw : "";
+            const tiles = normalizeMeldTiles((g as { tiles?: unknown }).tiles);
+            if (meldKey && tiles.length > 0)
+              nextMelds.push({ kind: "pong", meldKey, tiles });
+          }
+        }
+
+        const chowRaw = self?.chow;
+        if (Array.isArray(chowRaw)) {
+          for (const g of chowRaw) {
+            if (typeof g !== "object" || g === null) continue;
+            const keyRaw =
+              (g as { chow_key?: unknown; chowKey?: unknown }).chow_key ??
+              (g as { chow_key?: unknown; chowKey?: unknown }).chowKey ??
+              (g as { tileKey?: unknown }).tileKey;
+            const meldKey = typeof keyRaw === "string" ? keyRaw : "";
+            const tiles = normalizeMeldTiles((g as { tiles?: unknown }).tiles);
+            if (meldKey && tiles.length > 0)
+              nextMelds.push({ kind: "chow", meldKey, tiles });
+          }
+        }
+
+        const kongRaw = self?.kong;
+        if (Array.isArray(kongRaw)) {
+          for (const g of kongRaw) {
+            if (typeof g !== "object" || g === null) continue;
+            const keyRaw =
+              (g as { kong_key?: unknown; kongKey?: unknown }).kong_key ??
+              (g as { kong_key?: unknown; kongKey?: unknown }).kongKey ??
+              (g as { tileKey?: unknown }).tileKey;
+            const meldKey = typeof keyRaw === "string" ? keyRaw : "";
+            const tiles = normalizeMeldTiles((g as { tiles?: unknown }).tiles);
+            if (meldKey && tiles.length > 0)
+              nextMelds.push({ kind: "kong", meldKey, tiles });
+          }
+        }
+
+        setSelfMelds(nextMelds);
 
         const tilesRaw = self?.tiles;
         if (!Array.isArray(tilesRaw)) return;
@@ -1227,6 +1317,7 @@ export default function MahjongClient() {
       <div className="absolute inset-0 z-10 flex items-center justify-center">
         <MahjongPixiTable
           hand={hand}
+          melds={selfMelds}
           discards={discards}
           highlightDiscard={false}
           centerMessage={centerMessage}

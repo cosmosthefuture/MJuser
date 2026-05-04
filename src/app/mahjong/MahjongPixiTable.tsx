@@ -15,6 +15,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 type Props = {
   hand: Array<MahjongTile & { id?: number }>;
+  melds?: Array<{
+    kind: "pong" | "chow" | "kong";
+    meldKey: string;
+    tiles: Array<MahjongTile & { id?: number }>;
+  }>;
   discards: MahjongTile[];
   highlightDiscard: boolean;
   centerMessage?: string | null;
@@ -99,6 +104,7 @@ function drawMahjongBlock(
 
 export default function MahjongPixiTable({
   hand,
+  melds = [],
   discards,
   highlightDiscard,
   centerMessage = null,
@@ -206,10 +212,14 @@ export default function MahjongPixiTable({
     const paths = new Set<string>();
     for (const t of hand)
       paths.add(`${tileSpriteBasePath}/${tileSpriteFileName(t)}`);
+    for (const m of melds) {
+      for (const t of m.tiles)
+        paths.add(`${tileSpriteBasePath}/${tileSpriteFileName(t)}`);
+    }
     for (const t of discards)
       paths.add(`${tileSpriteBasePath}/${tileSpriteFileName(t)}`);
     return Array.from(paths);
-  }, [hand, discards, tileSpriteBasePath]);
+  }, [hand, melds, discards, tileSpriteBasePath]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -241,6 +251,25 @@ export default function MahjongPixiTable({
 
   // Keep the auth user's hand left-aligned in the rack.
   const handStartX = Math.max(24, rackX + 36);
+
+  const meldGroupGap = 18;
+  const meldsWidth = useMemo(() => {
+    if (!melds || melds.length === 0) return 0;
+    let total = 0;
+    for (let i = 0; i < melds.length; i++) {
+      const m = melds[i];
+      const count = Math.max(0, m?.tiles?.length ?? 0);
+      if (count === 0) continue;
+      total += count * tileW + (count - 1) * gap;
+      if (i < melds.length - 1) total += meldGroupGap;
+    }
+    return total;
+  }, [melds, tileW, gap]);
+
+  const meldsStartX = Math.max(
+    handStartX + 24,
+    rackX + rackW - 36 - meldsWidth,
+  );
 
   const discardCols = 10;
   const discardGap = 6;
@@ -693,6 +722,63 @@ export default function MahjongPixiTable({
               </pixiContainer>
             );
           })}
+
+          {(() => {
+            if (!melds || melds.length === 0) return null;
+            let cursorX = meldsStartX;
+            const baseY = rackY + 16;
+            const meldDepthX = 4;
+            const meldDepthY = 4;
+
+            return melds
+              .filter((m) => Array.isArray(m.tiles) && m.tiles.length > 0)
+              .map((m, mi) => {
+                const groupX = cursorX;
+                const tiles = m.tiles;
+                const containers = tiles.map((t, ti) => {
+                  const x = groupX + ti * (tileW + gap);
+                  const spritePath = `${tileSpriteBasePath}/${tileSpriteFileName(t)}`;
+                  const tex = textures[spritePath];
+
+                  return (
+                    <pixiContainer
+                      key={`meld-${m.kind}-${m.meldKey}-${mi}-${ti}`}
+                      x={x}
+                      y={baseY}
+                      eventMode="none"
+                    >
+                      <pixiGraphics
+                        draw={(g) => {
+                          drawMahjongBlock(g, {
+                            width: tileW,
+                            height: tileH,
+                            depthX: meldDepthX,
+                            depthY: meldDepthY,
+                            faceColor: 0xe7e8eb,
+                            borderColor: 0xb8bcc3,
+                          });
+                        }}
+                      />
+
+                      {tex ? (
+                        <pixiSprite
+                          texture={tex}
+                          x={4}
+                          y={5}
+                          width={tileW - meldDepthX - 8}
+                          height={tileH - meldDepthY - 10}
+                        />
+                      ) : null}
+                    </pixiContainer>
+                  );
+                });
+
+                const groupWidth =
+                  tiles.length * tileW + Math.max(0, tiles.length - 1) * gap;
+                cursorX = groupX + groupWidth + meldGroupGap;
+                return containers;
+              });
+          })()}
         </pixiContainer>
       </Application>
     </div>
