@@ -42,6 +42,11 @@ export default function MahjongClient() {
   const [diceRolling, setDiceRolling] = useState(false);
   const [diceFaces, setDiceFaces] = useState<[number, number] | null>(null);
   const [showDrawPile, setShowDrawPile] = useState(false);
+  const [turnCountdown, setTurnCountdown] = useState<{
+    userId: number;
+    remaining: number;
+    duration: number;
+  } | null>(null);
   const [roundPlayers, setRoundPlayers] = useState<RoundPlayer[]>([]);
   const [firstPlayerHighlightId, setFirstPlayerHighlightId] = useState<
     number | null
@@ -227,6 +232,58 @@ export default function MahjongClient() {
         setDrawPileCount(wallCount);
       };
 
+      const handleTurnCountdownStarted = (payload: unknown) => {
+        if (cancelled) return;
+        if (typeof payload !== "object" || payload === null) return;
+        const userIdRaw =
+          (payload as { user_id?: unknown; userId?: unknown }).user_id ??
+          (payload as { user_id?: unknown; userId?: unknown }).userId;
+        const durationRaw = (payload as { duration?: unknown }).duration;
+        const userId = Number(userIdRaw);
+        const duration = Number(durationRaw);
+        if (!Number.isFinite(userId) || !Number.isFinite(duration)) return;
+        setTurnCountdown({
+          userId,
+          remaining: duration,
+          duration,
+        });
+      };
+
+      const handleTurnCountdown = (payload: unknown) => {
+        if (cancelled) return;
+        if (typeof payload !== "object" || payload === null) return;
+        const userIdRaw =
+          (payload as { user_id?: unknown; userId?: unknown }).user_id ??
+          (payload as { user_id?: unknown; userId?: unknown }).userId;
+        const remainingRaw = (payload as { remaining?: unknown }).remaining;
+        const userId = Number(userIdRaw);
+        const remaining = Number(remainingRaw);
+        if (!Number.isFinite(userId) || !Number.isFinite(remaining)) return;
+        setTurnCountdown((prev) => {
+          if (!prev || prev.userId !== userId) {
+            return { userId, remaining, duration: Math.max(0, remaining) };
+          }
+          return { ...prev, remaining };
+        });
+      };
+
+      const handleTurnCountdownFinished = (payload: unknown) => {
+        if (cancelled) return;
+        if (typeof payload !== "object" || payload === null) {
+          setTurnCountdown(null);
+          return;
+        }
+        const userIdRaw =
+          (payload as { user_id?: unknown; userId?: unknown }).user_id ??
+          (payload as { user_id?: unknown; userId?: unknown }).userId;
+        const userId = Number(userIdRaw);
+        if (!Number.isFinite(userId)) {
+          setTurnCountdown(null);
+          return;
+        }
+        setTurnCountdown((prev) => (prev?.userId === userId ? null : prev));
+      };
+
       const handleInitialHandState = (payload: unknown) => {
         if (cancelled) return;
         if (!Array.isArray(payload)) return;
@@ -370,6 +427,21 @@ export default function MahjongClient() {
       socket.off("mahjong:wall_count_updated", handleWallCountUpdated);
       socket.on("mahjong:wall_count_updated", handleWallCountUpdated);
 
+      socket.off("mahjong:turn_countdown_started", handleTurnCountdownStarted);
+      socket.on("mahjong:turn_countdown_started", handleTurnCountdownStarted);
+
+      socket.off("mahjong:turn_countdown", handleTurnCountdown);
+      socket.on("mahjong:turn_countdown", handleTurnCountdown);
+
+      socket.off(
+        "mahjong:turn_countdown_finished",
+        handleTurnCountdownFinished,
+      );
+      socket.on(
+        "mahjong:turn_countdown_finished",
+        handleTurnCountdownFinished,
+      );
+
       socket.off("mahjong:initial_hand_state", handleInitialHandState);
       socket.on("mahjong:initial_hand_state", handleInitialHandState);
 
@@ -410,6 +482,9 @@ export default function MahjongClient() {
       socket?.off("mahjong:start_rolling_dice");
       socket?.off("mahjong:dice_rolled");
       socket?.off("mahjong:wall_count_updated");
+      socket?.off("mahjong:turn_countdown_started");
+      socket?.off("mahjong:turn_countdown");
+      socket?.off("mahjong:turn_countdown_finished");
       socket?.off("mahjong:initial_hand_state");
       socket?.off("mahjong:start_shuffling");
       socket?.off("mahjong:user_to_play");
@@ -555,6 +630,8 @@ export default function MahjongClient() {
               player != null && firstPlayerHighlightId != null
                 ? player.userId === firstPlayerHighlightId
                 : false;
+            const isActiveTurn =
+              turnCountdown != null ? player.userId === turnCountdown.userId : false;
 
             return (
               <div
@@ -572,6 +649,11 @@ export default function MahjongClient() {
                 <div className="max-w-[140px] truncate font-semibold">
                   {name}
                 </div>
+                {isActiveTurn ? (
+                  <div className="ml-1 rounded-full bg-amber-100/90 px-2 py-0.5 text-[11px] font-bold tabular-nums text-[#3b0500]">
+                    {Math.max(0, Math.floor(turnCountdown?.remaining ?? 0))}s
+                  </div>
+                ) : null}
               </div>
             );
           };
