@@ -28,6 +28,8 @@ type WsTile = {
   copy_no: number | null;
 };
 
+type ClientTile = MahjongTile & { id: number };
+
 type WinnerRevealPayload = {
   winner_user_id?: unknown;
   winner_userid?: unknown;
@@ -103,6 +105,22 @@ export default function MahjongClient() {
     socket.emit("mahjong:pass_kong", {
       roomId: String(roomId),
       userId: authUserId,
+    });
+  };
+
+  const emitDiscardTile = (tileId: number) => {
+    const socket = getSocket();
+    if (!socket) return;
+    if (roomId == null || authUserId == null) return;
+    console.log("[ws] emit mahjong:discard_tile", {
+      roomId: String(roomId),
+      userId: authUserId,
+      tileId,
+    });
+    socket.emit("mahjong:discard_tile", {
+      roomId: String(roomId),
+      userId: authUserId,
+      tileId,
     });
   };
 
@@ -191,7 +209,7 @@ export default function MahjongClient() {
   >({});
 
   const [,] = useState<MahjongTile[]>([]);
-  const [hand, setHand] = useState<MahjongTile[]>([]);
+  const [hand, setHand] = useState<ClientTile[]>([]);
   const [discards, setDiscards] = useState<MahjongTile[]>([]);
   const [drawPileCount, setDrawPileCount] = useState<number | null>(null);
   const [lastDiscardTile, setLastDiscardTile] = useState<MahjongTile | null>(
@@ -610,22 +628,25 @@ export default function MahjongClient() {
         const tilesRaw = self?.tiles;
         if (!Array.isArray(tilesRaw)) return;
 
-        const nextHand: MahjongTile[] = [];
+        const nextHand: ClientTile[] = [];
         for (const t of tilesRaw) {
           if (typeof t !== "object" || t === null) continue;
           const typeRaw = (t as { type?: unknown }).type;
           const numberRaw = (t as { number?: unknown }).number;
+          const idRaw = (t as { id?: unknown }).id;
           if (typeRaw === "hidden") continue;
 
           const rank = Number(numberRaw);
           if (!Number.isFinite(rank) || rank < 1 || rank > 9) continue;
+          const id = Number(idRaw);
+          if (!Number.isFinite(id)) continue;
 
           // WS uses "dot" | "bamboo". Our internal suit uses "dots" | "bamboo".
           const suit: MahjongTile["suit"] | null =
             typeRaw === "bamboo" ? "bamboo" : typeRaw === "dot" ? "dots" : null;
           if (!suit) continue;
 
-          nextHand.push({ suit, rank });
+          nextHand.push({ id, suit, rank });
         }
 
         if (nextHand.length > 0) {
@@ -824,6 +845,7 @@ export default function MahjongClient() {
           lastDiscardTile={lastDiscardTile}
           activeSides={activeSides}
           opponentHandCounts={opponentHandCounts}
+          onDoubleClickTile={(tileId) => emitDiscardTile(tileId)}
         />
       </div>
 

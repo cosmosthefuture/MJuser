@@ -14,13 +14,14 @@ import { MahjongTile } from "@/lib/mahjong72";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 type Props = {
-  hand: MahjongTile[];
+  hand: Array<MahjongTile & { id?: number }>;
   discards: MahjongTile[];
   highlightDiscard: boolean;
   centerMessage?: string | null;
   showDrawPile?: boolean;
   drawPileCount?: number | null;
   lastDiscardTile?: MahjongTile | null;
+  onDoubleClickTile?: (tileId: number) => void;
   // Which sides should be visible (matches avatar placement logic).
   activeSides?: Array<"bottom" | "right" | "top" | "left">;
   // Hidden-hand sizes for non-self players (used for wall block counts).
@@ -104,6 +105,7 @@ export default function MahjongPixiTable({
   showDrawPile = false,
   drawPileCount = null,
   lastDiscardTile = null,
+  onDoubleClickTile,
   activeSides,
   opponentHandCounts,
 }: Props) {
@@ -635,11 +637,11 @@ export default function MahjongPixiTable({
             }}
           />
 
-          {hand.map((t, idx) => {
-            const x = handStartX + idx * (tileW + gap);
-            const baseY = rackY + 16;
-            const isHovered = hoveredHandIdx === idx;
-            const y = baseY + (isHovered ? -10 : 0);
+	          {hand.map((t, idx) => {
+	            const x = handStartX + idx * (tileW + gap);
+	            const baseY = rackY + 16;
+	            const isHovered = hoveredHandIdx === idx;
+	            const y = baseY + (isHovered ? -10 : 0);
             const handDepthX = 4;
             const handDepthY = 4;
 
@@ -647,18 +649,25 @@ export default function MahjongPixiTable({
             const tex = textures[spritePath];
 
             return (
-              <pixiContainer
-                key={`${t.suit}-${t.rank}-${idx}`}
-                x={x}
-                y={y}
-                scale={isHovered ? 1.06 : 1}
-                eventMode="static"
-                cursor="default"
-                onPointerOver={() => setHoveredHandIdx(idx)}
-                onPointerOut={() =>
-                  setHoveredHandIdx((prev) => (prev === idx ? null : prev))
-                }
-              >
+	              <pixiContainer
+	                key={`${t.suit}-${t.rank}-${idx}`}
+	                x={x}
+	                y={y}
+	                scale={isHovered ? 1.06 : 1}
+	                eventMode="static"
+	                cursor="default"
+	                onPointerTap={(e) => {
+	                  const detail = (e as unknown as { detail?: number }).detail;
+	                  if (detail !== 2) return;
+	                  const tileId = (t as { id?: number }).id;
+	                  if (typeof tileId !== "number") return;
+	                  onDoubleClickTile?.(tileId);
+	                }}
+	                onPointerOver={() => setHoveredHandIdx(idx)}
+	                onPointerOut={() =>
+	                  setHoveredHandIdx((prev) => (prev === idx ? null : prev))
+	                }
+	              >
                 <pixiGraphics
                   draw={(g) => {
                     drawMahjongBlock(g, {
