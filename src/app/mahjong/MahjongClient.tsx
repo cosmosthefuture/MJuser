@@ -85,6 +85,7 @@ export default function MahjongClient() {
     tiles: MahjongTile[];
   } | null>(null);
   const [kongDecision, setKongDecision] = useState<{
+    kind: "kong" | "interrupt_kong";
     groups: Array<{
       kongKey: string;
       displayKey: string;
@@ -120,6 +121,17 @@ export default function MahjongClient() {
     });
   };
 
+  const emitAcceptInterruptKong = (kongKey: string) => {
+    const socket = getSocket();
+    if (!socket) return;
+    if (roomId == null || authUserId == null) return;
+    socket.emit("mahjong:accept_interrupt_kong", {
+      roomId: String(roomId),
+      userId: authUserId,
+      kongKey,
+    });
+  };
+
   const emitDiscardTile = (tileId: number) => {
     const socket = getSocket();
     if (!socket) return;
@@ -133,6 +145,27 @@ export default function MahjongClient() {
       roomId: String(roomId),
       userId: authUserId,
       tileId,
+    });
+  };
+
+  const emitAcceptInterruptPong = (pongKey: string) => {
+    const socket = getSocket();
+    if (!socket) return;
+    if (roomId == null || authUserId == null) return;
+    socket.emit("mahjong:accept_interrupt_pong", {
+      roomId: String(roomId),
+      userId: authUserId,
+      pongKey,
+    });
+  };
+
+  const emitPassInterruptPong = () => {
+    const socket = getSocket();
+    if (!socket) return;
+    if (roomId == null || authUserId == null) return;
+    socket.emit("mahjong:pass_interrupt_pong", {
+      roomId: String(roomId),
+      userId: authUserId,
     });
   };
 
@@ -189,6 +222,7 @@ export default function MahjongClient() {
       console.log("[dev] trigger mahjong:can_kong", payload);
 
       setKongDecision({
+        kind: "kong",
         groups: payload.groups.map((g) => ({
           kongKey: g.tileKey,
           displayKey: g.tileKey.replace(/_/g, " "),
@@ -527,7 +561,10 @@ export default function MahjongClient() {
         setWinnerReveal({ winnerUserId, winnerName, tiles });
       };
 
-      const handleCanKong = (payload: unknown) => {
+      const applyCanKong = (
+        payload: unknown,
+        kind: "kong" | "interrupt_kong",
+      ) => {
         if (cancelled) return;
         if (typeof payload !== "object" || payload === null) return;
         const p = payload as CanKongPayload;
@@ -572,8 +609,13 @@ export default function MahjongClient() {
 
         if (groups.length === 0) return;
         console.log("⛔ Can Kong");
-        setKongDecision({ groups });
+        setKongDecision({ kind, groups });
       };
+
+      const handleCanKong = (payload: unknown) => applyCanKong(payload, "kong");
+
+      const handleCanInterruptKong = (payload: unknown) =>
+        applyCanKong(payload, "interrupt_kong");
 
       const handleCanPong = (payload: unknown) => {
         if (cancelled) return;
@@ -831,8 +873,8 @@ export default function MahjongClient() {
       socket.off("mahjong:can_kong", handleCanKong);
       socket.on("mahjong:can_kong", handleCanKong);
 
-      socket.off("mahjong:can_interrupt_kong", handleCanKong);
-      socket.on("mahjong:can_interrupt_kong", handleCanKong);
+      socket.off("mahjong:can_interrupt_kong", handleCanInterruptKong);
+      socket.on("mahjong:can_interrupt_kong", handleCanInterruptKong);
 
       socket.off("mahjong:can_interrupt_pong", handleCanPong);
       socket.on("mahjong:can_interrupt_pong", handleCanPong);
@@ -1125,7 +1167,11 @@ export default function MahjongClient() {
                     <button
                       type="button"
                       onClick={() => {
-                        emitAcceptKong(g.kongKey);
+                        if (kongDecision.kind === "interrupt_kong") {
+                          emitAcceptInterruptKong(g.kongKey);
+                        } else {
+                          emitAcceptKong(g.kongKey);
+                        }
                         setKongDecision(null);
                       }}
                       className="rounded-full bg-amber-100/90 px-4 py-2 text-xs font-semibold text-[#3b0500] hover:bg-amber-100"
@@ -1135,7 +1181,9 @@ export default function MahjongClient() {
                     <button
                       type="button"
                       onClick={() => {
-                        emitPassKong();
+                        if (kongDecision.kind === "kong") {
+                          emitPassKong();
+                        }
                         setKongDecision(null);
                       }}
                       className="rounded-full border border-amber-100/15 bg-black/40 px-4 py-2 text-xs font-semibold text-amber-100 hover:bg-black/60"
@@ -1171,7 +1219,7 @@ export default function MahjongClient() {
                     <button
                       type="button"
                       onClick={() => {
-                        console.log("Pong accepted", g.pongKey);
+                        emitAcceptInterruptPong(g.pongKey);
                         setPongDecision(null);
                       }}
                       className="rounded-full bg-amber-100/90 px-4 py-2 text-xs font-semibold text-[#3b0500] hover:bg-amber-100"
@@ -1181,7 +1229,7 @@ export default function MahjongClient() {
                     <button
                       type="button"
                       onClick={() => {
-                        console.log("Pong passed", g.pongKey);
+                        emitPassInterruptPong();
                         setPongDecision(null);
                       }}
                       className="rounded-full border border-amber-100/15 bg-black/40 px-4 py-2 text-xs font-semibold text-amber-100 hover:bg-black/60"
