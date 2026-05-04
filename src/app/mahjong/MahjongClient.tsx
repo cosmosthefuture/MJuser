@@ -3,13 +3,11 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
-import Image from "next/image";
 import { ArrowLeft } from "lucide-react";
 import { useSelector } from "react-redux";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import {
-  MahjongTile,
-} from "@/lib/mahjong72";
+import MahjongTileCard from "./components/MahjongTileCard";
+import { MahjongTile } from "@/lib/mahjong72";
 import { fetchMahjongJoinToken } from "@/lib/mahjongRoomApi";
 import { connectSocket, getSocket } from "@/lib/wsClient";
 import type { RootState } from "@/redux/store";
@@ -74,6 +72,43 @@ export default function MahjongClient() {
     winnerName: string;
     tiles: MahjongTile[];
   } | null>(null);
+
+  useEffect(() => {
+    if (process.env.NODE_ENV === "production") return;
+
+    // Dev-only helper for testing the winner modal from the browser console:
+    // `globalThis.__mj_triggerWinnerReveal()`
+    (
+      globalThis as unknown as { __mj_triggerWinnerReveal?: () => void }
+    ).__mj_triggerWinnerReveal = () => {
+      setWinnerReveal({
+        winnerUserId: authUserId ?? 2,
+        winnerName: "User Two",
+        tiles: [
+          { suit: "bamboo", rank: 3 },
+          { suit: "bamboo", rank: 3 },
+          { suit: "bamboo", rank: 3 },
+          { suit: "bamboo", rank: 9 },
+          { suit: "dots", rank: 1 },
+          { suit: "dots", rank: 2 },
+          { suit: "dots", rank: 3 },
+          { suit: "bamboo", rank: 5 },
+          { suit: "bamboo", rank: 6 },
+          { suit: "bamboo", rank: 7 },
+          { suit: "dots", rank: 7 },
+          { suit: "dots", rank: 7 },
+          { suit: "dots", rank: 7 },
+          { suit: "bamboo", rank: 9 },
+        ],
+      });
+    };
+
+    return () => {
+      delete (
+        globalThis as unknown as { __mj_triggerWinnerReveal?: () => void }
+      ).__mj_triggerWinnerReveal;
+    };
+  }, [authUserId]);
   const [roundPlayers, setRoundPlayers] = useState<RoundPlayer[]>([]);
   const [firstPlayerHighlightId, setFirstPlayerHighlightId] = useState<
     number | null
@@ -254,7 +289,8 @@ export default function MahjongClient() {
         if (cancelled) return;
         if (typeof payload !== "object" || payload === null) return;
         const wallCountRaw =
-          (payload as { wallCount?: unknown; newWallCount?: unknown }).wallCount ??
+          (payload as { wallCount?: unknown; newWallCount?: unknown })
+            .wallCount ??
           (payload as { wallCount?: unknown; newWallCount?: unknown })
             .newWallCount;
         const wallCount = Number(wallCountRaw);
@@ -327,17 +363,12 @@ export default function MahjongClient() {
         if (typeof first !== "object" || first === null) return;
         const p = first as WinnerRevealPayload;
         const winnerUserIdRaw =
-          p.winner_user_id ??
-          p.winner_userid ??
-          p.winnerUserId;
+          p.winner_user_id ?? p.winner_userid ?? p.winnerUserId;
         const winnerUserId = Number(winnerUserIdRaw);
         if (!Number.isFinite(winnerUserId)) return;
 
         const winnerNameRaw =
-          p.winner_user_name ??
-          p.winner_username ??
-          p.winnerUserName ??
-          p.name;
+          p.winner_user_name ?? p.winner_username ?? p.winnerUserName ?? p.name;
         const winnerName =
           typeof winnerNameRaw === "string" && winnerNameRaw.trim()
             ? winnerNameRaw
@@ -388,17 +419,22 @@ export default function MahjongClient() {
 
         // Map non-self players' tileCount to the corresponding side so the small
         // wall blocks match the hidden hand size (commonly 13).
-        const nextOpponentCounts: Partial<Record<"right" | "top" | "left", number>> =
-          {};
+        const nextOpponentCounts: Partial<
+          Record<"right" | "top" | "left", number>
+        > = {};
         for (const p of payload) {
           if (typeof p !== "object" || p === null) continue;
           if ((p as { isSelf?: unknown }).isSelf === true) continue;
           const seatRaw =
             (p as { seat_position?: unknown; seatPosition?: unknown })
-              .seat_position ?? (p as { seat_position?: unknown; seatPosition?: unknown }).seatPosition;
+              .seat_position ??
+            (p as { seat_position?: unknown; seatPosition?: unknown })
+              .seatPosition;
           const seat = Number(seatRaw);
           const tilesRaw = (p as { tiles?: unknown }).tiles;
-          const tileCountFromTiles = Array.isArray(tilesRaw) ? tilesRaw.length : NaN;
+          const tileCountFromTiles = Array.isArray(tilesRaw)
+            ? tilesRaw.length
+            : NaN;
           const tileCountRaw = (p as { tileCount?: unknown }).tileCount;
           const tileCountFromField = Number(tileCountRaw);
           const tileCount = Number.isFinite(tileCountFromTiles)
@@ -439,7 +475,10 @@ export default function MahjongClient() {
         }
 
         const self = payload.find(
-          (p) => typeof p === "object" && p !== null && (p as { isSelf?: unknown }).isSelf === true,
+          (p) =>
+            typeof p === "object" &&
+            p !== null &&
+            (p as { isSelf?: unknown }).isSelf === true,
         ) as
           | {
               tiles?: unknown;
@@ -546,10 +585,7 @@ export default function MahjongClient() {
         "mahjong:turn_countdown_finished",
         handleTurnCountdownFinished,
       );
-      socket.on(
-        "mahjong:turn_countdown_finished",
-        handleTurnCountdownFinished,
-      );
+      socket.on("mahjong:turn_countdown_finished", handleTurnCountdownFinished);
 
       socket.off("mahjong:draw_round", handleDrawRound);
       socket.on("mahjong:draw_round", handleDrawRound);
@@ -563,14 +599,8 @@ export default function MahjongClient() {
       socket.off("mahjong:start_shuffling", handleStartShuffling);
       socket.on("mahjong:start_shuffling", handleStartShuffling);
 
-      socket.off(
-        "mahjong:user_to_play",
-        handleFirstPlayerSelected,
-      );
-      socket.on(
-        "mahjong:user_to_play",
-        handleFirstPlayerSelected,
-      );
+      socket.off("mahjong:user_to_play", handleFirstPlayerSelected);
+      socket.on("mahjong:user_to_play", handleFirstPlayerSelected);
 
       if (socket.connected) {
         void doJoin(socket);
@@ -676,7 +706,7 @@ export default function MahjongClient() {
 
       {/* Overlays (HTML) */}
       <div className="pointer-events-none absolute inset-0 z-20">
-        {(diceRolling || diceFaces) ? (
+        {diceRolling || diceFaces ? (
           <div
             className="absolute left-1/2 top-1/2"
             style={{
@@ -749,7 +779,9 @@ export default function MahjongClient() {
                 ? player.userId === firstPlayerHighlightId
                 : false;
             const isActiveTurn =
-              turnCountdown != null ? player.userId === turnCountdown.userId : false;
+              turnCountdown != null
+                ? player.userId === turnCountdown.userId
+                : false;
 
             return (
               <div
@@ -813,22 +845,9 @@ export default function MahjongClient() {
 
             <div className="mt-4 flex flex-wrap gap-2">
               {winnerReveal.tiles.map((t, idx) => {
-                const src =
-                  t.suit === "bamboo"
-                    ? `/images/MahjongRegular/bamboo${t.rank}.png`
-                    : `/images/MahjongRegular/dot${t.rank}.png`;
                 return (
-                  <div
-                    key={`${t.suit}-${t.rank}-${idx}`}
-                    className="rounded-lg bg-black/25 p-1"
-                  >
-                    <Image
-                      src={src}
-                      alt={`${t.suit}-${t.rank}`}
-                      width={52}
-                      height={72}
-                      className="h-[72px] w-[52px] rounded-md bg-white/90 object-contain"
-                    />
+                  <div key={`${t.suit}-${t.rank}-${idx}`} className="">
+                    <MahjongTileCard tile={t} />
                   </div>
                 );
               })}
@@ -863,22 +882,22 @@ function Dice3D({ face, rolling }: { face: number; rolling: boolean }) {
   );
 }
 
-  function getDiceRotation(face: number) {
-    // Rotate cube so that `face` is facing the camera.
-    switch (face) {
-      case 1:
-        return "rotateX(0deg) rotateY(0deg)";
-      case 2:
-        return "rotateX(0deg) rotateY(-90deg)";
-      case 3:
-        return "rotateX(-90deg) rotateY(0deg)";
-      case 4:
-        return "rotateX(90deg) rotateY(0deg)";
-      case 5:
-        return "rotateX(0deg) rotateY(90deg)";
-      case 6:
-        return "rotateX(0deg) rotateY(180deg)";
-      default:
+function getDiceRotation(face: number) {
+  // Rotate cube so that `face` is facing the camera.
+  switch (face) {
+    case 1:
+      return "rotateX(0deg) rotateY(0deg)";
+    case 2:
+      return "rotateX(0deg) rotateY(-90deg)";
+    case 3:
+      return "rotateX(-90deg) rotateY(0deg)";
+    case 4:
+      return "rotateX(90deg) rotateY(0deg)";
+    case 5:
+      return "rotateX(0deg) rotateY(90deg)";
+    case 6:
+      return "rotateX(0deg) rotateY(180deg)";
+    default:
       return "rotateX(0deg) rotateY(0deg)";
   }
 }
