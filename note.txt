@@ -1,0 +1,72 @@
+#globalThis.__mj_triggerWinnerReveal?.()
+#globalThis.__mj_triggerCanKong?.()
+globalThis.__mj_triggerCanInterruptPong?.()
+
+
+{
+  "canKong": true,
+  "groups": [
+    {
+      "tileKey": "bamboo_1",
+      "tiles": [
+        { "id": 8881, "type": "bamboo", "number": 1, "copy_no": 1 },
+        { "id": 8882, "type": "bamboo", "number": 1, "copy_no": 2 },
+        { "id": 8883, "type": "bamboo", "number": 1, "copy_no": 3 },
+        { "id": 8884, "type": "bamboo", "number": 1, "copy_no": 4 }
+      ]
+    }
+  ]
+}
+
+ socket.on("mahjong:can_interrupt_pong", (data) => { 
+ });
+
+ {
+  "canPong": true,
+  "groups": [
+    {
+      "tileKey": "bamboo_1",
+      "tiles": [
+        { "id": 8881, "type": "bamboo", "number": 1, "copy_no": 1 },
+        { "id": 8882, "type": "bamboo", "number": 1, "copy_no": 2 },
+        { "id": 8883, "type": "bamboo", "number": 1, "copy_no": 3 },
+      ]
+    }
+  ]
+}
+
+
+
+
+
+[ws] on mahjong:can_normal_chow 
+
+{
+    "canChow": true,
+    "groups": [
+        {
+            "tileKey": "bamboo_4_5_6",
+            "tiles": [
+                {
+                    "id": 52,
+                    "type": "bamboo",
+                    "number": 4,
+                    "copy_no": 4
+                },
+                {
+                    "id": 53,
+                    "type": "bamboo",
+                    "number": 5,
+                    "copy_no": 1,
+                    "fromDiscard": true
+                },
+                {
+                    "id": 60,
+                    "type": "bamboo",
+                    "number": 6,
+                    "copy_no": 4
+                }
+            ]
+        }
+    ]
+}
