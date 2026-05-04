@@ -284,6 +284,12 @@ export default function MahjongClient() {
         setTurnCountdown((prev) => (prev?.userId === userId ? null : prev));
       };
 
+      const handleDrawRound = () => {
+        if (cancelled) return;
+        setCenterMessage("THIS ROUND IS DRAW. NO WINNER");
+        console.log("THIS ROUND IS DRAW. NO WINNER");
+      };
+
       const handleInitialHandState = (payload: unknown) => {
         if (cancelled) return;
         if (!Array.isArray(payload)) return;
@@ -442,6 +448,9 @@ export default function MahjongClient() {
         handleTurnCountdownFinished,
       );
 
+      socket.off("mahjong:draw_round", handleDrawRound);
+      socket.on("mahjong:draw_round", handleDrawRound);
+
       socket.off("mahjong:initial_hand_state", handleInitialHandState);
       socket.on("mahjong:initial_hand_state", handleInitialHandState);
 
@@ -485,6 +494,7 @@ export default function MahjongClient() {
       socket?.off("mahjong:turn_countdown_started");
       socket?.off("mahjong:turn_countdown");
       socket?.off("mahjong:turn_countdown_finished");
+      socket?.off("mahjong:draw_round");
       socket?.off("mahjong:initial_hand_state");
       socket?.off("mahjong:start_shuffling");
       socket?.off("mahjong:user_to_play");
