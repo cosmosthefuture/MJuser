@@ -336,17 +336,10 @@ export default function MahjongClient() {
         if (!Number.isFinite(userId)) return;
 
         setFirstPlayerHighlightId(userId);
-        const nameRaw = p.user_name ?? p.userName;
-        if (typeof nameRaw === "string" && nameRaw.trim()) {
-          setCenterMessage(`${nameRaw} to play first`);
-        } else {
-          setCenterMessage("User to play first selected");
-        }
         if (firstPlayerHighlightTimer)
           window.clearTimeout(firstPlayerHighlightTimer);
         firstPlayerHighlightTimer = window.setTimeout(() => {
           setFirstPlayerHighlightId(null);
-          setCenterMessage(null);
         }, 2200);
       };
 
