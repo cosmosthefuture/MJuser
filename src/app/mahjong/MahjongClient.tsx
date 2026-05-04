@@ -119,6 +119,11 @@ export default function MahjongClient() {
     const socket = getSocket();
     if (!socket) return;
     if (roomId == null || authUserId == null) return;
+    console.log("[ws] emit mahjong:accept_kong", {
+      roomId: String(roomId),
+      userId: authUserId,
+      kongKey,
+    });
     socket.emit("mahjong:accept_kong", {
       roomId: String(roomId),
       userId: authUserId,
@@ -130,6 +135,10 @@ export default function MahjongClient() {
     const socket = getSocket();
     if (!socket) return;
     if (roomId == null || authUserId == null) return;
+    console.log("[ws] emit mahjong:pass_kong", {
+      roomId: String(roomId),
+      userId: authUserId,
+    });
     socket.emit("mahjong:pass_kong", {
       roomId: String(roomId),
       userId: authUserId,
@@ -140,6 +149,11 @@ export default function MahjongClient() {
     const socket = getSocket();
     if (!socket) return;
     if (roomId == null || authUserId == null) return;
+    console.log("[ws] emit mahjong:accept_normal_kong", {
+      roomId: String(roomId),
+      userId: authUserId,
+      kongKey,
+    });
     socket.emit("mahjong:accept_normal_kong", {
       roomId: String(roomId),
       userId: authUserId,
@@ -151,6 +165,10 @@ export default function MahjongClient() {
     const socket = getSocket();
     if (!socket) return;
     if (roomId == null || authUserId == null) return;
+    console.log("[ws] emit mahjong:pass_normal_kong", {
+      roomId: String(roomId),
+      userId: authUserId,
+    });
     socket.emit("mahjong:pass_normal_kong", {
       roomId: String(roomId),
       userId: authUserId,
@@ -161,6 +179,11 @@ export default function MahjongClient() {
     const socket = getSocket();
     if (!socket) return;
     if (roomId == null || authUserId == null) return;
+    console.log("[ws] emit mahjong:accept_interrupt_kong", {
+      roomId: String(roomId),
+      userId: authUserId,
+      kongKey,
+    });
     socket.emit("mahjong:accept_interrupt_kong", {
       roomId: String(roomId),
       userId: authUserId,
@@ -188,6 +211,11 @@ export default function MahjongClient() {
     const socket = getSocket();
     if (!socket) return;
     if (roomId == null || authUserId == null) return;
+    console.log("[ws] emit mahjong:accept_interrupt_pong", {
+      roomId: String(roomId),
+      userId: authUserId,
+      pongKey,
+    });
     socket.emit("mahjong:accept_interrupt_pong", {
       roomId: String(roomId),
       userId: authUserId,
@@ -199,6 +227,11 @@ export default function MahjongClient() {
     const socket = getSocket();
     if (!socket) return;
     if (roomId == null || authUserId == null) return;
+    console.log("[ws] emit mahjong:accept_normal_pong", {
+      roomId: String(roomId),
+      userId: authUserId,
+      pongKey,
+    });
     socket.emit("mahjong:accept_normal_pong", {
       roomId: String(roomId),
       userId: authUserId,
@@ -210,6 +243,10 @@ export default function MahjongClient() {
     const socket = getSocket();
     if (!socket) return;
     if (roomId == null || authUserId == null) return;
+    console.log("[ws] emit mahjong:pass_normal_pong", {
+      roomId: String(roomId),
+      userId: authUserId,
+    });
     socket.emit("mahjong:pass_normal_pong", {
       roomId: String(roomId),
       userId: authUserId,
@@ -220,6 +257,11 @@ export default function MahjongClient() {
     const socket = getSocket();
     if (!socket) return;
     if (roomId == null || authUserId == null) return;
+    console.log("[ws] emit mahjong:accept_normal_chow", {
+      roomId: String(roomId),
+      userId: authUserId,
+      chowKey,
+    });
     socket.emit("mahjong:accept_normal_chow", {
       roomId: String(roomId),
       userId: authUserId,
@@ -231,6 +273,10 @@ export default function MahjongClient() {
     const socket = getSocket();
     if (!socket) return;
     if (roomId == null || authUserId == null) return;
+    console.log("[ws] emit mahjong:pass_normal_chow", {
+      roomId: String(roomId),
+      userId: authUserId,
+    });
     socket.emit("mahjong:pass_normal_chow", {
       roomId: String(roomId),
       userId: authUserId,
