@@ -67,6 +67,30 @@ globalThis.__mj_triggerCanInterruptPong?.()
                     "copy_no": 4
                 }
             ]
+        },
+        {
+            "tileKey": "bamboo_3_4_5",
+            "tiles": [
+                {
+                    "id": 44,
+                    "type": "bamboo",
+                    "number": 3,
+                    "copy_no": 4
+                },
+                {
+                    "id": 53,
+                    "type": "bamboo",
+                    "number": 4,
+                    "copy_no": 1,
+                    "fromDiscard": true
+                },
+                {
+                    "id": 51,
+                    "type": "bamboo",
+                    "number": 5,
+                    "copy_no": 4
+                }
+            ]
         }
     ]
 }

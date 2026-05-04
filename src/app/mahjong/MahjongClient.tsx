@@ -54,6 +54,11 @@ type CanPongPayload = {
   groups?: unknown;
 };
 
+type CanChowPayload = {
+  canChow?: unknown;
+  groups?: unknown;
+};
+
 const MahjongPixiTable = dynamic(() => import("./MahjongPixiTable"), {
   ssr: false,
 });
@@ -96,6 +101,15 @@ export default function MahjongClient() {
     kind: "interrupt_pong" | "normal_pong";
     groups: Array<{
       pongKey: string;
+      displayKey: string;
+      tiles: MahjongTile[];
+    }>;
+  } | null>(null);
+
+  const [chowDecision, setChowDecision] = useState<{
+    kind: "normal_chow";
+    groups: Array<{
+      chowKey: string;
       displayKey: string;
       tiles: MahjongTile[];
     }>;
@@ -202,6 +216,27 @@ export default function MahjongClient() {
     });
   };
 
+  const emitAcceptNormalChow = (chowKey: string) => {
+    const socket = getSocket();
+    if (!socket) return;
+    if (roomId == null || authUserId == null) return;
+    socket.emit("mahjong:accept_normal_chow", {
+      roomId: String(roomId),
+      userId: authUserId,
+      chowKey,
+    });
+  };
+
+  const emitPassNormalChow = () => {
+    const socket = getSocket();
+    if (!socket) return;
+    if (roomId == null || authUserId == null) return;
+    socket.emit("mahjong:pass_normal_chow", {
+      roomId: String(roomId),
+      userId: authUserId,
+    });
+  };
+
   useEffect(() => {
     if (process.env.NODE_ENV === "production") return;
 
@@ -287,8 +322,49 @@ export default function MahjongClient() {
       };
       console.log("[dev] trigger mahjong:can_interrupt_pong", payload);
       setPongDecision({
+        kind: "interrupt_pong",
         groups: payload.groups.map((g) => ({
           pongKey: g.tileKey,
+          displayKey: g.tileKey.replace(/_/g, " "),
+          tiles: g.tiles.map((t) => ({
+            suit: t.type === "bamboo" ? "bamboo" : "dots",
+            rank: t.number,
+          })),
+        })),
+      });
+    };
+
+    // Dev-only helper for testing the chow bar from the browser console:
+    // `globalThis.__mj_triggerCanNormalChow()`
+    (
+      globalThis as unknown as { __mj_triggerCanNormalChow?: () => void }
+    ).__mj_triggerCanNormalChow = () => {
+      const payload = {
+        canChow: true,
+        groups: [
+          {
+            tileKey: "bamboo_4_5_6",
+            tiles: [
+              { id: 52, type: "bamboo", number: 4, copy_no: 4 },
+              { id: 53, type: "bamboo", number: 5, copy_no: 1 },
+              { id: 60, type: "bamboo", number: 6, copy_no: 4 },
+            ],
+          },
+          {
+            tileKey: "bamboo_3_4_5",
+            tiles: [
+              { id: 44, type: "bamboo", number: 3, copy_no: 4 },
+              { id: 53, type: "bamboo", number: 4, copy_no: 1 },
+              { id: 51, type: "bamboo", number: 5, copy_no: 4 },
+            ],
+          },
+        ],
+      };
+      console.log("[dev] trigger mahjong:can_normal_chow", payload);
+      setChowDecision({
+        kind: "normal_chow",
+        groups: payload.groups.map((g) => ({
+          chowKey: g.tileKey,
           displayKey: g.tileKey.replace(/_/g, " "),
           tiles: g.tiles.map((t) => ({
             suit: t.type === "bamboo" ? "bamboo" : "dots",
@@ -307,6 +383,9 @@ export default function MahjongClient() {
       delete (
         globalThis as unknown as { __mj_triggerCanInterruptPong?: () => void }
       ).__mj_triggerCanInterruptPong;
+      delete (
+        globalThis as unknown as { __mj_triggerCanNormalChow?: () => void }
+      ).__mj_triggerCanNormalChow;
     };
   }, [authUserId]);
   const [roundPlayers, setRoundPlayers] = useState<RoundPlayer[]>([]);
@@ -701,6 +780,50 @@ export default function MahjongClient() {
       const handleCanNormalPong = (payload: unknown) =>
         applyCanPong(payload, "normal_pong");
 
+      const applyCanChow = (payload: unknown) => {
+        if (cancelled) return;
+        if (typeof payload !== "object" || payload === null) return;
+        const p = payload as CanChowPayload;
+        const canChow = Boolean((p as { canChow?: unknown }).canChow);
+        if (!canChow) {
+          setChowDecision(null);
+          return;
+        }
+
+        const groupsRaw = (p as { groups?: unknown }).groups;
+        if (!Array.isArray(groupsRaw)) return;
+        const groups: Array<{
+          chowKey: string;
+          displayKey: string;
+          tiles: MahjongTile[];
+        }> = [];
+
+        for (const g of groupsRaw) {
+          if (typeof g !== "object" || g === null) continue;
+          const tileKeyRaw = (g as { tileKey?: unknown }).tileKey;
+          const chowKey = typeof tileKeyRaw === "string" ? tileKeyRaw : "";
+          const displayKey = chowKey ? chowKey.replace(/_/g, " ") : "";
+          const tilesRaw = (g as { tiles?: unknown }).tiles;
+          if (!Array.isArray(tilesRaw)) continue;
+          const tiles: MahjongTile[] = [];
+          for (const t of tilesRaw as WsTile[]) {
+            if (typeof t !== "object" || t === null) continue;
+            if (t.type === "hidden") continue;
+            const rank = Number(t.number);
+            if (!Number.isFinite(rank) || rank < 1 || rank > 9) continue;
+            const suit: MahjongTile["suit"] | null =
+              t.type === "bamboo" ? "bamboo" : t.type === "dot" ? "dots" : null;
+            if (!suit) continue;
+            tiles.push({ suit, rank });
+          }
+          if (tiles.length > 0) groups.push({ chowKey, displayKey, tiles });
+        }
+
+        if (groups.length === 0) return;
+        console.log("⛔ Can Chow");
+        setChowDecision({ kind: "normal_chow", groups });
+      };
+
       const handleInitialHandState = (payload: unknown) => {
         if (cancelled) return;
         if (!Array.isArray(payload)) return;
@@ -710,6 +833,7 @@ export default function MahjongClient() {
         setWinnerReveal(null);
         setKongDecision(null);
         setPongDecision(null);
+        setChowDecision(null);
 
         // Once hands are dealt, hide dice overlay and show draw pile box.
         setDiceRolling(false);
@@ -921,6 +1045,9 @@ export default function MahjongClient() {
       socket.off("mahjong:can_normal_pong", handleCanNormalPong);
       socket.on("mahjong:can_normal_pong", handleCanNormalPong);
 
+      socket.off("mahjong:can_normal_chow", applyCanChow);
+      socket.on("mahjong:can_normal_chow", applyCanChow);
+
       socket.off("mahjong:initial_hand_state", handleInitialHandState);
       socket.on("mahjong:initial_hand_state", handleInitialHandState);
 
@@ -965,6 +1092,7 @@ export default function MahjongClient() {
       socket?.off("mahjong:can_normal_kong");
       socket?.off("mahjong:can_interrupt_pong");
       socket?.off("mahjong:can_normal_pong");
+      socket?.off("mahjong:can_normal_chow");
       socket?.off("mahjong:initial_hand_state");
       socket?.off("mahjong:start_shuffling");
       socket?.off("mahjong:user_to_play");
@@ -1294,6 +1422,51 @@ export default function MahjongClient() {
                 </>
               );
             })()}
+          </div>
+        </div>
+      ) : null}
+
+      {chowDecision ? (
+        <div className="pointer-events-none absolute inset-0 z-30">
+          <div className="pointer-events-auto absolute left-1/2 -translate-x-1/2 bottom-[118px] flex items-center gap-3 rounded-2xl border border-amber-100/15 bg-black/55 px-4 py-3 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-sm">
+            <div className="flex flex-col gap-2">
+              {chowDecision.groups.map((g, gi) => (
+                <div
+                  key={`${g.chowKey}-${gi}`}
+                  className="flex items-center gap-3"
+                >
+                  <div className="flex items-center gap-2">
+                    {g.tiles.slice(0, 3).map((t, ti) => (
+                      <MahjongTileCard
+                        key={`${t.suit}-${t.rank}-${gi}-${ti}`}
+                        tile={t}
+                        size="xs"
+                      />
+                    ))}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      emitAcceptNormalChow(g.chowKey);
+                      setChowDecision(null);
+                    }}
+                    className="rounded-full bg-amber-100/90 px-4 py-2 text-xs font-semibold text-[#3b0500] hover:bg-amber-100"
+                  >
+                    Accept
+                  </button>
+                </div>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                emitPassNormalChow();
+                setChowDecision(null);
+              }}
+              className="rounded-full border border-amber-100/15 bg-black/40 px-4 py-2 text-xs font-semibold text-amber-100 hover:bg-black/60"
+            >
+              Pass
+            </button>
           </div>
         </div>
       ) : null}
