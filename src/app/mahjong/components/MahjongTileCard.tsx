@@ -14,10 +14,12 @@ export default function MahjongTileCard({
   size = "md",
 }: {
   tile: MahjongTile;
-  size?: "sm" | "md";
+  size?: "xs" | "sm" | "md";
 }) {
   const dims =
-    size === "sm"
+    size === "xs"
+      ? { tileW: 40, tileH: 56, depthX: 3, depthY: 3, radius: 10 }
+      : size === "sm"
       ? { tileW: 46, tileH: 64, depthX: 3, depthY: 3, radius: 10 }
       : { tileW: 58, tileH: 80, depthX: 4, depthY: 4, radius: 12 };
 

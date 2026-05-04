@@ -111,10 +111,46 @@ export default function MahjongClient() {
       });
     };
 
+    // Dev-only helper for testing the kong modal from the browser console:
+    // `globalThis.__mj_triggerCanKong()`
+    (
+      globalThis as unknown as { __mj_triggerCanKong?: () => void }
+    ).__mj_triggerCanKong = () => {
+      // Mirror the WS payload shape for easier testing.
+      const payload = {
+        canKong: true,
+        groups: [
+          {
+            tileKey: "bamboo_1",
+            tiles: [
+              { id: 8881, type: "bamboo", number: 1, copy_no: 1 },
+              { id: 8882, type: "bamboo", number: 1, copy_no: 2 },
+              { id: 8883, type: "bamboo", number: 1, copy_no: 3 },
+              { id: 8884, type: "bamboo", number: 1, copy_no: 4 },
+            ],
+          },
+        ],
+      };
+      console.log("[dev] trigger mahjong:can_kong", payload);
+
+      setKongDecision({
+        groups: payload.groups.map((g) => ({
+          tileKey: g.tileKey,
+          tiles: g.tiles.map((t) => ({
+            suit: t.type === "bamboo" ? "bamboo" : "dots",
+            rank: t.number,
+          })),
+        })),
+      });
+    };
+
     return () => {
       delete (
         globalThis as unknown as { __mj_triggerWinnerReveal?: () => void }
       ).__mj_triggerWinnerReveal;
+      delete (
+        globalThis as unknown as { __mj_triggerCanKong?: () => void }
+      ).__mj_triggerCanKong;
     };
   }, [authUserId]);
   const [roundPlayers, setRoundPlayers] = useState<RoundPlayer[]>([]);
@@ -418,7 +454,8 @@ export default function MahjongClient() {
         for (const g of groupsRaw) {
           if (typeof g !== "object" || g === null) continue;
           const tileKeyRaw = (g as { tileKey?: unknown }).tileKey;
-          const tileKey = typeof tileKeyRaw === "string" ? tileKeyRaw : "";
+          const tileKey =
+            typeof tileKeyRaw === "string" ? tileKeyRaw.replace(/_/g, " ") : "";
           const tilesRaw = (g as { tiles?: unknown }).tiles;
           if (!Array.isArray(tilesRaw)) continue;
           const tiles: MahjongTile[] = [];
@@ -913,50 +950,30 @@ export default function MahjongClient() {
       ) : null}
 
       {kongDecision ? (
-        <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/70 p-4">
-          <div className="pointer-events-auto w-full max-w-[760px] rounded-2xl border border-amber-100/15 bg-black/75 p-5 shadow-[0_25px_80px_rgba(0,0,0,0.55)] backdrop-blur-sm">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <div className="text-lg font-bold text-amber-200">Can Kong</div>
-                <div className="mt-1 text-sm text-amber-100/80">
-                  Choose Accept or Pass
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setKongDecision(null)}
-                className="rounded-full border border-amber-100/15 bg-black/40 px-3 py-1.5 text-sm text-amber-100 hover:bg-black/60"
-              >
-                Close
-              </button>
-            </div>
-
-            <div className="mt-4 space-y-4">
-              {kongDecision.groups.map((g, gi) => (
-                <div
-                  key={`${g.tileKey}-${gi}`}
-                  className="rounded-xl border border-amber-100/10 bg-black/35 p-3"
-                >
-                  <div className="text-sm font-semibold text-amber-100/90">
-                    {g.tileKey || `Group ${gi + 1}`}
-                  </div>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {g.tiles.map((t, ti) => (
+        <div className="pointer-events-none absolute inset-0 z-30">
+          <div className="pointer-events-auto absolute left-1/2 -translate-x-1/2 bottom-[118px] flex items-center gap-3 rounded-2xl border border-amber-100/15 bg-black/55 px-4 py-3 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-sm">
+            {(() => {
+              const g = kongDecision.groups[0];
+              if (!g) return null;
+              return (
+                <>
+                  <div className="flex items-center gap-2">
+                    {g.tiles.slice(0, 4).map((t, ti) => (
                       <MahjongTileCard
                         key={`${t.suit}-${t.rank}-${ti}`}
                         tile={t}
-                        size="sm"
+                        size="xs"
                       />
                     ))}
                   </div>
-                  <div className="mt-3 flex gap-2">
+                  <div className="flex items-center gap-2">
                     <button
                       type="button"
                       onClick={() => {
                         console.log("Kong accepted", g.tileKey);
                         setKongDecision(null);
                       }}
-                      className="rounded-full bg-amber-100/90 px-4 py-2 text-sm font-semibold text-[#3b0500] hover:bg-amber-100"
+                      className="rounded-full bg-amber-100/90 px-4 py-2 text-xs font-semibold text-[#3b0500] hover:bg-amber-100"
                     >
                       Accept
                     </button>
@@ -966,14 +983,14 @@ export default function MahjongClient() {
                         console.log("Kong passed", g.tileKey);
                         setKongDecision(null);
                       }}
-                      className="rounded-full border border-amber-100/15 bg-black/40 px-4 py-2 text-sm font-semibold text-amber-100 hover:bg-black/60"
+                      className="rounded-full border border-amber-100/15 bg-black/40 px-4 py-2 text-xs font-semibold text-amber-100 hover:bg-black/60"
                     >
                       Pass
                     </button>
                   </div>
-                </div>
-              ))}
-            </div>
+                </>
+              );
+            })()}
           </div>
         </div>
       ) : null}
