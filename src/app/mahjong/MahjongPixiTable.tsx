@@ -461,21 +461,11 @@ export default function MahjongPixiTable({
                     const rowsPerCol = 5;
                     const tileW = 28;
                     const tileH = 40;
-                    const tileGap = 1;
+                    const tileGapX = 10;
+                    const tileGapY = -8;
                     const depthX = 3;
                     const depthY = 3;
-
-                    const cols = Math.ceil(
-                      rightDiscardTiles.length / rowsPerCol,
-                    );
-                    const contentW =
-                      cols * tileW + Math.max(0, cols - 1) * tileGap;
-                    const contentH =
-                      rowsPerCol * tileH +
-                      Math.max(0, rowsPerCol - 1) * tileGap;
                     const pad = 10;
-                    const boxW = contentW + pad * 2;
-                    const boxH = contentH + pad * 2;
 
                     const cx = Math.floor(designWidth / 2);
                     const cy = Math.floor(tableY + tableH / 2);
@@ -484,21 +474,11 @@ export default function MahjongPixiTable({
 
                     return (
                       <pixiContainer x={boxX} y={boxY}>
-                        <pixiGraphics
-                          draw={(g) => {
-                            g.clear();
-                            g.lineStyle(3, 0x1f4fff, 0.9);
-                            g.beginFill(0x000000, 0.0);
-                            g.drawRoundedRect(0, 0, boxW, boxH, 10);
-                            g.endFill();
-                          }}
-                        />
-
                         {rightDiscardTiles.map((t, i) => {
                           const row = i % rowsPerCol;
                           const col = Math.floor(i / rowsPerCol);
-                          const x = pad + col * (tileW + tileGap);
-                          const y = pad + row * (tileH + tileGap);
+                          const x = pad + col * (tileW + tileGapX);
+                          const y = pad + row * (tileH + tileGapY);
                           const spritePath = `${tileSpriteBasePath}/${tileSpriteFileName(t)}`;
                           const tex = textures[spritePath];
 
