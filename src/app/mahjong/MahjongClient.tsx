@@ -1036,6 +1036,47 @@ export default function MahjongClient() {
           Record<"right" | "top" | "left", number>
         > = {};
 
+        const getSeatNumber = (raw: unknown): number | null => {
+          if (typeof raw !== "object" || raw === null) return null;
+          const seatRaw =
+            (raw as { seat_position?: unknown; seatPosition?: unknown })
+              .seat_position ??
+            (raw as { seat_position?: unknown; seatPosition?: unknown })
+              .seatPosition;
+          const seat = Number(seatRaw);
+          return Number.isFinite(seat) ? seat : null;
+        };
+
+        const selfSeat = (() => {
+          const selfPlayer = payload.find(
+            (p) =>
+              typeof p === "object" &&
+              p !== null &&
+              (p as { isSelf?: unknown }).isSelf === true,
+          );
+          return getSeatNumber(selfPlayer);
+        })();
+
+        const opponentCount = payload.filter(
+          (p) =>
+            typeof p === "object" &&
+            p !== null &&
+            (p as { isSelf?: unknown }).isSelf !== true,
+        ).length;
+
+        const sideFromSeats = (
+          selfSeatNo: number | null,
+          otherSeatNo: number | null,
+        ): "right" | "top" | "left" | null => {
+          if (opponentCount === 1) return "right";
+          if (selfSeatNo == null || otherSeatNo == null) return null;
+          const delta = (((otherSeatNo - selfSeatNo) % 4) + 4) % 4;
+          if (delta === 1) return "right";
+          if (delta === 2) return "top";
+          if (delta === 3) return "left";
+          return null;
+        };
+
         const normalizeOpponentMeldTiles = (raw: unknown): MahjongTile[] => {
           if (!Array.isArray(raw)) return [];
           const out: MahjongTile[] = [];
@@ -1061,21 +1102,7 @@ export default function MahjongClient() {
         for (const p of payload) {
           if (typeof p !== "object" || p === null) continue;
           if ((p as { isSelf?: unknown }).isSelf === true) continue;
-          const seatRaw =
-            (p as { seat_position?: unknown; seatPosition?: unknown })
-              .seat_position ??
-            (p as { seat_position?: unknown; seatPosition?: unknown })
-              .seatPosition;
-          const seat = Number(seatRaw);
-
-          const side: "right" | "top" | "left" | null =
-            seat === 2
-              ? "right"
-              : seat === 3
-                ? "top"
-                : seat === 4
-                  ? "left"
-                  : null;
+          const side = sideFromSeats(selfSeat, getSeatNumber(p));
           if (!side) continue;
 
           const tilesRaw = (p as { tiles?: unknown }).tiles;
@@ -1554,7 +1581,6 @@ export default function MahjongClient() {
               : null;
           const fallbackAuthPlayer = authPlayer ?? roundPlayers[0] ?? null;
           const others = roundPlayers.filter((p) => p !== fallbackAuthPlayer);
-          const seatOrder = ["right", "top", "left"] as const;
           const seats: Array<{
             position: "bottom" | "right" | "top" | "left";
             player: RoundPlayer;
@@ -1564,10 +1590,32 @@ export default function MahjongClient() {
             seats.push({ position: "bottom", player: fallbackAuthPlayer });
           }
 
-          for (let i = 0; i < others.length && i < seatOrder.length; i++) {
-            const other = others[i];
-            if (!other) continue;
-            seats.push({ position: seatOrder[i], player: other });
+          const selfSeatNo = fallbackAuthPlayer?.seatPosition ?? null;
+          if (others.length === 1) {
+            const only = others[0];
+            if (only) seats.push({ position: "right", player: only });
+          } else {
+            const byDelta = [...others]
+              .map((p) => {
+                const otherSeatNo = p.seatPosition;
+                const delta =
+                  selfSeatNo != null
+                    ? (((otherSeatNo - selfSeatNo) % 4) + 4) % 4
+                    : null;
+                return { player: p, delta };
+              })
+              .filter((x) => x.delta != null && x.delta !== 0)
+              .sort((a, b) => (a.delta ?? 99) - (b.delta ?? 99));
+
+            for (const item of byDelta) {
+              const delta = item.delta;
+              if (delta === 1)
+                seats.push({ position: "right", player: item.player });
+              if (delta === 2)
+                seats.push({ position: "top", player: item.player });
+              if (delta === 3)
+                seats.push({ position: "left", player: item.player });
+            }
           }
 
           const Seat = ({
