@@ -298,7 +298,7 @@ export default function MahjongPixiTable({
 
   const opponentSmallTileW = 28;
   const opponentSmallTileH = 40;
-  const opponentSmallGap = 6;
+  const opponentSmallGap = 3;
 
   return (
     <div ref={containerRef} className="w-full h-full">
