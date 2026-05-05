@@ -459,6 +459,7 @@ export default function MahjongClient() {
     };
   }, [authUserId]);
   const [roundPlayers, setRoundPlayers] = useState<RoundPlayer[]>([]);
+  const [selfSeatPosition, setSelfSeatPosition] = useState<number | null>(null);
   const [firstPlayerHighlightId, setFirstPlayerHighlightId] = useState<
     number | null
   >(null);
@@ -591,7 +592,10 @@ export default function MahjongClient() {
               (p as { seat?: unknown }).seat ??
               (p as { seat_position?: unknown; seatPosition?: unknown })
                 .seatPosition;
-            const nameRaw = (p as { name?: unknown }).name;
+            const nameRaw =
+              (p as { user_name?: unknown; userName?: unknown }).user_name ??
+              (p as { user_name?: unknown; userName?: unknown }).userName ??
+              (p as { name?: unknown }).name;
 
             const userId = Number(userIdRaw);
             const seatPosition = Number(seatRaw);
@@ -1021,17 +1025,6 @@ export default function MahjongClient() {
         setDiceFaces(null);
         setShowDrawPile(true);
 
-        // Use the seated player count to decide which wall sides to render.
-        // (Avatars use the same bottom->right->top->left order.)
-        const count = payload.length;
-        if (count >= 1) {
-          const sides: Array<"bottom" | "right" | "top" | "left"> = ["bottom"];
-          if (count >= 2) sides.push("right");
-          if (count >= 3) sides.push("top");
-          if (count >= 4) sides.push("left");
-          setActiveSides(sides);
-        }
-
         // Map non-self players' tileCount to the corresponding side so the small
         // wall blocks match the hidden hand size (commonly 13).
         const nextOpponentCounts: Partial<
@@ -1059,6 +1052,8 @@ export default function MahjongClient() {
           return getSeatNumber(selfPlayer);
         })();
 
+        setSelfSeatPosition(selfSeat);
+
         const opponentCount = payload.filter(
           (p) =>
             typeof p === "object" &&
@@ -1078,6 +1073,38 @@ export default function MahjongClient() {
           if (delta === 3) return "left";
           return null;
         };
+
+        // Decide which wall sides to render based on actual seat positions.
+        // This keeps the wall/tiles aligned with seat labels for any logged-in user.
+        if (selfSeat != null) {
+          const sidesSet = new Set<"bottom" | "right" | "top" | "left">([
+            "bottom",
+          ]);
+          for (const p of payload) {
+            if (typeof p !== "object" || p === null) continue;
+            if ((p as { isSelf?: unknown }).isSelf === true) continue;
+            const side = sideFromSeats(selfSeat, getSeatNumber(p));
+            if (side) sidesSet.add(side);
+          }
+          const ordered: Array<"bottom" | "right" | "top" | "left"> = [
+            "bottom",
+            "right",
+            "top",
+            "left",
+          ];
+          setActiveSides(ordered.filter((s) => sidesSet.has(s)));
+        } else {
+          const count = payload.length;
+          if (count >= 1) {
+            const sides: Array<"bottom" | "right" | "top" | "left"> = [
+              "bottom",
+            ];
+            if (count >= 2) sides.push("right");
+            if (count >= 3) sides.push("top");
+            if (count >= 4) sides.push("left");
+            setActiveSides(sides);
+          }
+        }
 
         const normalizeOpponentMeldTiles = (raw: unknown): MahjongTile[] => {
           if (!Array.isArray(raw)) return [];
@@ -1618,7 +1645,15 @@ export default function MahjongClient() {
             authUserId != null
               ? (roundPlayers.find((p) => p.userId === authUserId) ?? null)
               : null;
-          const fallbackAuthPlayer = authPlayer ?? roundPlayers[0] ?? null;
+          const fallbackAuthPlayer =
+            authPlayer ??
+            (selfSeatPosition != null
+              ? (roundPlayers.find(
+                  (p) => p.seatPosition === selfSeatPosition,
+                ) ?? null)
+              : null) ??
+            roundPlayers[0] ??
+            null;
           const others = roundPlayers.filter((p) => p !== fallbackAuthPlayer);
           const seats: Array<{
             position: "bottom" | "right" | "top" | "left";
