@@ -1538,6 +1538,7 @@ export default function MahjongClient() {
           lastDiscardTile={lastDiscardTile}
           activeSides={activeSides}
           opponentHandCounts={opponentHandCounts}
+          opponentMelds={opponentMelds}
           onDoubleClickTile={(tileId) => emitDiscardTile(tileId)}
         />
       </div>
@@ -1688,54 +1689,6 @@ export default function MahjongClient() {
                   position={seat.position}
                 />
               ))}
-
-              {(() => {
-                const SideMelds = ({
-                  side,
-                }: {
-                  side: "right" | "top" | "left";
-                }) => {
-                  const melds = opponentMelds?.[side] ?? [];
-                  if (!melds || melds.length === 0) return null;
-
-                  const orderedGroups = [
-                    ...melds.filter((m) => m.kind === "chow"),
-                    ...melds.filter((m) => m.kind === "pong"),
-                    ...melds.filter((m) => m.kind === "kong"),
-                  ];
-
-                  const pos =
-                    side === "right"
-                      ? "right-10 top-1/2 -translate-y-1/2"
-                      : side === "left"
-                        ? "left-10 top-1/2 -translate-y-1/2"
-                        : "left-1/2 top-16 -translate-x-1/2";
-
-                  return (
-                    <div className={`absolute ${pos} flex flex-wrap gap-5`}>
-                      {orderedGroups.map((g, gi) => (
-                        <div key={`${side}-meld-${gi}`} className="flex gap-2">
-                          {g.tiles.map((t, ti) => (
-                            <MahjongTileCard
-                              key={`${side}-meld-${gi}-${t.suit}-${t.rank}-${ti}`}
-                              tile={t}
-                              size="xs"
-                            />
-                          ))}
-                        </div>
-                      ))}
-                    </div>
-                  );
-                };
-
-                return (
-                  <>
-                    <SideMelds side="right" />
-                    <SideMelds side="top" />
-                    <SideMelds side="left" />
-                  </>
-                );
-              })()}
             </>
           );
         })()}
