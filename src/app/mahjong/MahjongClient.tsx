@@ -469,6 +469,15 @@ export default function MahjongClient() {
     Partial<Record<"right" | "top" | "left", number>>
   >({});
 
+  const [opponentMelds, setOpponentMelds] = useState<
+    Partial<
+      Record<
+        "right" | "top" | "left",
+        Array<{ kind: "pong" | "chow" | "kong"; tiles: MahjongTile[] }>
+      >
+    >
+  >({});
+
   const [,] = useState<MahjongTile[]>([]);
   const [hand, setHand] = useState<ClientTile[]>([]);
   const [selfMelds, setSelfMelds] = useState<
@@ -1026,6 +1035,29 @@ export default function MahjongClient() {
         const nextOpponentCounts: Partial<
           Record<"right" | "top" | "left", number>
         > = {};
+
+        const normalizeOpponentMeldTiles = (raw: unknown): MahjongTile[] => {
+          if (!Array.isArray(raw)) return [];
+          const out: MahjongTile[] = [];
+          for (const t of raw as WsTile[]) {
+            if (typeof t !== "object" || t === null) continue;
+            if (t.type === "hidden") continue;
+            const rank = Number(t.number);
+            if (!Number.isFinite(rank) || rank < 1 || rank > 9) continue;
+            const suit: MahjongTile["suit"] | null =
+              t.type === "bamboo" ? "bamboo" : t.type === "dot" ? "dots" : null;
+            if (!suit) continue;
+            out.push({ suit, rank });
+          }
+          return out;
+        };
+
+        const nextOpponentMelds: Partial<
+          Record<
+            "right" | "top" | "left",
+            Array<{ kind: "pong" | "chow" | "kong"; tiles: MahjongTile[] }>
+          >
+        > = {};
         for (const p of payload) {
           if (typeof p !== "object" || p === null) continue;
           if ((p as { isSelf?: unknown }).isSelf === true) continue;
@@ -1035,6 +1067,17 @@ export default function MahjongClient() {
             (p as { seat_position?: unknown; seatPosition?: unknown })
               .seatPosition;
           const seat = Number(seatRaw);
+
+          const side: "right" | "top" | "left" | null =
+            seat === 2
+              ? "right"
+              : seat === 3
+                ? "top"
+                : seat === 4
+                  ? "left"
+                  : null;
+          if (!side) continue;
+
           const tilesRaw = (p as { tiles?: unknown }).tiles;
           const tileCountFromTiles = Array.isArray(tilesRaw)
             ? tilesRaw.length
@@ -1044,12 +1087,52 @@ export default function MahjongClient() {
           const tileCount = Number.isFinite(tileCountFromTiles)
             ? tileCountFromTiles
             : tileCountFromField;
-          if (!Number.isFinite(tileCount) || tileCount <= 0) continue;
-          if (seat === 2) nextOpponentCounts.right = tileCount;
-          if (seat === 3) nextOpponentCounts.top = tileCount;
-          if (seat === 4) nextOpponentCounts.left = tileCount;
+          if (Number.isFinite(tileCount) && tileCount > 0) {
+            nextOpponentCounts[side] = tileCount;
+          }
+
+          const meldsForSide: Array<{
+            kind: "pong" | "chow" | "kong";
+            tiles: MahjongTile[];
+          }> = [];
+
+          const pongRaw = (p as { pong?: unknown }).pong;
+          if (Array.isArray(pongRaw)) {
+            for (const g of pongRaw) {
+              if (typeof g !== "object" || g === null) continue;
+              const tiles = normalizeOpponentMeldTiles(
+                (g as { tiles?: unknown }).tiles,
+              );
+              if (tiles.length > 0) meldsForSide.push({ kind: "pong", tiles });
+            }
+          }
+
+          const chowRaw = (p as { chow?: unknown }).chow;
+          if (Array.isArray(chowRaw)) {
+            for (const g of chowRaw) {
+              if (typeof g !== "object" || g === null) continue;
+              const tiles = normalizeOpponentMeldTiles(
+                (g as { tiles?: unknown }).tiles,
+              );
+              if (tiles.length > 0) meldsForSide.push({ kind: "chow", tiles });
+            }
+          }
+
+          const kongRaw = (p as { kong?: unknown }).kong;
+          if (Array.isArray(kongRaw)) {
+            for (const g of kongRaw) {
+              if (typeof g !== "object" || g === null) continue;
+              const tiles = normalizeOpponentMeldTiles(
+                (g as { tiles?: unknown }).tiles,
+              );
+              if (tiles.length > 0) meldsForSide.push({ kind: "kong", tiles });
+            }
+          }
+
+          if (meldsForSide.length > 0) nextOpponentMelds[side] = meldsForSide;
         }
         setOpponentHandCounts(nextOpponentCounts);
+        setOpponentMelds(nextOpponentMelds);
 
         // Track last discarded tile (for the draw pile panel).
         const first = payload[0];
@@ -1557,6 +1640,54 @@ export default function MahjongClient() {
                   position={seat.position}
                 />
               ))}
+
+              {(() => {
+                const SideMelds = ({
+                  side,
+                }: {
+                  side: "right" | "top" | "left";
+                }) => {
+                  const melds = opponentMelds?.[side] ?? [];
+                  if (!melds || melds.length === 0) return null;
+
+                  const orderedGroups = [
+                    ...melds.filter((m) => m.kind === "chow"),
+                    ...melds.filter((m) => m.kind === "pong"),
+                    ...melds.filter((m) => m.kind === "kong"),
+                  ];
+
+                  const pos =
+                    side === "right"
+                      ? "right-10 top-1/2 -translate-y-1/2"
+                      : side === "left"
+                        ? "left-10 top-1/2 -translate-y-1/2"
+                        : "left-1/2 top-16 -translate-x-1/2";
+
+                  return (
+                    <div className={`absolute ${pos} flex flex-wrap gap-5`}>
+                      {orderedGroups.map((g, gi) => (
+                        <div key={`${side}-meld-${gi}`} className="flex gap-2">
+                          {g.tiles.map((t, ti) => (
+                            <MahjongTileCard
+                              key={`${side}-meld-${gi}-${t.suit}-${t.rank}-${ti}`}
+                              tile={t}
+                              size="xs"
+                            />
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  );
+                };
+
+                return (
+                  <>
+                    <SideMelds side="right" />
+                    <SideMelds side="top" />
+                    <SideMelds side="left" />
+                  </>
+                );
+              })()}
             </>
           );
         })()}
@@ -1605,7 +1736,7 @@ export default function MahjongClient() {
             </div>
 
             {winnerReveal.melds.length > 0 ? (
-              <div className="mt-5 flex flex-col gap-3">
+              <div className="mt-5 flex flex-wrap items-start gap-8">
                 {(() => {
                   const kinds: Array<"chow" | "pong" | "kong"> = [
                     "chow",
@@ -1620,7 +1751,7 @@ export default function MahjongClient() {
                       );
                       if (groups.length === 0) return null;
                       return (
-                        <div key={kind} className="">
+                        <div key={kind} className="min-w-[180px]">
                           <div className="text-xs font-semibold uppercase tracking-wide text-amber-100/70">
                             {kind}
                           </div>
