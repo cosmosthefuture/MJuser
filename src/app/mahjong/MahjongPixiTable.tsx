@@ -470,7 +470,7 @@ export default function MahjongPixiTable({
                     const cx = Math.floor(designWidth / 2);
                     const cy = Math.floor(tableY + tableH / 2);
                     const boxX = cx + 95;
-                    const boxY = cy - 55;
+                    const boxY = cy - 90;
 
                     return (
                       <pixiContainer x={boxX} y={boxY}>
