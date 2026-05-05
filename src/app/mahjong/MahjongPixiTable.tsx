@@ -464,7 +464,7 @@ export default function MahjongPixiTable({
                     const cx = Math.floor(designWidth / 2);
                     const cy = Math.floor(tableY + tableH / 2);
                     const startX = cx - Math.floor(contentW / 2);
-                    const startY = cy + 12;
+                    const startY = cy + 52;
 
                     return (
                       <pixiContainer x={startX} y={startY}>
