@@ -232,8 +232,17 @@ export default function MahjongPixiTable({
     }
     for (const t of discards)
       paths.add(`${tileSpriteBasePath}/${tileSpriteFileName(t)}`);
+    if (lastDiscardTile)
+      paths.add(`${tileSpriteBasePath}/${tileSpriteFileName(lastDiscardTile)}`);
     return Array.from(paths);
-  }, [hand, melds, discards, opponentMelds, tileSpriteBasePath]);
+  }, [
+    hand,
+    melds,
+    discards,
+    opponentMelds,
+    tileSpriteBasePath,
+    lastDiscardTile,
+  ]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;

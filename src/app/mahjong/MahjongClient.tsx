@@ -1162,31 +1162,25 @@ export default function MahjongClient() {
         setOpponentMelds(nextOpponentMelds);
 
         // Track last discarded tile (for the draw pile panel).
-        const first = payload[0];
-        if (typeof first === "object" && first !== null) {
-          const lastDiscardRaw = (first as { last_discard_tile?: unknown })
+        // Payload order can vary, so search for the first valid last_discard_tile.
+        let nextLastDiscard: MahjongTile | null = null;
+        for (const entry of payload) {
+          if (typeof entry !== "object" || entry === null) continue;
+          const lastDiscardRaw = (entry as { last_discard_tile?: unknown })
             .last_discard_tile;
-          if (typeof lastDiscardRaw === "object" && lastDiscardRaw !== null) {
-            const typeRaw = (lastDiscardRaw as { type?: unknown }).type;
-            const numberRaw = (lastDiscardRaw as { number?: unknown }).number;
-            const rank = Number(numberRaw);
-            const suit: MahjongTile["suit"] | null =
-              typeRaw === "bamboo"
-                ? "bamboo"
-                : typeRaw === "dot"
-                  ? "dots"
-                  : null;
-            if (suit && Number.isFinite(rank) && rank >= 1 && rank <= 9) {
-              setLastDiscardTile({ suit, rank });
-            } else {
-              setLastDiscardTile(null);
-            }
-          } else {
-            setLastDiscardTile(null);
+          if (typeof lastDiscardRaw !== "object" || lastDiscardRaw === null)
+            continue;
+          const typeRaw = (lastDiscardRaw as { type?: unknown }).type;
+          const numberRaw = (lastDiscardRaw as { number?: unknown }).number;
+          const rank = Number(numberRaw);
+          const suit: MahjongTile["suit"] | null =
+            typeRaw === "bamboo" ? "bamboo" : typeRaw === "dot" ? "dots" : null;
+          if (suit && Number.isFinite(rank) && rank >= 1 && rank <= 9) {
+            nextLastDiscard = { suit, rank };
+            break;
           }
-        } else {
-          setLastDiscardTile(null);
         }
+        setLastDiscardTile(nextLastDiscard);
 
         const self = payload.find(
           (p) =>

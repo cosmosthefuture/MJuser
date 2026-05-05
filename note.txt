@@ -426,6 +426,7 @@ need to show tiles of others images
 
 need to show the middle discard tile
 
-not showing side discard tile 
+#not showing side discard tile 
+
 
 show its own discard tiles
