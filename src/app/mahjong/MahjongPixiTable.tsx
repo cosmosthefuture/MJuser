@@ -21,6 +21,7 @@ type Props = {
     tiles: Array<MahjongTile & { id?: number }>;
   }>;
   discards: MahjongTile[];
+  selfDiscardTiles?: MahjongTile[];
   highlightDiscard: boolean;
   centerMessage?: string | null;
   showDrawPile?: boolean;
@@ -113,6 +114,7 @@ export default function MahjongPixiTable({
   hand,
   melds = [],
   discards,
+  selfDiscardTiles = [],
   highlightDiscard,
   centerMessage = null,
   showDrawPile = false,
@@ -234,6 +236,8 @@ export default function MahjongPixiTable({
       paths.add(`${tileSpriteBasePath}/${tileSpriteFileName(t)}`);
     if (lastDiscardTile)
       paths.add(`${tileSpriteBasePath}/${tileSpriteFileName(lastDiscardTile)}`);
+    for (const t of selfDiscardTiles)
+      paths.add(`${tileSpriteBasePath}/${tileSpriteFileName(t)}`);
     return Array.from(paths);
   }, [
     hand,
@@ -242,6 +246,7 @@ export default function MahjongPixiTable({
     opponentMelds,
     tileSpriteBasePath,
     lastDiscardTile,
+    selfDiscardTiles,
   ]);
 
   useEffect(() => {
@@ -445,6 +450,67 @@ export default function MahjongPixiTable({
                 y={Math.floor(tableY + tableH / 2) - 50}
                 style={labelStyle}
               />
+
+              {selfDiscardTiles.length > 0
+                ? (() => {
+                    const cols = 5;
+                    const tileW = 28;
+                    const tileH = 40;
+                    const tileGap = 3;
+                    const depthX = 3;
+                    const depthY = 3;
+                    const contentW = cols * tileW + (cols - 1) * tileGap;
+
+                    const cx = Math.floor(designWidth / 2);
+                    const cy = Math.floor(tableY + tableH / 2);
+                    const startX = cx - Math.floor(contentW / 2);
+                    const startY = cy + 12;
+
+                    return (
+                      <pixiContainer x={startX} y={startY}>
+                        {selfDiscardTiles.map((t, i) => {
+                          const col = i % cols;
+                          const row = Math.floor(i / cols);
+                          const x = col * (tileW + tileGap);
+                          const y = row * (tileH + tileGap);
+                          const spritePath = `${tileSpriteBasePath}/${tileSpriteFileName(t)}`;
+                          const tex = textures[spritePath];
+
+                          return (
+                            <pixiContainer
+                              key={`sd-${t.suit}-${t.rank}-${i}`}
+                              x={x}
+                              y={y}
+                            >
+                              <pixiGraphics
+                                draw={(g) => {
+                                  drawMahjongBlock(g, {
+                                    width: tileW,
+                                    height: tileH,
+                                    depthX,
+                                    depthY,
+                                    faceColor: 0xe7e8eb,
+                                    borderColor: 0xb8bcc3,
+                                  });
+                                }}
+                              />
+                              {tex ? (
+                                <pixiSprite
+                                  texture={tex}
+                                  x={3}
+                                  y={4}
+                                  width={tileW - depthX - 6}
+                                  height={tileH - depthY - 8}
+                                />
+                              ) : null}
+                            </pixiContainer>
+                          );
+                        })}
+                      </pixiContainer>
+                    );
+                  })()
+                : null}
+
               {lastDiscardTile
                 ? (() => {
                     const spritePath = `${tileSpriteBasePath}/${tileSpriteFileName(
@@ -481,13 +547,6 @@ export default function MahjongPixiTable({
                 : null}
             </>
           ) : null}
-
-          <pixiText
-            text={highlightDiscard ? "Click a tile to discard" : ""}
-            x={24}
-            y={rackY - 22}
-            style={labelStyle}
-          />
 
           {centerMessage ? (
             <pixiContainer

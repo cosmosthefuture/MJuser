@@ -488,6 +488,7 @@ export default function MahjongClient() {
     }>
   >([]);
   const [discards, setDiscards] = useState<MahjongTile[]>([]);
+  const [selfDiscardTiles, setSelfDiscardTiles] = useState<MahjongTile[]>([]);
   const [drawPileCount, setDrawPileCount] = useState<number | null>(null);
   const [lastDiscardTile, setLastDiscardTile] = useState<MahjongTile | null>(
     null,
@@ -1193,6 +1194,7 @@ export default function MahjongClient() {
               pong?: unknown;
               chow?: unknown;
               kong?: unknown;
+              discarded_tiles?: unknown;
               tileCount?: unknown;
               seat_position?: unknown;
               seatPosition?: unknown;
@@ -1281,6 +1283,24 @@ export default function MahjongClient() {
 
         const tilesRaw = self?.tiles;
         if (!Array.isArray(tilesRaw)) return;
+
+        const discardedRaw = self?.discarded_tiles;
+        if (Array.isArray(discardedRaw)) {
+          const nextSelfDiscards: MahjongTile[] = [];
+          for (const t of discardedRaw as WsTile[]) {
+            if (typeof t !== "object" || t === null) continue;
+            if (t.type === "hidden") continue;
+            const rank = Number(t.number);
+            if (!Number.isFinite(rank) || rank < 1 || rank > 9) continue;
+            const suit: MahjongTile["suit"] | null =
+              t.type === "bamboo" ? "bamboo" : t.type === "dot" ? "dots" : null;
+            if (!suit) continue;
+            nextSelfDiscards.push({ suit, rank });
+          }
+          setSelfDiscardTiles(nextSelfDiscards);
+        } else {
+          setSelfDiscardTiles([]);
+        }
 
         const nextHand: ClientTile[] = [];
         for (const t of tilesRaw) {
@@ -1466,7 +1486,7 @@ export default function MahjongClient() {
       socket?.off("mahjong:start_shuffling");
       socket?.off("mahjong:user_to_play");
     };
-  }, [token, roomId]);
+  }, [token, roomId, authUserId]);
 
   useEffect(() => {
     if (roundPlayers.length === 0) return;
@@ -1525,6 +1545,7 @@ export default function MahjongClient() {
           hand={hand}
           melds={selfMelds}
           discards={discards}
+          selfDiscardTiles={selfDiscardTiles}
           highlightDiscard={false}
           centerMessage={centerMessage}
           showDrawPile={showDrawPile}
