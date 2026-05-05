@@ -536,32 +536,20 @@ export default function MahjongPixiTable({
                     const rows = Math.ceil(topDiscardTiles.length / cols);
                     const contentW =
                       cols * tileW + Math.max(0, cols - 1) * tileGap;
-                    const contentH =
-                      rows * tileH + Math.max(0, rows - 1) * tileGap;
                     const pad = 10;
                     const boxW = contentW + pad * 2;
-                    const boxH = contentH + pad * 2;
 
                     const cx = Math.floor(designWidth / 2);
                     const cy = Math.floor(tableY + tableH / 2);
                     const boxX = cx - Math.floor(boxW / 2);
-                    const boxY = cy - 190;
+                    const boxY = cy - 155;
 
                     return (
                       <pixiContainer x={boxX} y={boxY}>
-                        <pixiGraphics
-                          draw={(g) => {
-                            g.clear();
-                            g.lineStyle(3, 0x1f4fff, 0.9);
-                            g.beginFill(0x000000, 0.0);
-                            g.drawRoundedRect(0, 0, boxW, boxH, 10);
-                            g.endFill();
-                          }}
-                        />
-
                         {topDiscardTiles.map((t, i) => {
                           const col = i % cols;
-                          const row = Math.floor(i / cols);
+                          const rowFromTop = Math.floor(i / cols);
+                          const row = rows - 1 - rowFromTop;
                           const x = pad + col * (tileW + tileGap);
                           const y = pad + row * (tileH + tileGap);
                           const spritePath = `${tileSpriteBasePath}/${tileSpriteFileName(t)}`;
