@@ -87,7 +87,12 @@ export default function MahjongClient() {
   const [winnerReveal, setWinnerReveal] = useState<{
     winnerUserId: number;
     winnerName: string;
+    resultLabel: string;
     tiles: MahjongTile[];
+    melds: Array<{
+      kind: "chow" | "pong" | "kong";
+      tiles: MahjongTile[];
+    }>;
   } | null>(null);
   const [kongDecision, setKongDecision] = useState<{
     kind: "kong" | "interrupt_kong" | "normal_kong";
@@ -308,6 +313,7 @@ export default function MahjongClient() {
       setWinnerReveal({
         winnerUserId: authUserId ?? 2,
         winnerName: "User Two",
+        resultLabel: authUserId != null ? "You Win" : "",
         tiles: [
           { suit: "bamboo", rank: 3 },
           { suit: "bamboo", rank: 3 },
@@ -324,6 +330,7 @@ export default function MahjongClient() {
           { suit: "dots", rank: 7 },
           { suit: "bamboo", rank: 9 },
         ],
+        melds: [],
       });
     };
 
@@ -704,14 +711,27 @@ export default function MahjongClient() {
 
       const handleWinnerReveal = (payload: unknown) => {
         if (cancelled) return;
-        if (!Array.isArray(payload) || payload.length === 0) return;
-        const first = payload[0];
-        if (typeof first !== "object" || first === null) return;
-        const p = first as WinnerRevealPayload;
+        const p: WinnerRevealPayload | null = Array.isArray(payload)
+          ? payload.length > 0 &&
+            typeof payload[0] === "object" &&
+            payload[0] !== null
+            ? (payload[0] as WinnerRevealPayload)
+            : null
+          : typeof payload === "object" && payload !== null
+            ? (payload as WinnerRevealPayload)
+            : null;
+        if (!p) return;
         const winnerUserIdRaw =
           p.winner_user_id ?? p.winner_userid ?? p.winnerUserId;
         const winnerUserId = Number(winnerUserIdRaw);
         if (!Number.isFinite(winnerUserId)) return;
+
+        const resultLabel =
+          authUserId != null
+            ? authUserId === winnerUserId
+              ? "You Win"
+              : "You Lose"
+            : "";
 
         const winnerNameRaw =
           p.winner_user_name ?? p.winner_username ?? p.winnerUserName ?? p.name;
@@ -735,8 +755,68 @@ export default function MahjongClient() {
           }
         }
 
+        const normalizeRevealTiles = (raw: unknown): MahjongTile[] => {
+          if (!Array.isArray(raw)) return [];
+          const out: MahjongTile[] = [];
+          for (const t of raw as WsTile[]) {
+            if (typeof t !== "object" || t === null) continue;
+            if (t.type === "hidden") continue;
+            const rank = Number(t.number);
+            if (!Number.isFinite(rank) || rank < 1 || rank > 9) continue;
+            const suit: MahjongTile["suit"] | null =
+              t.type === "bamboo" ? "bamboo" : t.type === "dot" ? "dots" : null;
+            if (!suit) continue;
+            out.push({ suit, rank });
+          }
+          return out;
+        };
+
+        const melds: Array<{
+          kind: "chow" | "pong" | "kong";
+          tiles: MahjongTile[];
+        }> = [];
+        const chowRaw = p.chow;
+        if (Array.isArray(chowRaw)) {
+          for (const g of chowRaw) {
+            if (typeof g !== "object" || g === null) continue;
+            const groupTiles = normalizeRevealTiles(
+              (g as { tiles?: unknown }).tiles,
+            );
+            if (groupTiles.length > 0)
+              melds.push({ kind: "chow", tiles: groupTiles });
+          }
+        }
+        const pongRaw = p.pong;
+        if (Array.isArray(pongRaw)) {
+          for (const g of pongRaw) {
+            if (typeof g !== "object" || g === null) continue;
+            const groupTiles = normalizeRevealTiles(
+              (g as { tiles?: unknown }).tiles,
+            );
+            if (groupTiles.length > 0)
+              melds.push({ kind: "pong", tiles: groupTiles });
+          }
+        }
+        const kongRaw = p.kong;
+        if (Array.isArray(kongRaw)) {
+          for (const g of kongRaw) {
+            if (typeof g !== "object" || g === null) continue;
+            const groupTiles = normalizeRevealTiles(
+              (g as { tiles?: unknown }).tiles,
+            );
+            if (groupTiles.length > 0)
+              melds.push({ kind: "kong", tiles: groupTiles });
+          }
+        }
+
         setTurnCountdown(null);
-        setWinnerReveal({ winnerUserId, winnerName, tiles });
+        setWinnerReveal({
+          winnerUserId,
+          winnerName,
+          resultLabel,
+          tiles,
+          melds,
+        });
       };
 
       const applyCanKong = (
@@ -1477,22 +1557,33 @@ export default function MahjongClient() {
       {winnerReveal ? (
         <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/70 p-4">
           <div className="pointer-events-auto w-full max-w-[760px] rounded-2xl border border-amber-100/15 bg-black/75 p-5 shadow-[0_25px_80px_rgba(0,0,0,0.55)] backdrop-blur-sm">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <div className="text-lg font-bold text-amber-200">
-                  Winner Reveal
-                </div>
+            <div className="grid grid-cols-3 items-start gap-4">
+              <div />
+              <div className="text-center">
+                {winnerReveal.resultLabel ? (
+                  <div
+                    className={`text-3xl font-extrabold tracking-tight ${
+                      winnerReveal.resultLabel === "You Win"
+                        ? "text-emerald-200"
+                        : "text-rose-200"
+                    }`}
+                  >
+                    {winnerReveal.resultLabel}
+                  </div>
+                ) : null}
                 <div className="mt-1 text-sm text-amber-100/90">
                   {winnerReveal.winnerName}
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={() => setWinnerReveal(null)}
-                className="rounded-full border border-amber-100/15 bg-black/40 px-3 py-1.5 text-sm text-amber-100 hover:bg-black/60"
-              >
-                Close
-              </button>
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setWinnerReveal(null)}
+                  className="rounded-full border border-amber-100/15 bg-black/40 px-3 py-1.5 text-sm text-amber-100 hover:bg-black/60"
+                >
+                  Close
+                </button>
+              </div>
             </div>
 
             <div className="mt-4 flex flex-wrap gap-2">
@@ -1504,6 +1595,46 @@ export default function MahjongClient() {
                 );
               })}
             </div>
+
+            {winnerReveal.melds.length > 0 ? (
+              <div className="mt-5 flex flex-col gap-3">
+                {(() => {
+                  const kinds: Array<"chow" | "pong" | "kong"> = [
+                    "chow",
+                    "pong",
+                    "kong",
+                  ];
+
+                  return kinds
+                    .map((kind) => {
+                      const groups = winnerReveal.melds.filter(
+                        (m) => m.kind === kind,
+                      );
+                      if (groups.length === 0) return null;
+                      return (
+                        <div key={kind} className="">
+                          <div className="text-xs font-semibold uppercase tracking-wide text-amber-100/70">
+                            {kind}
+                          </div>
+                          <div className="mt-2 flex flex-wrap gap-6">
+                            {groups.map((g, gi) => (
+                              <div key={`${kind}-${gi}`} className="flex gap-2">
+                                {g.tiles.map((t, ti) => (
+                                  <MahjongTileCard
+                                    key={`${kind}-${gi}-${t.suit}-${t.rank}-${ti}`}
+                                    tile={t}
+                                  />
+                                ))}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })
+                    .filter(Boolean);
+                })()}
+              </div>
+            ) : null}
           </div>
         </div>
       ) : null}
