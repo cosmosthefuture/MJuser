@@ -694,27 +694,22 @@ export default function MahjongPixiTable({
           />
 
           {(() => {
-            const flattenMeldTiles = (side: "right" | "top" | "left") => {
+            const orderedMeldGroups = (side: "right" | "top" | "left") => {
               const raw = opponentMelds?.[side] ?? [];
-              const ordered = [
+              return [
                 ...raw.filter((m) => m.kind === "chow"),
                 ...raw.filter((m) => m.kind === "pong"),
                 ...raw.filter((m) => m.kind === "kong"),
-              ];
-              const out: Array<MahjongTile> = [];
-              for (const g of ordered) {
-                for (const t of g.tiles ?? []) out.push(t);
-              }
-              return out;
+              ].filter((g) => Array.isArray(g.tiles) && g.tiles.length > 0);
             };
 
             const showTop = sides.size === 0 || sides.has("top");
             const showLeft = sides.size === 0 || sides.has("left");
             const showRight = sides.size === 0 || sides.has("right");
 
-            const topTiles = flattenMeldTiles("top");
-            const leftTiles = flattenMeldTiles("left");
-            const rightTiles = flattenMeldTiles("right");
+            const topGroups = orderedMeldGroups("top");
+            const leftGroups = orderedMeldGroups("left");
+            const rightGroups = orderedMeldGroups("right");
 
             const smallW = 26;
             const smallH = 34;
@@ -779,43 +774,80 @@ export default function MahjongPixiTable({
 
             const out: Array<unknown> = [];
 
-            if (showTop && topTiles.length > 0) {
+            const groupGap = 3;
+
+            if (showTop && topGroups.length > 0) {
               const startX =
                 topStartX + topCount * (smallW + 2) + Math.max(10, gap);
               const y = topY + smallH / 2;
-              topTiles.forEach((t, i) => {
-                const cx = startX + i * (opponentSmallTileW + opponentSmallGap);
-                out.push(renderMiniTile(`op-top-inline-${i}`, t, cx, y, 0));
+
+              let cursor = startX;
+              topGroups.forEach((g, gi) => {
+                (g.tiles ?? []).forEach((t, ti) => {
+                  const cx =
+                    cursor + ti * (opponentSmallTileW + opponentSmallGap);
+                  out.push(
+                    renderMiniTile(`op-top-inline-${gi}-${ti}`, t, cx, y, 0),
+                  );
+                });
+                cursor +=
+                  (g.tiles?.length ?? 0) *
+                  (opponentSmallTileW + opponentSmallGap);
+                if (gi < topGroups.length - 1) cursor += groupGap;
               });
             }
 
-            if (showLeft && leftTiles.length > 0) {
+            if (showLeft && leftGroups.length > 0) {
               const startY =
                 sideStartY + sideCountLeft * (smallW + 2) + Math.max(10, gap);
               const x = sideXLeft + smallH / 2;
-              leftTiles.forEach((t, i) => {
-                const cy = startY + i * (opponentSmallTileW + opponentSmallGap);
-                out.push(
-                  renderMiniTile(`op-left-inline-${i}`, t, x, cy, Math.PI / 2),
-                );
+
+              let cursor = startY;
+              leftGroups.forEach((g, gi) => {
+                (g.tiles ?? []).forEach((t, ti) => {
+                  const cy =
+                    cursor + ti * (opponentSmallTileW + opponentSmallGap);
+                  out.push(
+                    renderMiniTile(
+                      `op-left-inline-${gi}-${ti}`,
+                      t,
+                      x,
+                      cy,
+                      Math.PI / 2,
+                    ),
+                  );
+                });
+                cursor +=
+                  (g.tiles?.length ?? 0) *
+                  (opponentSmallTileW + opponentSmallGap);
+                if (gi < leftGroups.length - 1) cursor += groupGap;
               });
             }
 
-            if (showRight && rightTiles.length > 0) {
+            if (showRight && rightGroups.length > 0) {
               const startY =
                 sideStartY + sideCountRight * (smallW + 2) + Math.max(10, gap);
               const x = sideXRight + smallH / 2;
-              rightTiles.forEach((t, i) => {
-                const cy = startY + i * (opponentSmallTileW + opponentSmallGap);
-                out.push(
-                  renderMiniTile(
-                    `op-right-inline-${i}`,
-                    t,
-                    x,
-                    cy,
-                    -Math.PI / 2,
-                  ),
-                );
+
+              let cursor = startY;
+              rightGroups.forEach((g, gi) => {
+                (g.tiles ?? []).forEach((t, ti) => {
+                  const cy =
+                    cursor + ti * (opponentSmallTileW + opponentSmallGap);
+                  out.push(
+                    renderMiniTile(
+                      `op-right-inline-${gi}-${ti}`,
+                      t,
+                      x,
+                      cy,
+                      -Math.PI / 2,
+                    ),
+                  );
+                });
+                cursor +=
+                  (g.tiles?.length ?? 0) *
+                  (opponentSmallTileW + opponentSmallGap);
+                if (gi < rightGroups.length - 1) cursor += groupGap;
               });
             }
 
