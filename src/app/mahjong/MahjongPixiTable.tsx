@@ -685,27 +685,36 @@ export default function MahjongPixiTable({
           />
 
           {(() => {
-            const groupsFor = (side: "right" | "top" | "left") => {
+            const flattenMeldTiles = (side: "right" | "top" | "left") => {
               const raw = opponentMelds?.[side] ?? [];
               const ordered = [
                 ...raw.filter((m) => m.kind === "chow"),
                 ...raw.filter((m) => m.kind === "pong"),
                 ...raw.filter((m) => m.kind === "kong"),
               ];
-              return ordered;
+              const out: Array<MahjongTile> = [];
+              for (const g of ordered) {
+                for (const t of g.tiles ?? []) out.push(t);
+              }
+              return out;
             };
 
             const showTop = sides.size === 0 || sides.has("top");
             const showLeft = sides.size === 0 || sides.has("left");
             const showRight = sides.size === 0 || sides.has("right");
 
-            const topGroups = groupsFor("top");
-            const leftGroups = groupsFor("left");
-            const rightGroups = groupsFor("right");
+            const topTiles = flattenMeldTiles("top");
+            const leftTiles = flattenMeldTiles("left");
+            const rightTiles = flattenMeldTiles("right");
 
             const smallW = 26;
             const smallH = 34;
             const topY = tableY + 18;
+
+            const topCount = counts.top ?? 16;
+            const topStartX = Math.floor(
+              designWidth / 2 - (topCount * smallW + (topCount - 1) * 2) / 2,
+            );
 
             const sideCountLeft = counts.left ?? 14;
             const sideCountRight = counts.right ?? 14;
@@ -718,116 +727,87 @@ export default function MahjongPixiTable({
                 (sideCount * smallW + (sideCount - 1) * 2) / 2,
             );
 
-            const alignToHiddenRowY = (count: number) => {
-              const safeCount = Math.max(1, Math.floor(count));
-              const midIdx = Math.floor((safeCount - 1) / 2);
-              const hiddenCenterY =
-                sideStartY + midIdx * (smallW + 2) + smallW / 2;
-              return Math.floor(hiddenCenterY);
-            };
-
-            const renderRow = (
+            const renderMiniTile = (
               key: string,
+              tile: MahjongTile,
               x: number,
               y: number,
-              groups: Array<{ tiles: MahjongTile[] }>,
-              anchor: "left" | "right" | "center" = "left",
+              rotation = 0,
             ) => {
-              if (!groups || groups.length === 0) return null;
+              const spritePath = `${tileSpriteBasePath}/${tileSpriteFileName(tile)}`;
+              const tex = textures[spritePath];
+              const w = opponentSmallTileW;
+              const h = opponentSmallTileH;
 
-              const flat: Array<{ groupIndex: number; tile: MahjongTile }> = [];
-              groups.forEach((g, gi) => {
-                (g.tiles ?? []).forEach((t) =>
-                  flat.push({ groupIndex: gi, tile: t }),
-                );
-              });
-              if (flat.length === 0) return null;
-
-              let totalW = 0;
-              let prevGroup = flat[0]?.groupIndex ?? 0;
-              for (let i = 0; i < flat.length; i++) {
-                const item = flat[i];
-                if (i > 0) {
-                  totalW += opponentSmallGap;
-                  if (item.groupIndex !== prevGroup)
-                    totalW += opponentSmallGap * 2;
-                }
-                totalW += opponentSmallTileW;
-                prevGroup = item.groupIndex;
-              }
-
-              const startX =
-                anchor === "right"
-                  ? x - totalW
-                  : anchor === "center"
-                    ? x - totalW / 2
-                    : x;
-
-              let cursorX = startX;
-              prevGroup = flat[0]?.groupIndex ?? 0;
               return (
-                <pixiContainer key={key} x={cursorX} y={y}>
-                  {flat.map((item, i) => {
-                    if (i > 0) {
-                      cursorX += opponentSmallGap;
-                      if (item.groupIndex !== prevGroup)
-                        cursorX += opponentSmallGap * 2;
-                    }
-                    const spritePath = `${tileSpriteBasePath}/${tileSpriteFileName(
-                      item.tile,
-                    )}`;
-                    const tex = textures[spritePath];
-                    const xLocal = cursorX - startX;
-                    const out = (
-                      <pixiContainer key={`${key}-${i}`} x={xLocal} y={0}>
-                        <pixiGraphics
-                          draw={(g) => {
-                            drawMahjongBlock(g, {
-                              width: opponentSmallTileW,
-                              height: opponentSmallTileH,
-                              depthX: 4,
-                              depthY: 4,
-                              faceColor: 0xe7e8eb,
-                              borderColor: 0xb8bcc3,
-                            });
-                          }}
-                        />
-                        {tex ? (
-                          <pixiSprite
-                            texture={tex}
-                            x={4}
-                            y={5}
-                            width={opponentSmallTileW - 4 - 8}
-                            height={opponentSmallTileH - 4 - 10}
-                          />
-                        ) : null}
-                      </pixiContainer>
-                    );
-                    cursorX += opponentSmallTileW;
-                    prevGroup = item.groupIndex;
-                    return out;
-                  })}
+                <pixiContainer key={key} x={x} y={y} rotation={rotation}>
+                  <pixiGraphics
+                    x={-w / 2}
+                    y={-h / 2}
+                    draw={(g) => {
+                      drawMahjongBlock(g, {
+                        width: w,
+                        height: h,
+                        depthX: 4,
+                        depthY: 4,
+                        faceColor: 0xe7e8eb,
+                        borderColor: 0xb8bcc3,
+                      });
+                    }}
+                  />
+                  {tex ? (
+                    <pixiSprite
+                      texture={tex}
+                      x={-w / 2 + 4}
+                      y={-h / 2 + 5}
+                      width={w - 4 - 8}
+                      height={h - 4 - 10}
+                    />
+                  ) : null}
                 </pixiContainer>
               );
             };
 
             const out: Array<unknown> = [];
-            if (showRight && rightGroups.length > 0) {
-              const y =
-                alignToHiddenRowY(counts.right ?? 14) - opponentSmallTileH / 2;
-              const x = sideXRight - 10;
-              out.push(renderRow("op-right", x, y, rightGroups, "right"));
+
+            if (showTop && topTiles.length > 0) {
+              const startX =
+                topStartX + topCount * (smallW + 2) + Math.max(10, gap);
+              const y = topY + smallH / 2;
+              topTiles.forEach((t, i) => {
+                const cx = startX + i * (opponentSmallTileW + opponentSmallGap);
+                out.push(renderMiniTile(`op-top-inline-${i}`, t, cx, y, 0));
+              });
             }
-            if (showLeft && leftGroups.length > 0) {
-              const y =
-                alignToHiddenRowY(counts.left ?? 14) - opponentSmallTileH / 2;
-              const x = sideXLeft + smallH + 10;
-              out.push(renderRow("op-left", x, y, leftGroups, "left"));
+
+            if (showLeft && leftTiles.length > 0) {
+              const startY =
+                sideStartY + sideCountLeft * (smallW + 2) + Math.max(10, gap);
+              const x = sideXLeft + smallH / 2;
+              leftTiles.forEach((t, i) => {
+                const cy = startY + i * (opponentSmallTileW + opponentSmallGap);
+                out.push(
+                  renderMiniTile(`op-left-inline-${i}`, t, x, cy, Math.PI / 2),
+                );
+              });
             }
-            if (showTop && topGroups.length > 0) {
-              const y = topY + smallH + 10;
-              const x = Math.floor(designWidth / 2);
-              out.push(renderRow("op-top", x, y, topGroups, "center"));
+
+            if (showRight && rightTiles.length > 0) {
+              const startY =
+                sideStartY + sideCountRight * (smallW + 2) + Math.max(10, gap);
+              const x = sideXRight + smallH / 2;
+              rightTiles.forEach((t, i) => {
+                const cy = startY + i * (opponentSmallTileW + opponentSmallGap);
+                out.push(
+                  renderMiniTile(
+                    `op-right-inline-${i}`,
+                    t,
+                    x,
+                    cy,
+                    -Math.PI / 2,
+                  ),
+                );
+              });
             }
 
             return <>{out}</>;
