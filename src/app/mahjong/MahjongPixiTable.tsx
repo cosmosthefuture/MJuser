@@ -23,6 +23,7 @@ type Props = {
   discards: MahjongTile[];
   selfDiscardTiles?: MahjongTile[];
   rightDiscardTiles?: MahjongTile[];
+  topDiscardTiles?: MahjongTile[];
   highlightDiscard: boolean;
   centerMessage?: string | null;
   showDrawPile?: boolean;
@@ -117,6 +118,7 @@ export default function MahjongPixiTable({
   discards,
   selfDiscardTiles = [],
   rightDiscardTiles = [],
+  topDiscardTiles = [],
   highlightDiscard,
   centerMessage = null,
   showDrawPile = false,
@@ -242,16 +244,19 @@ export default function MahjongPixiTable({
       paths.add(`${tileSpriteBasePath}/${tileSpriteFileName(t)}`);
     for (const t of rightDiscardTiles)
       paths.add(`${tileSpriteBasePath}/${tileSpriteFileName(t)}`);
+    for (const t of topDiscardTiles)
+      paths.add(`${tileSpriteBasePath}/${tileSpriteFileName(t)}`);
     return Array.from(paths);
   }, [
     hand,
     melds,
-    discards,
     opponentMelds,
     tileSpriteBasePath,
     lastDiscardTile,
     selfDiscardTiles,
     rightDiscardTiles,
+    topDiscardTiles,
+    discards,
   ]);
 
   useEffect(() => {
@@ -508,6 +513,83 @@ export default function MahjongPixiTable({
                                   texture={tex}
                                   x={-tileW / 2 + 3}
                                   y={-tileH / 2 + 4}
+                                  width={tileW - depthX - 6}
+                                  height={tileH - depthY - 8}
+                                />
+                              ) : null}
+                            </pixiContainer>
+                          );
+                        })}
+                      </pixiContainer>
+                    );
+                  })()
+                : null}
+
+              {topDiscardTiles.length > 0
+                ? (() => {
+                    const cols = 6;
+                    const tileW = 28;
+                    const tileH = 40;
+                    const tileGap = 4;
+                    const depthX = 3;
+                    const depthY = 3;
+                    const rows = Math.ceil(topDiscardTiles.length / cols);
+                    const contentW =
+                      cols * tileW + Math.max(0, cols - 1) * tileGap;
+                    const contentH =
+                      rows * tileH + Math.max(0, rows - 1) * tileGap;
+                    const pad = 10;
+                    const boxW = contentW + pad * 2;
+                    const boxH = contentH + pad * 2;
+
+                    const cx = Math.floor(designWidth / 2);
+                    const cy = Math.floor(tableY + tableH / 2);
+                    const boxX = cx - Math.floor(boxW / 2);
+                    const boxY = cy - 190;
+
+                    return (
+                      <pixiContainer x={boxX} y={boxY}>
+                        <pixiGraphics
+                          draw={(g) => {
+                            g.clear();
+                            g.lineStyle(3, 0x1f4fff, 0.9);
+                            g.beginFill(0x000000, 0.0);
+                            g.drawRoundedRect(0, 0, boxW, boxH, 10);
+                            g.endFill();
+                          }}
+                        />
+
+                        {topDiscardTiles.map((t, i) => {
+                          const col = i % cols;
+                          const row = Math.floor(i / cols);
+                          const x = pad + col * (tileW + tileGap);
+                          const y = pad + row * (tileH + tileGap);
+                          const spritePath = `${tileSpriteBasePath}/${tileSpriteFileName(t)}`;
+                          const tex = textures[spritePath];
+
+                          return (
+                            <pixiContainer
+                              key={`td-${t.suit}-${t.rank}-${i}`}
+                              x={x}
+                              y={y}
+                            >
+                              <pixiGraphics
+                                draw={(g) => {
+                                  drawMahjongBlock(g, {
+                                    width: tileW,
+                                    height: tileH,
+                                    depthX,
+                                    depthY,
+                                    faceColor: 0xe7e8eb,
+                                    borderColor: 0xb8bcc3,
+                                  });
+                                }}
+                              />
+                              {tex ? (
+                                <pixiSprite
+                                  texture={tex}
+                                  x={3}
+                                  y={4}
                                   width={tileW - depthX - 6}
                                   height={tileH - depthY - 8}
                                 />

@@ -491,6 +491,7 @@ export default function MahjongClient() {
   const [discards, setDiscards] = useState<MahjongTile[]>([]);
   const [selfDiscardTiles, setSelfDiscardTiles] = useState<MahjongTile[]>([]);
   const [rightDiscardTiles, setRightDiscardTiles] = useState<MahjongTile[]>([]);
+  const [topDiscardTiles, setTopDiscardTiles] = useState<MahjongTile[]>([]);
   const [drawPileCount, setDrawPileCount] = useState<number | null>(null);
   const [lastDiscardTile, setLastDiscardTile] = useState<MahjongTile | null>(
     null,
@@ -1129,6 +1130,7 @@ export default function MahjongClient() {
           >
         > = {};
         const nextRightDiscards: MahjongTile[] = [];
+        const nextTopDiscards: MahjongTile[] = [];
         for (const p of payload) {
           if (typeof p !== "object" || p === null) continue;
           if ((p as { isSelf?: unknown }).isSelf === true) continue;
@@ -1188,28 +1190,32 @@ export default function MahjongClient() {
 
           const discardedRaw = (p as { discarded_tiles?: unknown })
             .discarded_tiles;
-          if (side === "right" && Array.isArray(discardedRaw)) {
+          const sideDiscards: MahjongTile[] = [];
+          if (Array.isArray(discardedRaw)) {
             for (const t of discardedRaw as WsTile[]) {
               if (typeof t !== "object" || t === null) continue;
-              if (t.type === "hidden") continue;
-              const rank = Number(t.number);
+              if ((t as { type?: unknown }).type === "hidden") continue;
+              const rank = Number((t as { number?: unknown }).number);
               if (!Number.isFinite(rank) || rank < 1 || rank > 9) continue;
               const suit: MahjongTile["suit"] | null =
-                t.type === "bamboo"
+                (t as { type?: unknown }).type === "bamboo"
                   ? "bamboo"
-                  : t.type === "dot"
+                  : (t as { type?: unknown }).type === "dot"
                     ? "dots"
                     : null;
               if (!suit) continue;
-              nextRightDiscards.push({ suit, rank });
+              sideDiscards.push({ suit, rank });
             }
           }
+          if (side === "right") nextRightDiscards.push(...sideDiscards);
+          if (side === "top") nextTopDiscards.push(...sideDiscards);
 
           if (meldsForSide.length > 0) nextOpponentMelds[side] = meldsForSide;
         }
         setOpponentHandCounts(nextOpponentCounts);
         setOpponentMelds(nextOpponentMelds);
         setRightDiscardTiles(nextRightDiscards);
+        setTopDiscardTiles(nextTopDiscards);
 
         // Track last discarded tile (for the draw pile panel).
         // Payload order can vary, so search for the first valid last_discard_tile.
@@ -1596,6 +1602,7 @@ export default function MahjongClient() {
           discards={discards}
           selfDiscardTiles={selfDiscardTiles}
           rightDiscardTiles={rightDiscardTiles}
+          topDiscardTiles={topDiscardTiles}
           highlightDiscard={false}
           centerMessage={centerMessage}
           showDrawPile={showDrawPile}
