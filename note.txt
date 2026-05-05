@@ -9,6 +9,6 @@
 
 ##sort button showing at the start
 #other users 4 
-collapsing shuffling
 
 #when pass make disable other button
+collapsing shuffling
