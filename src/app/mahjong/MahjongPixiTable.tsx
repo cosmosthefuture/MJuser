@@ -527,7 +527,7 @@ export default function MahjongPixiTable({
 
               {topDiscardTiles.length > 0
                 ? (() => {
-                    const cols = 6;
+                    const cols = 5;
                     const tileW = 28;
                     const tileH = 40;
                     const tileGap = 4;
