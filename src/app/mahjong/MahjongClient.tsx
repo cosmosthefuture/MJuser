@@ -492,6 +492,7 @@ export default function MahjongClient() {
   const [selfDiscardTiles, setSelfDiscardTiles] = useState<MahjongTile[]>([]);
   const [rightDiscardTiles, setRightDiscardTiles] = useState<MahjongTile[]>([]);
   const [topDiscardTiles, setTopDiscardTiles] = useState<MahjongTile[]>([]);
+  const [leftDiscardTiles, setLeftDiscardTiles] = useState<MahjongTile[]>([]);
   const [drawPileCount, setDrawPileCount] = useState<number | null>(null);
   const [lastDiscardTile, setLastDiscardTile] = useState<MahjongTile | null>(
     null,
@@ -1131,6 +1132,7 @@ export default function MahjongClient() {
         > = {};
         const nextRightDiscards: MahjongTile[] = [];
         const nextTopDiscards: MahjongTile[] = [];
+        const nextLeftDiscards: MahjongTile[] = [];
         for (const p of payload) {
           if (typeof p !== "object" || p === null) continue;
           if ((p as { isSelf?: unknown }).isSelf === true) continue;
@@ -1209,6 +1211,7 @@ export default function MahjongClient() {
           }
           if (side === "right") nextRightDiscards.push(...sideDiscards);
           if (side === "top") nextTopDiscards.push(...sideDiscards);
+          if (side === "left") nextLeftDiscards.push(...sideDiscards);
 
           if (meldsForSide.length > 0) nextOpponentMelds[side] = meldsForSide;
         }
@@ -1216,6 +1219,7 @@ export default function MahjongClient() {
         setOpponentMelds(nextOpponentMelds);
         setRightDiscardTiles(nextRightDiscards);
         setTopDiscardTiles(nextTopDiscards);
+        setLeftDiscardTiles(nextLeftDiscards);
 
         // Track last discarded tile (for the draw pile panel).
         // Payload order can vary, so search for the first valid last_discard_tile.
@@ -1603,6 +1607,7 @@ export default function MahjongClient() {
           selfDiscardTiles={selfDiscardTiles}
           rightDiscardTiles={rightDiscardTiles}
           topDiscardTiles={topDiscardTiles}
+          leftDiscardTiles={leftDiscardTiles}
           highlightDiscard={false}
           centerMessage={centerMessage}
           showDrawPile={showDrawPile}
