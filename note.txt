@@ -429,8 +429,8 @@ need to show tiles of others images
 #not showing side discard tile 
 
 
-show its own discard tiles
-bottom round counter
+#show its own discard tiles
+#bottom round counter
 
 sort button showing at the start
 other users 4 

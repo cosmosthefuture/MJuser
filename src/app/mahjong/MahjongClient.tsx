@@ -463,6 +463,9 @@ export default function MahjongClient() {
   const [firstPlayerHighlightId, setFirstPlayerHighlightId] = useState<
     number | null
   >(null);
+  const [activePlayerUserId, setActivePlayerUserId] = useState<number | null>(
+    null,
+  );
   const [activeSides, setActiveSides] = useState<
     Array<"bottom" | "right" | "top" | "left">
   >([]);
@@ -1398,27 +1401,24 @@ export default function MahjongClient() {
         console.log("Shuffling Tiles");
       };
 
-      const handleFirstPlayerSelected = (payload: unknown) => {
+      const handleUserToPlay = (payload: unknown) => {
         if (cancelled) return;
         if (typeof payload !== "object" || payload === null) return;
         const p = payload as {
           user_id?: unknown;
           userId?: unknown;
           user_id_to_play_first?: unknown;
-          user_name?: unknown;
-          userName?: unknown;
         };
-        // Server now sends `{ user_id, user_name }`, but keep backward-compat with older payloads.
-        const userIdRaw = p.user_id ?? p.userId ?? p.user_id_to_play_first;
-        const userId = Number(userIdRaw);
+        const userId = Number(p.user_id ?? p.userId ?? p.user_id_to_play_first);
         if (!Number.isFinite(userId)) return;
-
+        setActivePlayerUserId(userId);
+        // Small pop animation each time the "user to play" changes.
         setFirstPlayerHighlightId(userId);
         if (firstPlayerHighlightTimer)
           window.clearTimeout(firstPlayerHighlightTimer);
         firstPlayerHighlightTimer = window.setTimeout(() => {
           setFirstPlayerHighlightId(null);
-        }, 2200);
+        }, 1200);
       };
 
       socket.off("mahjong:waiting_for_players", handleWaitingForPlayers);
@@ -1499,8 +1499,8 @@ export default function MahjongClient() {
       socket.off("mahjong:start_shuffling", handleStartShuffling);
       socket.on("mahjong:start_shuffling", handleStartShuffling);
 
-      socket.off("mahjong:user_to_play", handleFirstPlayerSelected);
-      socket.on("mahjong:user_to_play", handleFirstPlayerSelected);
+      socket.off("mahjong:user_to_play", handleUserToPlay);
+      socket.on("mahjong:user_to_play", handleUserToPlay);
 
       if (socket.connected) {
         void doJoin(socket);
@@ -1739,6 +1739,10 @@ export default function MahjongClient() {
               turnCountdown != null
                 ? player.userId === turnCountdown.userId
                 : false;
+            const isUserToPlay =
+              activePlayerUserId != null
+                ? player.userId === activePlayerUserId
+                : false;
 
             return (
               <div
@@ -1748,6 +1752,11 @@ export default function MahjongClient() {
                     : ""
                 }`}
               >
+                {isUserToPlay ? (
+                  <div className="pointer-events-none absolute -inset-[2px] rounded-full">
+                    <div className="absolute inset-0 rounded-full ring-3 ring-amber-200/70 shadow-[0_0_0_12px_rgba(255,210,125,0.14),0_0_40px_rgba(255,210,125,0.18)] animate-pulse" />
+                  </div>
+                ) : null}
                 <Avatar className="size-8 border border-amber-100/20 bg-black/30">
                   <AvatarFallback className="bg-black/30 text-amber-100 font-bold">
                     {initials}
