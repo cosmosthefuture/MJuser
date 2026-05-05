@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import { ArrowLeft } from "lucide-react";
@@ -120,6 +120,8 @@ export default function MahjongClient() {
     }>;
   } | null>(null);
 
+  const sortHandInFlightRef = useRef(false);
+
   const emitAcceptKong = (kongKey: string) => {
     const socket = getSocket();
     if (!socket) return;
@@ -216,6 +218,7 @@ export default function MahjongClient() {
     const socket = getSocket();
     if (!socket) return;
     if (roomId == null || authUserId == null) return;
+    sortHandInFlightRef.current = true;
     console.log("[ws] emit mahjong:sort_hand", {
       roomId: String(roomId),
       userId: authUserId,
@@ -990,12 +993,17 @@ export default function MahjongClient() {
         if (cancelled) return;
         if (!Array.isArray(payload)) return;
 
+        const isSortUpdate = sortHandInFlightRef.current;
+        sortHandInFlightRef.current = false;
+
         // Clear transient "Shuffling Tiles" message once hands arrive.
         setCenterMessage(null);
         setWinnerReveal(null);
-        setKongDecision(null);
-        setPongDecision(null);
-        setChowDecision(null);
+        if (!isSortUpdate) {
+          setKongDecision(null);
+          setPongDecision(null);
+          setChowDecision(null);
+        }
 
         // Once hands are dealt, hide dice overlay and show draw pile box.
         setDiceRolling(false);
