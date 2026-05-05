@@ -121,6 +121,8 @@ export default function MahjongClient() {
   } | null>(null);
 
   const sortHandInFlightRef = useRef(false);
+  const isDecisionModalOpen =
+    kongDecision != null || pongDecision != null || chowDecision != null;
 
   const emitAcceptKong = (kongKey: string) => {
     const socket = getSocket();
@@ -199,6 +201,7 @@ export default function MahjongClient() {
   };
 
   const emitDiscardTile = (tileId: number) => {
+    if (isDecisionModalOpen) return;
     const socket = getSocket();
     if (!socket) return;
     if (roomId == null || authUserId == null) return;
@@ -1616,7 +1619,9 @@ export default function MahjongClient() {
           activeSides={activeSides}
           opponentHandCounts={opponentHandCounts}
           opponentMelds={opponentMelds}
-          onDoubleClickTile={(tileId) => emitDiscardTile(tileId)}
+          onDoubleClickTile={
+            isDecisionModalOpen ? undefined : (tileId) => emitDiscardTile(tileId)
+          }
         />
       </div>
 
