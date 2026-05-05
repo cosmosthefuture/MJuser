@@ -489,6 +489,7 @@ export default function MahjongClient() {
   >([]);
   const [discards, setDiscards] = useState<MahjongTile[]>([]);
   const [selfDiscardTiles, setSelfDiscardTiles] = useState<MahjongTile[]>([]);
+  const [rightDiscardTiles, setRightDiscardTiles] = useState<MahjongTile[]>([]);
   const [drawPileCount, setDrawPileCount] = useState<number | null>(null);
   const [lastDiscardTile, setLastDiscardTile] = useState<MahjongTile | null>(
     null,
@@ -1100,6 +1101,7 @@ export default function MahjongClient() {
             Array<{ kind: "pong" | "chow" | "kong"; tiles: MahjongTile[] }>
           >
         > = {};
+        const nextRightDiscards: MahjongTile[] = [];
         for (const p of payload) {
           if (typeof p !== "object" || p === null) continue;
           if ((p as { isSelf?: unknown }).isSelf === true) continue;
@@ -1157,10 +1159,30 @@ export default function MahjongClient() {
             }
           }
 
+          const discardedRaw = (p as { discarded_tiles?: unknown })
+            .discarded_tiles;
+          if (side === "right" && Array.isArray(discardedRaw)) {
+            for (const t of discardedRaw as WsTile[]) {
+              if (typeof t !== "object" || t === null) continue;
+              if (t.type === "hidden") continue;
+              const rank = Number(t.number);
+              if (!Number.isFinite(rank) || rank < 1 || rank > 9) continue;
+              const suit: MahjongTile["suit"] | null =
+                t.type === "bamboo"
+                  ? "bamboo"
+                  : t.type === "dot"
+                    ? "dots"
+                    : null;
+              if (!suit) continue;
+              nextRightDiscards.push({ suit, rank });
+            }
+          }
+
           if (meldsForSide.length > 0) nextOpponentMelds[side] = meldsForSide;
         }
         setOpponentHandCounts(nextOpponentCounts);
         setOpponentMelds(nextOpponentMelds);
+        setRightDiscardTiles(nextRightDiscards);
 
         // Track last discarded tile (for the draw pile panel).
         // Payload order can vary, so search for the first valid last_discard_tile.
@@ -1546,6 +1568,7 @@ export default function MahjongClient() {
           melds={selfMelds}
           discards={discards}
           selfDiscardTiles={selfDiscardTiles}
+          rightDiscardTiles={rightDiscardTiles}
           highlightDiscard={false}
           centerMessage={centerMessage}
           showDrawPile={showDrawPile}

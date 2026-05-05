@@ -22,6 +22,7 @@ type Props = {
   }>;
   discards: MahjongTile[];
   selfDiscardTiles?: MahjongTile[];
+  rightDiscardTiles?: MahjongTile[];
   highlightDiscard: boolean;
   centerMessage?: string | null;
   showDrawPile?: boolean;
@@ -115,6 +116,7 @@ export default function MahjongPixiTable({
   melds = [],
   discards,
   selfDiscardTiles = [],
+  rightDiscardTiles = [],
   highlightDiscard,
   centerMessage = null,
   showDrawPile = false,
@@ -238,6 +240,8 @@ export default function MahjongPixiTable({
       paths.add(`${tileSpriteBasePath}/${tileSpriteFileName(lastDiscardTile)}`);
     for (const t of selfDiscardTiles)
       paths.add(`${tileSpriteBasePath}/${tileSpriteFileName(t)}`);
+    for (const t of rightDiscardTiles)
+      paths.add(`${tileSpriteBasePath}/${tileSpriteFileName(t)}`);
     return Array.from(paths);
   }, [
     hand,
@@ -247,6 +251,7 @@ export default function MahjongPixiTable({
     tileSpriteBasePath,
     lastDiscardTile,
     selfDiscardTiles,
+    rightDiscardTiles,
   ]);
 
   useEffect(() => {
@@ -450,6 +455,90 @@ export default function MahjongPixiTable({
                 y={Math.floor(tableY + tableH / 2) - 50}
                 style={labelStyle}
               />
+
+              {rightDiscardTiles.length > 0
+                ? (() => {
+                    const rowsPerCol = 5;
+                    const tileW = 28;
+                    const tileH = 40;
+                    const tileGap = 1;
+                    const depthX = 3;
+                    const depthY = 3;
+
+                    const cols = Math.ceil(
+                      rightDiscardTiles.length / rowsPerCol,
+                    );
+                    const contentW =
+                      cols * tileW + Math.max(0, cols - 1) * tileGap;
+                    const contentH =
+                      rowsPerCol * tileH +
+                      Math.max(0, rowsPerCol - 1) * tileGap;
+                    const pad = 10;
+                    const boxW = contentW + pad * 2;
+                    const boxH = contentH + pad * 2;
+
+                    const cx = Math.floor(designWidth / 2);
+                    const cy = Math.floor(tableY + tableH / 2);
+                    const boxX = cx + 95;
+                    const boxY = cy - 55;
+
+                    return (
+                      <pixiContainer x={boxX} y={boxY}>
+                        <pixiGraphics
+                          draw={(g) => {
+                            g.clear();
+                            g.lineStyle(3, 0x1f4fff, 0.9);
+                            g.beginFill(0x000000, 0.0);
+                            g.drawRoundedRect(0, 0, boxW, boxH, 10);
+                            g.endFill();
+                          }}
+                        />
+
+                        {rightDiscardTiles.map((t, i) => {
+                          const row = i % rowsPerCol;
+                          const col = Math.floor(i / rowsPerCol);
+                          const x = pad + col * (tileW + tileGap);
+                          const y = pad + row * (tileH + tileGap);
+                          const spritePath = `${tileSpriteBasePath}/${tileSpriteFileName(t)}`;
+                          const tex = textures[spritePath];
+
+                          return (
+                            <pixiContainer
+                              key={`rd-${t.suit}-${t.rank}-${i}`}
+                              x={x + tileW / 2}
+                              y={y + tileH / 2}
+                              rotation={-Math.PI / 2}
+                            >
+                              <pixiGraphics
+                                x={-tileW / 2}
+                                y={-tileH / 2}
+                                draw={(g) => {
+                                  drawMahjongBlock(g, {
+                                    width: tileW,
+                                    height: tileH,
+                                    depthX,
+                                    depthY,
+                                    faceColor: 0xe7e8eb,
+                                    borderColor: 0xb8bcc3,
+                                  });
+                                }}
+                              />
+                              {tex ? (
+                                <pixiSprite
+                                  texture={tex}
+                                  x={-tileW / 2 + 3}
+                                  y={-tileH / 2 + 4}
+                                  width={tileW - depthX - 6}
+                                  height={tileH - depthY - 8}
+                                />
+                              ) : null}
+                            </pixiContainer>
+                          );
+                        })}
+                      </pixiContainer>
+                    );
+                  })()
+                : null}
 
               {selfDiscardTiles.length > 0
                 ? (() => {
