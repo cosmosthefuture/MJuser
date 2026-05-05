@@ -94,3 +94,135 @@ globalThis.__mj_triggerCanInterruptPong?.()
         }
     ]
 }
+
+
+
+[ws] on mahjong:winner_reveal 
+
+{
+    "winner_user_id": 1,
+    "winner_user_name": "User One",
+    "handTiles": [
+        {
+            "id": 3,
+            "type": "dot",
+            "number": 1,
+            "copy_no": 3
+        },
+        {
+            "id": 68,
+            "type": "bamboo",
+            "number": 8,
+            "copy_no": 4
+        },
+        {
+            "id": 66,
+            "type": "bamboo",
+            "number": 8,
+            "copy_no": 2
+        },
+        {
+            "id": 1,
+            "type": "dot",
+            "number": 1,
+            "copy_no": 1
+        }
+    ],
+    "chow": [
+        {
+            "kong_key": "dot_3",
+            "tiles": [
+                {
+                    "id": 9,
+                    "type": "dot",
+                    "number": 3,
+                    "copy_no": 1
+                },
+                {
+                    "id": 11,
+                    "type": "dot",
+                    "number": 3,
+                    "copy_no": 3
+                },
+                {
+                    "id": 10,
+                    "type": "dot",
+                    "number": 3,
+                    "copy_no": 2
+                },
+                {
+                    "id": 12,
+                    "type": "dot",
+                    "number": 3,
+                    "copy_no": 4
+                }
+            ]
+        }
+    ],
+    "pong": [
+        {
+            "kong_key": "dot_3",
+            "tiles": [
+                {
+                    "id": 9,
+                    "type": "dot",
+                    "number": 3,
+                    "copy_no": 1
+                },
+                {
+                    "id": 11,
+                    "type": "dot",
+                    "number": 3,
+                    "copy_no": 3
+                },
+                {
+                    "id": 10,
+                    "type": "dot",
+                    "number": 3,
+                    "copy_no": 2
+                },
+                {
+                    "id": 12,
+                    "type": "dot",
+                    "number": 3,
+                    "copy_no": 4
+                }
+            ]
+        }
+    ],
+    "kong": [
+        {
+            "kong_key": "dot_3",
+            "tiles": [
+                {
+                    "id": 9,
+                    "type": "dot",
+                    "number": 3,
+                    "copy_no": 1
+                },
+                {
+                    "id": 11,
+                    "type": "dot",
+                    "number": 3,
+                    "copy_no": 3
+                },
+                {
+                    "id": 10,
+                    "type": "dot",
+                    "number": 3,
+                    "copy_no": 2
+                },
+                {
+                    "id": 12,
+                    "type": "dot",
+                    "number": 3,
+                    "copy_no": 4
+                }
+            ]
+        }
+    ]
+}
+
+
+need to show tiles of others images
+[ws] on mahjong:join_room_success 

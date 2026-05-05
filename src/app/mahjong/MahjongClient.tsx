@@ -207,6 +207,20 @@ export default function MahjongClient() {
     });
   };
 
+  const emitSortHand = () => {
+    const socket = getSocket();
+    if (!socket) return;
+    if (roomId == null || authUserId == null) return;
+    console.log("[ws] emit mahjong:sort_hand", {
+      roomId: String(roomId),
+      userId: authUserId,
+    });
+    socket.emit("mahjong:sort_hand", {
+      roomId: String(roomId),
+      userId: authUserId,
+    });
+  };
+
   const emitAcceptInterruptPong = (pongKey: string) => {
     const socket = getSocket();
     if (!socket) return;
@@ -1328,6 +1342,18 @@ export default function MahjongClient() {
           opponentHandCounts={opponentHandCounts}
           onDoubleClickTile={(tileId) => emitDiscardTile(tileId)}
         />
+      </div>
+
+      <div className="pointer-events-none absolute inset-0 z-20">
+        <div className="pointer-events-auto absolute right-28 bottom-[200px]">
+          <button
+            type="button"
+            onClick={emitSortHand}
+            className="rounded-full border border-amber-100/15 bg-black/45 px-4 py-2 text-xs font-semibold text-amber-100 shadow-[0_20px_60px_rgba(0,0,0,0.45)] backdrop-blur-sm hover:bg-black/60"
+          >
+            Sort
+          </button>
+        </div>
       </div>
 
       {/* Overlays (HTML) */}
