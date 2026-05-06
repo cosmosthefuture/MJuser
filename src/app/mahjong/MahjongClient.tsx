@@ -39,6 +39,7 @@ type WinnerRevealPayload = {
   winnerUserName?: unknown;
   name?: unknown;
   handTiles?: unknown;
+  pair?: unknown;
   chow?: unknown;
   pong?: unknown;
   kong?: unknown;
@@ -316,27 +317,93 @@ export default function MahjongClient() {
     (
       globalThis as unknown as { __mj_triggerWinnerReveal?: () => void }
     ).__mj_triggerWinnerReveal = () => {
+      const payload = {
+        winner_user_id: authUserId ?? 2,
+        winner_user_name: "User Two",
+        pair: [
+          { id: 23, type: "dot", number: 6, copy_no: 3 },
+          { id: 24, type: "dot", number: 6, copy_no: 4 },
+        ],
+        chow: [
+          {
+            chow_key: "bamboo_3_4_5",
+            tiles: [
+              { id: 46, type: "bamboo", number: 3, copy_no: 2 },
+              { id: 51, type: "bamboo", number: 4, copy_no: 3 },
+              { id: 55, type: "bamboo", number: 5, copy_no: 3 },
+            ],
+          },
+          {
+            chow_key: "bamboo_3_4_5",
+            tiles: [
+              { id: 48, type: "bamboo", number: 3, copy_no: 4 },
+              { id: 50, type: "bamboo", number: 4, copy_no: 2 },
+              { id: 53, type: "bamboo", number: 5, copy_no: 1 },
+            ],
+          },
+          {
+            chow_key: "bamboo_7_8_9",
+            tiles: [
+              { id: 63, type: "bamboo", number: 7, copy_no: 3 },
+              { id: 66, type: "bamboo", number: 8, copy_no: 2 },
+              { id: 72, type: "bamboo", number: 9, copy_no: 4 },
+            ],
+          },
+          {
+            chow_key: "dot_4_5_6",
+            tiles: [
+              { id: 15, type: "dot", number: 4, copy_no: 3 },
+              { id: 17, type: "dot", number: 5, copy_no: 1 },
+              { id: 22, type: "dot", number: 6, copy_no: 2 },
+            ],
+          },
+        ],
+        pong: [],
+        kong: [],
+      };
+      console.log("[dev] trigger mahjong:winner_reveal", payload);
       setWinnerReveal({
         winnerUserId: authUserId ?? 2,
         winnerName: "User Two",
         resultLabel: authUserId != null ? "You Win" : "",
         tiles: [
-          { suit: "bamboo", rank: 3 },
-          { suit: "bamboo", rank: 3 },
-          { suit: "bamboo", rank: 3 },
-          { suit: "bamboo", rank: 9 },
-          { suit: "dots", rank: 1 },
-          { suit: "dots", rank: 2 },
-          { suit: "dots", rank: 3 },
-          { suit: "bamboo", rank: 5 },
-          { suit: "bamboo", rank: 6 },
-          { suit: "bamboo", rank: 7 },
-          { suit: "dots", rank: 7 },
-          { suit: "dots", rank: 7 },
-          { suit: "dots", rank: 7 },
-          { suit: "bamboo", rank: 9 },
+          { suit: "dots", rank: 6 },
+          { suit: "dots", rank: 6 },
         ],
-        melds: [],
+        melds: [
+          {
+            kind: "chow",
+            tiles: [
+              { suit: "bamboo", rank: 3 },
+              { suit: "bamboo", rank: 4 },
+              { suit: "bamboo", rank: 5 },
+            ],
+          },
+          {
+            kind: "chow",
+            tiles: [
+              { suit: "bamboo", rank: 3 },
+              { suit: "bamboo", rank: 4 },
+              { suit: "bamboo", rank: 5 },
+            ],
+          },
+          {
+            kind: "chow",
+            tiles: [
+              { suit: "bamboo", rank: 7 },
+              { suit: "bamboo", rank: 8 },
+              { suit: "bamboo", rank: 9 },
+            ],
+          },
+          {
+            kind: "chow",
+            tiles: [
+              { suit: "dots", rank: 4 },
+              { suit: "dots", rank: 5 },
+              { suit: "dots", rank: 6 },
+            ],
+          },
+        ],
       });
     };
 
@@ -762,21 +829,6 @@ export default function MahjongClient() {
             ? winnerNameRaw
             : `User ${winnerUserId}`;
 
-        const tilesRaw = p.handTiles;
-        const tiles: MahjongTile[] = [];
-        if (Array.isArray(tilesRaw)) {
-          for (const t of tilesRaw as WsTile[]) {
-            if (typeof t !== "object" || t === null) continue;
-            if (t.type === "hidden") continue;
-            const rank = Number(t.number);
-            if (!Number.isFinite(rank) || rank < 1 || rank > 9) continue;
-            const suit: MahjongTile["suit"] | null =
-              t.type === "bamboo" ? "bamboo" : t.type === "dot" ? "dots" : null;
-            if (!suit) continue;
-            tiles.push({ suit, rank });
-          }
-        }
-
         const normalizeRevealTiles = (raw: unknown): MahjongTile[] => {
           if (!Array.isArray(raw)) return [];
           const out: MahjongTile[] = [];
@@ -792,6 +844,11 @@ export default function MahjongClient() {
           }
           return out;
         };
+
+        const handTilesRaw = p.handTiles;
+        const pairRaw = p.pair;
+        const pairTiles = normalizeRevealTiles(pairRaw);
+        const tilesFromHand = normalizeRevealTiles(handTilesRaw);
 
         const melds: Array<{
           kind: "chow" | "pong" | "kong";
@@ -830,6 +887,13 @@ export default function MahjongClient() {
               melds.push({ kind: "kong", tiles: groupTiles });
           }
         }
+
+        const tiles: MahjongTile[] =
+          pairTiles.length > 0
+            ? pairTiles
+            : tilesFromHand.length > 0
+              ? tilesFromHand
+              : [];
 
         setTurnCountdown(null);
         setWinnerReveal({
