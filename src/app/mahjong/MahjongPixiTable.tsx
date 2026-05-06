@@ -147,6 +147,32 @@ export default function MahjongPixiTable({
 
   const [textures, setTextures] = useState<Record<string, Texture>>({});
   const [hoveredHandIdx, setHoveredHandIdx] = useState<number | null>(null);
+  const lastTileTapRef = useRef<{ tileId: number; ts: number } | null>(null);
+
+  const tryEmitDoubleTap = (tileId: number, evtDetail?: number) => {
+    // Prefer native click-count when available.
+    if (evtDetail === 2) {
+      onDoubleClickTile?.(tileId);
+      lastTileTapRef.current = null;
+      return;
+    }
+
+    // Fallback: manual "double-click" detector to avoid relying on `detail`,
+    // which can be inconsistent for Pixi pointer events after clicking outside
+    // the canvas (focus/target changes).
+    const now =
+      typeof performance !== "undefined" ? performance.now() : Date.now();
+    const last = lastTileTapRef.current;
+    const withinMs = 320;
+
+    if (last && last.tileId === tileId && now - last.ts <= withinMs) {
+      onDoubleClickTile?.(tileId);
+      lastTileTapRef.current = null;
+      return;
+    }
+
+    lastTileTapRef.current = { tileId, ts: now };
+  };
 
   useEffect(() => {
     if (!containerRef.current || typeof window === "undefined") return;
@@ -1142,11 +1168,10 @@ export default function MahjongPixiTable({
                 eventMode="static"
                 cursor="default"
                 onPointerTap={(e: unknown) => {
-                  const detail = (e as unknown as { detail?: number }).detail;
-                  if (detail !== 2) return;
                   const tileId = (t as { id?: number }).id;
                   if (typeof tileId !== "number") return;
-                  onDoubleClickTile?.(tileId);
+                  const detail = (e as unknown as { detail?: number }).detail;
+                  tryEmitDoubleTap(tileId, detail);
                 }}
                 onPointerOver={() => setHoveredHandIdx(idx)}
                 onPointerOut={() =>
