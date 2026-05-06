@@ -538,7 +538,8 @@ export default function MahjongPixiTable({
                     const tileGap = 4;
                     const depthX = 3;
                     const depthY = 3;
-                    const rows = Math.ceil(topDiscardTiles.length / cols);
+                    const orderedTopDiscards = [...topDiscardTiles].reverse();
+                    const rows = Math.ceil(orderedTopDiscards.length / cols);
                     const contentW =
                       cols * tileW + Math.max(0, cols - 1) * tileGap;
                     const pad = 10;
@@ -551,7 +552,7 @@ export default function MahjongPixiTable({
 
                     return (
                       <pixiContainer x={boxX} y={boxY}>
-                        {topDiscardTiles.map((t, i) => {
+                        {orderedTopDiscards.map((t, i) => {
                           const col = i % cols;
                           const rowFromTop = Math.floor(i / cols);
                           const row = rows - 1 - rowFromTop;
