@@ -509,7 +509,6 @@ export default function MahjongClient() {
     if (!roomId || !Number.isFinite(roomId)) return;
 
     let cancelled = false;
-    let roundToastTimer: number | null = null;
     let diceTimer: number | null = null;
     let firstPlayerHighlightTimer: number | null = null;
 
@@ -579,11 +578,7 @@ export default function MahjongClient() {
 
       const handleRoundStarted = () => {
         if (cancelled) return;
-        setCenterMessage("Round started");
-        if (roundToastTimer) window.clearTimeout(roundToastTimer);
-        roundToastTimer = window.setTimeout(() => {
-          setCenterMessage((prev) => (prev === "Round started" ? null : prev));
-        }, 1400);
+        setCenterMessage(null);
       };
 
       const normalizeRoundPlayers = (players: unknown): RoundPlayer[] => {
@@ -1400,6 +1395,8 @@ export default function MahjongClient() {
       const handleStartShuffling = () => {
         if (cancelled) return;
         // Visible cue for the "start shuffling" server event.
+        setDiceRolling(false);
+        setDiceFaces(null);
         setCenterMessage("Shuffling Tiles");
         // Lightweight debug log for parity with example client snippet.
         console.log("Shuffling Tiles");
@@ -1517,7 +1514,6 @@ export default function MahjongClient() {
 
     return () => {
       cancelled = true;
-      if (roundToastTimer) window.clearTimeout(roundToastTimer);
       if (diceTimer) window.clearInterval(diceTimer);
       if (firstPlayerHighlightTimer)
         window.clearTimeout(firstPlayerHighlightTimer);
@@ -1649,7 +1645,9 @@ export default function MahjongClient() {
           opponentHandCounts={opponentHandCounts}
           opponentMelds={opponentMelds}
           onDoubleClickTile={
-            isDecisionModalOpen ? undefined : (tileId) => emitDiscardTile(tileId)
+            isDecisionModalOpen
+              ? undefined
+              : (tileId) => emitDiscardTile(tileId)
           }
         />
       </div>
