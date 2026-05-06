@@ -12,3 +12,6 @@
 
 #when pass make disable other button
 collapsing shuffling
+user seat position before shuffling 
+
+#အပူးက သူများဖဲနိုင်လား

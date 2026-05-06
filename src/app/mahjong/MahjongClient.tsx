@@ -613,7 +613,8 @@ export default function MahjongClient() {
               return null;
             return { userId, name, seatPosition };
           })
-          .filter((p): p is RoundPlayer => !!p);
+          .filter((p): p is RoundPlayer => !!p)
+          .sort((a, b) => a.seatPosition - b.seatPosition);
       };
 
       const handleRoundStartedPlayers = (payload: unknown) => {
@@ -1556,16 +1557,44 @@ export default function MahjongClient() {
       authUserId != null
         ? (roundPlayers.find((p) => p.userId === authUserId) ?? null)
         : null;
-    const self = authPlayer ?? roundPlayers[0] ?? null;
-    const others = self ? roundPlayers.filter((p) => p !== self) : [];
 
-    const sides: Array<"bottom" | "right" | "top" | "left"> = [];
-    if (self) sides.push("bottom");
-    if (others.length >= 1) sides.push("right");
-    if (others.length >= 2) sides.push("top");
-    if (others.length >= 3) sides.push("left");
-    setActiveSides(sides);
-  }, [roundPlayers, authUserId]);
+    const self =
+      authPlayer ??
+      (selfSeatPosition != null
+        ? (roundPlayers.find((p) => p.seatPosition === selfSeatPosition) ??
+          null)
+        : null) ??
+      roundPlayers[0] ??
+      null;
+
+    if (!self) return;
+
+    const others = roundPlayers.filter((p) => p !== self);
+    const sidesSet = new Set<"bottom" | "right" | "top" | "left">(["bottom"]);
+
+    if (others.length === 1) {
+      sidesSet.add("right");
+      setActiveSides(["bottom", "right"]);
+      return;
+    }
+
+    const selfSeatNo = self.seatPosition;
+    for (const p of others) {
+      const otherSeatNo = p.seatPosition;
+      const delta = (((otherSeatNo - selfSeatNo) % 4) + 4) % 4;
+      if (delta === 1) sidesSet.add("right");
+      if (delta === 2) sidesSet.add("top");
+      if (delta === 3) sidesSet.add("left");
+    }
+
+    const ordered: Array<"bottom" | "right" | "top" | "left"> = [
+      "bottom",
+      "right",
+      "top",
+      "left",
+    ];
+    setActiveSides(ordered.filter((s) => sidesSet.has(s)));
+  }, [roundPlayers, authUserId, selfSeatPosition]);
 
   return (
     <div className="relative w-screen h-screen overflow-hidden text-amber-100">
