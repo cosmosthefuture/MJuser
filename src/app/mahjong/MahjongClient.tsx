@@ -969,6 +969,25 @@ export default function MahjongClient() {
       setDiscards([]);
     };
 
+    const applyUserToPlay = (payload: unknown) => {
+      if (cancelled) return;
+      if (typeof payload !== "object" || payload === null) return;
+      const p = payload as {
+        user_id?: unknown;
+        userId?: unknown;
+        user_id_to_play_first?: unknown;
+      };
+      const userId = Number(p.user_id ?? p.userId ?? p.user_id_to_play_first);
+      if (!Number.isFinite(userId)) return;
+      setActivePlayerUserId(userId);
+      // Small pop animation each time the "user to play" changes.
+      setFirstPlayerHighlightId(userId);
+      if (firstPlayerHighlightTimer) window.clearTimeout(firstPlayerHighlightTimer);
+      firstPlayerHighlightTimer = window.setTimeout(() => {
+        setFirstPlayerHighlightId(null);
+      }, 1200);
+    };
+
     const handleJoinSuccess = (data: unknown) => {
       if (cancelled) return;
       setRoomState(data);
@@ -983,6 +1002,7 @@ export default function MahjongClient() {
       setDrawPileCount(wallCount);
 
       applyInitialHandState((data as { handState?: unknown }).handState);
+      applyUserToPlay((data as { currentTurnPlayer?: unknown }).currentTurnPlayer);
     };
 
     const doJoin = async (socket: ReturnType<typeof getSocket>) => {
@@ -1478,23 +1498,7 @@ export default function MahjongClient() {
       };
 
       const handleUserToPlay = (payload: unknown) => {
-        if (cancelled) return;
-        if (typeof payload !== "object" || payload === null) return;
-        const p = payload as {
-          user_id?: unknown;
-          userId?: unknown;
-          user_id_to_play_first?: unknown;
-        };
-        const userId = Number(p.user_id ?? p.userId ?? p.user_id_to_play_first);
-        if (!Number.isFinite(userId)) return;
-        setActivePlayerUserId(userId);
-        // Small pop animation each time the "user to play" changes.
-        setFirstPlayerHighlightId(userId);
-        if (firstPlayerHighlightTimer)
-          window.clearTimeout(firstPlayerHighlightTimer);
-        firstPlayerHighlightTimer = window.setTimeout(() => {
-          setFirstPlayerHighlightId(null);
-        }, 1200);
+        applyUserToPlay(payload);
       };
 
       socket.off("mahjong:waiting_for_players", handleWaitingForPlayers);
