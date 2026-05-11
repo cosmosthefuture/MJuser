@@ -588,10 +588,401 @@ export default function MahjongClient() {
       return connectSocket({ token: wsToken });
     };
 
+    const applyInitialHandState = (payload: unknown) => {
+      if (cancelled) return;
+      if (!Array.isArray(payload)) return;
+
+      const isSortUpdate = sortHandInFlightRef.current;
+      sortHandInFlightRef.current = false;
+
+      // Clear transient "Shuffling Tiles" message once hands arrive.
+      setCenterMessage(null);
+      setWinnerReveal(null);
+      if (!isSortUpdate) {
+        setKongDecision(null);
+        setPongDecision(null);
+        setChowDecision(null);
+      }
+
+      // Once hands are dealt, hide dice overlay and show draw pile box.
+      setDiceRolling(false);
+      setDiceFaces(null);
+      setShowDrawPile(true);
+
+      // Map non-self players' tileCount to the corresponding side so the small
+      // wall blocks match the hidden hand size (commonly 13).
+      const nextOpponentCounts: Partial<
+        Record<"right" | "top" | "left", number>
+      > = {};
+
+      const getSeatNumber = (raw: unknown): number | null => {
+        if (typeof raw !== "object" || raw === null) return null;
+        const seatRaw =
+          (raw as { seat_position?: unknown; seatPosition?: unknown })
+            .seat_position ??
+          (raw as { seat_position?: unknown; seatPosition?: unknown })
+            .seatPosition;
+        const seat = Number(seatRaw);
+        return Number.isFinite(seat) ? seat : null;
+      };
+
+      const selfSeat = (() => {
+        const selfPlayer = payload.find(
+          (p) =>
+            typeof p === "object" &&
+            p !== null &&
+            (p as { isSelf?: unknown }).isSelf === true,
+        );
+        return getSeatNumber(selfPlayer);
+      })();
+
+      setSelfSeatPosition(selfSeat);
+
+      const opponentCount = payload.filter(
+        (p) =>
+          typeof p === "object" &&
+          p !== null &&
+          (p as { isSelf?: unknown }).isSelf !== true,
+      ).length;
+
+      const sideFromSeats = (
+        selfSeatNo: number | null,
+        otherSeatNo: number | null,
+      ): "right" | "top" | "left" | null => {
+        if (opponentCount === 1) return "right";
+        if (selfSeatNo == null || otherSeatNo == null) return null;
+        const delta = (((otherSeatNo - selfSeatNo) % 4) + 4) % 4;
+        if (delta === 1) return "right";
+        if (delta === 2) return "top";
+        if (delta === 3) return "left";
+        return null;
+      };
+
+      // Decide which wall sides to render based on actual seat positions.
+      // This keeps the wall/tiles aligned with seat labels for any logged-in user.
+      if (selfSeat != null) {
+        const sidesSet = new Set<"bottom" | "right" | "top" | "left">([
+          "bottom",
+        ]);
+        for (const p of payload) {
+          if (typeof p !== "object" || p === null) continue;
+          if ((p as { isSelf?: unknown }).isSelf === true) continue;
+          const side = sideFromSeats(selfSeat, getSeatNumber(p));
+          if (side) sidesSet.add(side);
+        }
+        const ordered: Array<"bottom" | "right" | "top" | "left"> = [
+          "bottom",
+          "right",
+          "top",
+          "left",
+        ];
+        setActiveSides(ordered.filter((s) => sidesSet.has(s)));
+      } else {
+        const count = payload.length;
+        if (count >= 1) {
+          const sides: Array<"bottom" | "right" | "top" | "left"> = ["bottom"];
+          if (count >= 2) sides.push("right");
+          if (count >= 3) sides.push("top");
+          if (count >= 4) sides.push("left");
+          setActiveSides(sides);
+        }
+      }
+
+      const normalizeOpponentMeldTiles = (raw: unknown): MahjongTile[] => {
+        if (!Array.isArray(raw)) return [];
+        const out: MahjongTile[] = [];
+        for (const t of raw as WsTile[]) {
+          if (typeof t !== "object" || t === null) continue;
+          if (t.type === "hidden") continue;
+          const rank = Number(t.number);
+          if (!Number.isFinite(rank) || rank < 1 || rank > 9) continue;
+          const suit: MahjongTile["suit"] | null =
+            t.type === "bamboo" ? "bamboo" : t.type === "dot" ? "dots" : null;
+          if (!suit) continue;
+          out.push({ suit, rank });
+        }
+        return out;
+      };
+
+      const nextOpponentMelds: Partial<
+        Record<
+          "right" | "top" | "left",
+          Array<{ kind: "pong" | "chow" | "kong"; tiles: MahjongTile[] }>
+        >
+      > = {};
+      const nextRightDiscards: MahjongTile[] = [];
+      const nextTopDiscards: MahjongTile[] = [];
+      const nextLeftDiscards: MahjongTile[] = [];
+      for (const p of payload) {
+        if (typeof p !== "object" || p === null) continue;
+        if ((p as { isSelf?: unknown }).isSelf === true) continue;
+        const side = sideFromSeats(selfSeat, getSeatNumber(p));
+        if (!side) continue;
+
+        const tilesRaw = (p as { tiles?: unknown }).tiles;
+        const tileCountFromTiles = Array.isArray(tilesRaw)
+          ? tilesRaw.length
+          : NaN;
+        const tileCountRaw = (p as { tileCount?: unknown }).tileCount;
+        const tileCountFromField = Number(tileCountRaw);
+        const tileCount = Number.isFinite(tileCountFromTiles)
+          ? tileCountFromTiles
+          : tileCountFromField;
+        if (Number.isFinite(tileCount) && tileCount > 0) {
+          nextOpponentCounts[side] = tileCount;
+        }
+
+        const meldsForSide: Array<{
+          kind: "pong" | "chow" | "kong";
+          tiles: MahjongTile[];
+        }> = [];
+
+        const pongRaw = (p as { pong?: unknown }).pong;
+        if (Array.isArray(pongRaw)) {
+          for (const g of pongRaw) {
+            if (typeof g !== "object" || g === null) continue;
+            const tiles = normalizeOpponentMeldTiles(
+              (g as { tiles?: unknown }).tiles,
+            );
+            if (tiles.length > 0) meldsForSide.push({ kind: "pong", tiles });
+          }
+        }
+
+        const chowRaw = (p as { chow?: unknown }).chow;
+        if (Array.isArray(chowRaw)) {
+          for (const g of chowRaw) {
+            if (typeof g !== "object" || g === null) continue;
+            const tiles = normalizeOpponentMeldTiles(
+              (g as { tiles?: unknown }).tiles,
+            );
+            if (tiles.length > 0) meldsForSide.push({ kind: "chow", tiles });
+          }
+        }
+
+        const kongRaw = (p as { kong?: unknown }).kong;
+        if (Array.isArray(kongRaw)) {
+          for (const g of kongRaw) {
+            if (typeof g !== "object" || g === null) continue;
+            const tiles = normalizeOpponentMeldTiles(
+              (g as { tiles?: unknown }).tiles,
+            );
+            if (tiles.length > 0) meldsForSide.push({ kind: "kong", tiles });
+          }
+        }
+
+        const discardedRaw = (p as { discarded_tiles?: unknown }).discarded_tiles;
+        const sideDiscards: MahjongTile[] = [];
+        if (Array.isArray(discardedRaw)) {
+          for (const t of discardedRaw as WsTile[]) {
+            if (typeof t !== "object" || t === null) continue;
+            if ((t as { type?: unknown }).type === "hidden") continue;
+            const rank = Number((t as { number?: unknown }).number);
+            if (!Number.isFinite(rank) || rank < 1 || rank > 9) continue;
+            const suit: MahjongTile["suit"] | null =
+              (t as { type?: unknown }).type === "bamboo"
+                ? "bamboo"
+                : (t as { type?: unknown }).type === "dot"
+                  ? "dots"
+                  : null;
+            if (!suit) continue;
+            sideDiscards.push({ suit, rank });
+          }
+        }
+        if (side === "right") nextRightDiscards.push(...sideDiscards);
+        if (side === "top") nextTopDiscards.push(...sideDiscards);
+        if (side === "left") nextLeftDiscards.push(...sideDiscards);
+
+        if (meldsForSide.length > 0) nextOpponentMelds[side] = meldsForSide;
+      }
+      setOpponentHandCounts(nextOpponentCounts);
+      setOpponentMelds(nextOpponentMelds);
+      setRightDiscardTiles(nextRightDiscards);
+      setTopDiscardTiles(nextTopDiscards);
+      setLeftDiscardTiles(nextLeftDiscards);
+
+      // Track last discarded tile (for the draw pile panel).
+      // Payload order can vary, so search for the first valid last_discard_tile.
+      let nextLastDiscard: MahjongTile | null = null;
+      for (const entry of payload) {
+        if (typeof entry !== "object" || entry === null) continue;
+        const lastDiscardRaw = (entry as { last_discard_tile?: unknown })
+          .last_discard_tile;
+        if (typeof lastDiscardRaw !== "object" || lastDiscardRaw === null)
+          continue;
+        const typeRaw = (lastDiscardRaw as { type?: unknown }).type;
+        const numberRaw = (lastDiscardRaw as { number?: unknown }).number;
+        const rank = Number(numberRaw);
+        const suit: MahjongTile["suit"] | null =
+          typeRaw === "bamboo" ? "bamboo" : typeRaw === "dot" ? "dots" : null;
+        if (suit && Number.isFinite(rank) && rank >= 1 && rank <= 9) {
+          nextLastDiscard = { suit, rank };
+          break;
+        }
+      }
+      setLastDiscardTile(nextLastDiscard);
+
+      const self = payload.find(
+        (p) =>
+          typeof p === "object" &&
+          p !== null &&
+          (p as { isSelf?: unknown }).isSelf === true,
+      ) as
+        | {
+            tiles?: unknown;
+            pong?: unknown;
+            chow?: unknown;
+            kong?: unknown;
+            discarded_tiles?: unknown;
+            tileCount?: unknown;
+            seat_position?: unknown;
+            seatPosition?: unknown;
+          }
+        | undefined;
+
+      const normalizeMeldTiles = (
+        tiles: unknown,
+      ): Array<MahjongTile & { id: number }> => {
+        if (!Array.isArray(tiles)) return [];
+        const out: Array<MahjongTile & { id: number }> = [];
+        for (const t of tiles) {
+          if (typeof t !== "object" || t === null) continue;
+          const typeRaw = (t as { type?: unknown }).type;
+          const numberRaw = (t as { number?: unknown }).number;
+          const idRaw = (t as { id?: unknown }).id;
+          if (typeRaw === "hidden") continue;
+          const rank = Number(numberRaw);
+          const id = Number(idRaw);
+          if (!Number.isFinite(rank) || rank < 1 || rank > 9) continue;
+          if (!Number.isFinite(id)) continue;
+          const suit: MahjongTile["suit"] | null =
+            typeRaw === "bamboo"
+              ? "bamboo"
+              : typeRaw === "dot"
+                ? "dots"
+                : null;
+          if (!suit) continue;
+          out.push({ id, suit, rank });
+        }
+        return out;
+      };
+
+      const nextMelds: Array<{
+        kind: "pong" | "chow" | "kong";
+        meldKey: string;
+        tiles: Array<MahjongTile & { id: number }>;
+      }> = [];
+
+      const pongRaw = self?.pong;
+      if (Array.isArray(pongRaw)) {
+        for (const g of pongRaw) {
+          if (typeof g !== "object" || g === null) continue;
+          const keyRaw =
+            (g as { pong_key?: unknown; pongKey?: unknown }).pong_key ??
+            (g as { pong_key?: unknown; pongKey?: unknown }).pongKey ??
+            (g as { tileKey?: unknown }).tileKey;
+          const meldKey = typeof keyRaw === "string" ? keyRaw : "";
+          const tiles = normalizeMeldTiles((g as { tiles?: unknown }).tiles);
+          if (meldKey && tiles.length > 0)
+            nextMelds.push({ kind: "pong", meldKey, tiles });
+        }
+      }
+
+      const chowRaw = self?.chow;
+      if (Array.isArray(chowRaw)) {
+        for (const g of chowRaw) {
+          if (typeof g !== "object" || g === null) continue;
+          const keyRaw =
+            (g as { chow_key?: unknown; chowKey?: unknown }).chow_key ??
+            (g as { chow_key?: unknown; chowKey?: unknown }).chowKey ??
+            (g as { tileKey?: unknown }).tileKey;
+          const meldKey = typeof keyRaw === "string" ? keyRaw : "";
+          const tiles = normalizeMeldTiles((g as { tiles?: unknown }).tiles);
+          if (meldKey && tiles.length > 0)
+            nextMelds.push({ kind: "chow", meldKey, tiles });
+        }
+      }
+
+      const kongRaw = self?.kong;
+      if (Array.isArray(kongRaw)) {
+        for (const g of kongRaw) {
+          if (typeof g !== "object" || g === null) continue;
+          const keyRaw =
+            (g as { kong_key?: unknown; kongKey?: unknown }).kong_key ??
+            (g as { kong_key?: unknown; kongKey?: unknown }).kongKey ??
+            (g as { tileKey?: unknown }).tileKey;
+          const meldKey = typeof keyRaw === "string" ? keyRaw : "";
+          const tiles = normalizeMeldTiles((g as { tiles?: unknown }).tiles);
+          if (meldKey && tiles.length > 0)
+            nextMelds.push({ kind: "kong", meldKey, tiles });
+        }
+      }
+
+      setSelfMelds(nextMelds);
+
+      const tilesRaw = self?.tiles;
+      if (!Array.isArray(tilesRaw)) return;
+
+      const discardedRaw = self?.discarded_tiles;
+      if (Array.isArray(discardedRaw)) {
+        const nextSelfDiscards: MahjongTile[] = [];
+        for (const t of discardedRaw as WsTile[]) {
+          if (typeof t !== "object" || t === null) continue;
+          if (t.type === "hidden") continue;
+          const rank = Number(t.number);
+          if (!Number.isFinite(rank) || rank < 1 || rank > 9) continue;
+          const suit: MahjongTile["suit"] | null =
+            t.type === "bamboo" ? "bamboo" : t.type === "dot" ? "dots" : null;
+          if (!suit) continue;
+          nextSelfDiscards.push({ suit, rank });
+        }
+        setSelfDiscardTiles(nextSelfDiscards);
+      } else {
+        setSelfDiscardTiles([]);
+      }
+
+      const nextHand: ClientTile[] = [];
+      for (const t of tilesRaw) {
+        if (typeof t !== "object" || t === null) continue;
+        const typeRaw = (t as { type?: unknown }).type;
+        const numberRaw = (t as { number?: unknown }).number;
+        const idRaw = (t as { id?: unknown }).id;
+        if (typeRaw === "hidden") continue;
+
+        const rank = Number(numberRaw);
+        if (!Number.isFinite(rank) || rank < 1 || rank > 9) continue;
+        const id = Number(idRaw);
+        if (!Number.isFinite(id)) continue;
+
+        // WS uses "dot" | "bamboo". Our internal suit uses "dots" | "bamboo".
+        const suit: MahjongTile["suit"] | null =
+          typeRaw === "bamboo" ? "bamboo" : typeRaw === "dot" ? "dots" : null;
+        if (!suit) continue;
+
+        nextHand.push({ id, suit, rank });
+      }
+
+      if (nextHand.length > 0) {
+        // Preserve server order for now.
+        setHand(nextHand);
+      }
+      // Reset discards when a new initial state arrives.
+      setDiscards([]);
+    };
+
     const handleJoinSuccess = (data: unknown) => {
       if (cancelled) return;
       setRoomState(data);
       setJoinError(null);
+
+      if (typeof data !== "object" || data === null) return;
+      const status = (data as { status?: unknown }).status;
+      if (status !== "playing") return;
+      const wallCountRaw = (data as { wallCount?: unknown }).wallCount;
+      const wallCount = Number(wallCountRaw);
+      if (!Number.isFinite(wallCount) || wallCount < 0) return;
+      setDrawPileCount(wallCount);
+
+      applyInitialHandState((data as { handState?: unknown }).handState);
     };
 
     const doJoin = async (socket: ReturnType<typeof getSocket>) => {
@@ -1073,387 +1464,7 @@ export default function MahjongClient() {
       };
 
       const handleInitialHandState = (payload: unknown) => {
-        if (cancelled) return;
-        if (!Array.isArray(payload)) return;
-
-        const isSortUpdate = sortHandInFlightRef.current;
-        sortHandInFlightRef.current = false;
-
-        // Clear transient "Shuffling Tiles" message once hands arrive.
-        setCenterMessage(null);
-        setWinnerReveal(null);
-        if (!isSortUpdate) {
-          setKongDecision(null);
-          setPongDecision(null);
-          setChowDecision(null);
-        }
-
-        // Once hands are dealt, hide dice overlay and show draw pile box.
-        setDiceRolling(false);
-        setDiceFaces(null);
-        setShowDrawPile(true);
-
-        // Map non-self players' tileCount to the corresponding side so the small
-        // wall blocks match the hidden hand size (commonly 13).
-        const nextOpponentCounts: Partial<
-          Record<"right" | "top" | "left", number>
-        > = {};
-
-        const getSeatNumber = (raw: unknown): number | null => {
-          if (typeof raw !== "object" || raw === null) return null;
-          const seatRaw =
-            (raw as { seat_position?: unknown; seatPosition?: unknown })
-              .seat_position ??
-            (raw as { seat_position?: unknown; seatPosition?: unknown })
-              .seatPosition;
-          const seat = Number(seatRaw);
-          return Number.isFinite(seat) ? seat : null;
-        };
-
-        const selfSeat = (() => {
-          const selfPlayer = payload.find(
-            (p) =>
-              typeof p === "object" &&
-              p !== null &&
-              (p as { isSelf?: unknown }).isSelf === true,
-          );
-          return getSeatNumber(selfPlayer);
-        })();
-
-        setSelfSeatPosition(selfSeat);
-
-        const opponentCount = payload.filter(
-          (p) =>
-            typeof p === "object" &&
-            p !== null &&
-            (p as { isSelf?: unknown }).isSelf !== true,
-        ).length;
-
-        const sideFromSeats = (
-          selfSeatNo: number | null,
-          otherSeatNo: number | null,
-        ): "right" | "top" | "left" | null => {
-          if (opponentCount === 1) return "right";
-          if (selfSeatNo == null || otherSeatNo == null) return null;
-          const delta = (((otherSeatNo - selfSeatNo) % 4) + 4) % 4;
-          if (delta === 1) return "right";
-          if (delta === 2) return "top";
-          if (delta === 3) return "left";
-          return null;
-        };
-
-        // Decide which wall sides to render based on actual seat positions.
-        // This keeps the wall/tiles aligned with seat labels for any logged-in user.
-        if (selfSeat != null) {
-          const sidesSet = new Set<"bottom" | "right" | "top" | "left">([
-            "bottom",
-          ]);
-          for (const p of payload) {
-            if (typeof p !== "object" || p === null) continue;
-            if ((p as { isSelf?: unknown }).isSelf === true) continue;
-            const side = sideFromSeats(selfSeat, getSeatNumber(p));
-            if (side) sidesSet.add(side);
-          }
-          const ordered: Array<"bottom" | "right" | "top" | "left"> = [
-            "bottom",
-            "right",
-            "top",
-            "left",
-          ];
-          setActiveSides(ordered.filter((s) => sidesSet.has(s)));
-        } else {
-          const count = payload.length;
-          if (count >= 1) {
-            const sides: Array<"bottom" | "right" | "top" | "left"> = [
-              "bottom",
-            ];
-            if (count >= 2) sides.push("right");
-            if (count >= 3) sides.push("top");
-            if (count >= 4) sides.push("left");
-            setActiveSides(sides);
-          }
-        }
-
-        const normalizeOpponentMeldTiles = (raw: unknown): MahjongTile[] => {
-          if (!Array.isArray(raw)) return [];
-          const out: MahjongTile[] = [];
-          for (const t of raw as WsTile[]) {
-            if (typeof t !== "object" || t === null) continue;
-            if (t.type === "hidden") continue;
-            const rank = Number(t.number);
-            if (!Number.isFinite(rank) || rank < 1 || rank > 9) continue;
-            const suit: MahjongTile["suit"] | null =
-              t.type === "bamboo" ? "bamboo" : t.type === "dot" ? "dots" : null;
-            if (!suit) continue;
-            out.push({ suit, rank });
-          }
-          return out;
-        };
-
-        const nextOpponentMelds: Partial<
-          Record<
-            "right" | "top" | "left",
-            Array<{ kind: "pong" | "chow" | "kong"; tiles: MahjongTile[] }>
-          >
-        > = {};
-        const nextRightDiscards: MahjongTile[] = [];
-        const nextTopDiscards: MahjongTile[] = [];
-        const nextLeftDiscards: MahjongTile[] = [];
-        for (const p of payload) {
-          if (typeof p !== "object" || p === null) continue;
-          if ((p as { isSelf?: unknown }).isSelf === true) continue;
-          const side = sideFromSeats(selfSeat, getSeatNumber(p));
-          if (!side) continue;
-
-          const tilesRaw = (p as { tiles?: unknown }).tiles;
-          const tileCountFromTiles = Array.isArray(tilesRaw)
-            ? tilesRaw.length
-            : NaN;
-          const tileCountRaw = (p as { tileCount?: unknown }).tileCount;
-          const tileCountFromField = Number(tileCountRaw);
-          const tileCount = Number.isFinite(tileCountFromTiles)
-            ? tileCountFromTiles
-            : tileCountFromField;
-          if (Number.isFinite(tileCount) && tileCount > 0) {
-            nextOpponentCounts[side] = tileCount;
-          }
-
-          const meldsForSide: Array<{
-            kind: "pong" | "chow" | "kong";
-            tiles: MahjongTile[];
-          }> = [];
-
-          const pongRaw = (p as { pong?: unknown }).pong;
-          if (Array.isArray(pongRaw)) {
-            for (const g of pongRaw) {
-              if (typeof g !== "object" || g === null) continue;
-              const tiles = normalizeOpponentMeldTiles(
-                (g as { tiles?: unknown }).tiles,
-              );
-              if (tiles.length > 0) meldsForSide.push({ kind: "pong", tiles });
-            }
-          }
-
-          const chowRaw = (p as { chow?: unknown }).chow;
-          if (Array.isArray(chowRaw)) {
-            for (const g of chowRaw) {
-              if (typeof g !== "object" || g === null) continue;
-              const tiles = normalizeOpponentMeldTiles(
-                (g as { tiles?: unknown }).tiles,
-              );
-              if (tiles.length > 0) meldsForSide.push({ kind: "chow", tiles });
-            }
-          }
-
-          const kongRaw = (p as { kong?: unknown }).kong;
-          if (Array.isArray(kongRaw)) {
-            for (const g of kongRaw) {
-              if (typeof g !== "object" || g === null) continue;
-              const tiles = normalizeOpponentMeldTiles(
-                (g as { tiles?: unknown }).tiles,
-              );
-              if (tiles.length > 0) meldsForSide.push({ kind: "kong", tiles });
-            }
-          }
-
-          const discardedRaw = (p as { discarded_tiles?: unknown })
-            .discarded_tiles;
-          const sideDiscards: MahjongTile[] = [];
-          if (Array.isArray(discardedRaw)) {
-            for (const t of discardedRaw as WsTile[]) {
-              if (typeof t !== "object" || t === null) continue;
-              if ((t as { type?: unknown }).type === "hidden") continue;
-              const rank = Number((t as { number?: unknown }).number);
-              if (!Number.isFinite(rank) || rank < 1 || rank > 9) continue;
-              const suit: MahjongTile["suit"] | null =
-                (t as { type?: unknown }).type === "bamboo"
-                  ? "bamboo"
-                  : (t as { type?: unknown }).type === "dot"
-                    ? "dots"
-                    : null;
-              if (!suit) continue;
-              sideDiscards.push({ suit, rank });
-            }
-          }
-          if (side === "right") nextRightDiscards.push(...sideDiscards);
-          if (side === "top") nextTopDiscards.push(...sideDiscards);
-          if (side === "left") nextLeftDiscards.push(...sideDiscards);
-
-          if (meldsForSide.length > 0) nextOpponentMelds[side] = meldsForSide;
-        }
-        setOpponentHandCounts(nextOpponentCounts);
-        setOpponentMelds(nextOpponentMelds);
-        setRightDiscardTiles(nextRightDiscards);
-        setTopDiscardTiles(nextTopDiscards);
-        setLeftDiscardTiles(nextLeftDiscards);
-
-        // Track last discarded tile (for the draw pile panel).
-        // Payload order can vary, so search for the first valid last_discard_tile.
-        let nextLastDiscard: MahjongTile | null = null;
-        for (const entry of payload) {
-          if (typeof entry !== "object" || entry === null) continue;
-          const lastDiscardRaw = (entry as { last_discard_tile?: unknown })
-            .last_discard_tile;
-          if (typeof lastDiscardRaw !== "object" || lastDiscardRaw === null)
-            continue;
-          const typeRaw = (lastDiscardRaw as { type?: unknown }).type;
-          const numberRaw = (lastDiscardRaw as { number?: unknown }).number;
-          const rank = Number(numberRaw);
-          const suit: MahjongTile["suit"] | null =
-            typeRaw === "bamboo" ? "bamboo" : typeRaw === "dot" ? "dots" : null;
-          if (suit && Number.isFinite(rank) && rank >= 1 && rank <= 9) {
-            nextLastDiscard = { suit, rank };
-            break;
-          }
-        }
-        setLastDiscardTile(nextLastDiscard);
-
-        const self = payload.find(
-          (p) =>
-            typeof p === "object" &&
-            p !== null &&
-            (p as { isSelf?: unknown }).isSelf === true,
-        ) as
-          | {
-              tiles?: unknown;
-              pong?: unknown;
-              chow?: unknown;
-              kong?: unknown;
-              discarded_tiles?: unknown;
-              tileCount?: unknown;
-              seat_position?: unknown;
-              seatPosition?: unknown;
-            }
-          | undefined;
-
-        const normalizeMeldTiles = (
-          tiles: unknown,
-        ): Array<MahjongTile & { id: number }> => {
-          if (!Array.isArray(tiles)) return [];
-          const out: Array<MahjongTile & { id: number }> = [];
-          for (const t of tiles) {
-            if (typeof t !== "object" || t === null) continue;
-            const typeRaw = (t as { type?: unknown }).type;
-            const numberRaw = (t as { number?: unknown }).number;
-            const idRaw = (t as { id?: unknown }).id;
-            if (typeRaw === "hidden") continue;
-            const rank = Number(numberRaw);
-            const id = Number(idRaw);
-            if (!Number.isFinite(rank) || rank < 1 || rank > 9) continue;
-            if (!Number.isFinite(id)) continue;
-            const suit: MahjongTile["suit"] | null =
-              typeRaw === "bamboo"
-                ? "bamboo"
-                : typeRaw === "dot"
-                  ? "dots"
-                  : null;
-            if (!suit) continue;
-            out.push({ id, suit, rank });
-          }
-          return out;
-        };
-
-        const nextMelds: Array<{
-          kind: "pong" | "chow" | "kong";
-          meldKey: string;
-          tiles: Array<MahjongTile & { id: number }>;
-        }> = [];
-
-        const pongRaw = self?.pong;
-        if (Array.isArray(pongRaw)) {
-          for (const g of pongRaw) {
-            if (typeof g !== "object" || g === null) continue;
-            const keyRaw =
-              (g as { pong_key?: unknown; pongKey?: unknown }).pong_key ??
-              (g as { pong_key?: unknown; pongKey?: unknown }).pongKey ??
-              (g as { tileKey?: unknown }).tileKey;
-            const meldKey = typeof keyRaw === "string" ? keyRaw : "";
-            const tiles = normalizeMeldTiles((g as { tiles?: unknown }).tiles);
-            if (meldKey && tiles.length > 0)
-              nextMelds.push({ kind: "pong", meldKey, tiles });
-          }
-        }
-
-        const chowRaw = self?.chow;
-        if (Array.isArray(chowRaw)) {
-          for (const g of chowRaw) {
-            if (typeof g !== "object" || g === null) continue;
-            const keyRaw =
-              (g as { chow_key?: unknown; chowKey?: unknown }).chow_key ??
-              (g as { chow_key?: unknown; chowKey?: unknown }).chowKey ??
-              (g as { tileKey?: unknown }).tileKey;
-            const meldKey = typeof keyRaw === "string" ? keyRaw : "";
-            const tiles = normalizeMeldTiles((g as { tiles?: unknown }).tiles);
-            if (meldKey && tiles.length > 0)
-              nextMelds.push({ kind: "chow", meldKey, tiles });
-          }
-        }
-
-        const kongRaw = self?.kong;
-        if (Array.isArray(kongRaw)) {
-          for (const g of kongRaw) {
-            if (typeof g !== "object" || g === null) continue;
-            const keyRaw =
-              (g as { kong_key?: unknown; kongKey?: unknown }).kong_key ??
-              (g as { kong_key?: unknown; kongKey?: unknown }).kongKey ??
-              (g as { tileKey?: unknown }).tileKey;
-            const meldKey = typeof keyRaw === "string" ? keyRaw : "";
-            const tiles = normalizeMeldTiles((g as { tiles?: unknown }).tiles);
-            if (meldKey && tiles.length > 0)
-              nextMelds.push({ kind: "kong", meldKey, tiles });
-          }
-        }
-
-        setSelfMelds(nextMelds);
-
-        const tilesRaw = self?.tiles;
-        if (!Array.isArray(tilesRaw)) return;
-
-        const discardedRaw = self?.discarded_tiles;
-        if (Array.isArray(discardedRaw)) {
-          const nextSelfDiscards: MahjongTile[] = [];
-          for (const t of discardedRaw as WsTile[]) {
-            if (typeof t !== "object" || t === null) continue;
-            if (t.type === "hidden") continue;
-            const rank = Number(t.number);
-            if (!Number.isFinite(rank) || rank < 1 || rank > 9) continue;
-            const suit: MahjongTile["suit"] | null =
-              t.type === "bamboo" ? "bamboo" : t.type === "dot" ? "dots" : null;
-            if (!suit) continue;
-            nextSelfDiscards.push({ suit, rank });
-          }
-          setSelfDiscardTiles(nextSelfDiscards);
-        } else {
-          setSelfDiscardTiles([]);
-        }
-
-        const nextHand: ClientTile[] = [];
-        for (const t of tilesRaw) {
-          if (typeof t !== "object" || t === null) continue;
-          const typeRaw = (t as { type?: unknown }).type;
-          const numberRaw = (t as { number?: unknown }).number;
-          const idRaw = (t as { id?: unknown }).id;
-          if (typeRaw === "hidden") continue;
-
-          const rank = Number(numberRaw);
-          if (!Number.isFinite(rank) || rank < 1 || rank > 9) continue;
-          const id = Number(idRaw);
-          if (!Number.isFinite(id)) continue;
-
-          // WS uses "dot" | "bamboo". Our internal suit uses "dots" | "bamboo".
-          const suit: MahjongTile["suit"] | null =
-            typeRaw === "bamboo" ? "bamboo" : typeRaw === "dot" ? "dots" : null;
-          if (!suit) continue;
-
-          nextHand.push({ id, suit, rank });
-        }
-
-        if (nextHand.length > 0) {
-          // Preserve server order for now.
-          setHand(nextHand);
-        }
-        // Reset discards when a new initial state arrives.
-        setDiscards([]);
+        applyInitialHandState(payload);
       };
 
       const handleStartShuffling = () => {
