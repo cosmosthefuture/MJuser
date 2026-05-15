@@ -140,6 +140,14 @@ export default function MahjongClient() {
       setIsViewportReady(true);
     };
 
+    const orientationApi = screen.orientation as ScreenOrientation & {
+      lock?: (orientation: "landscape") => Promise<void>;
+    };
+
+    if (typeof orientationApi.lock === "function") {
+      void orientationApi.lock("landscape").catch(() => undefined);
+    }
+
     updateViewport();
     window.addEventListener("resize", updateViewport);
     window.addEventListener("orientationchange", updateViewport);
@@ -1702,14 +1710,11 @@ export default function MahjongClient() {
 
   const isPortraitPhone =
     viewport.width < 900 && viewport.height > viewport.width;
-  const portraitScale = isPortraitPhone
-    ? Math.min(2.6, Math.max(1, viewport.height / Math.max(1, viewport.width)))
-    : 1;
   const stageStyle = isPortraitPhone
     ? {
         width: `${viewport.height}px`,
         height: `${viewport.width}px`,
-        transform: `translate(-50%, -50%) rotate(90deg) scale(${portraitScale})`,
+        transform: "translate(-50%, -50%) rotate(90deg)",
         transformOrigin: "center center",
       }
     : {
