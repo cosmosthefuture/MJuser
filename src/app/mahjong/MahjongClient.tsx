@@ -74,6 +74,12 @@ export default function MahjongClient() {
     s.auth.id ? Number(s.auth.id) : null,
   );
 
+  const [isViewportReady, setIsViewportReady] = useState(false);
+  const [viewport, setViewport] = useState({
+    width: 1280,
+    height: 720,
+  });
+
   const [joinError, setJoinError] = useState<string | null>(null);
   const [roomState, setRoomState] = useState<MahjongRoomState | null>(null);
   const [centerMessage, setCenterMessage] = useState<string | null>(null);
@@ -124,6 +130,29 @@ export default function MahjongClient() {
   const sortHandInFlightRef = useRef(false);
   const isDecisionModalOpen =
     kongDecision != null || pongDecision != null || chowDecision != null;
+
+  useEffect(() => {
+    const updateViewport = () => {
+      setViewport({
+        width: window.visualViewport?.width ?? window.innerWidth,
+        height: window.visualViewport?.height ?? window.innerHeight,
+      });
+      setIsViewportReady(true);
+    };
+
+    updateViewport();
+    window.addEventListener("resize", updateViewport);
+    window.addEventListener("orientationchange", updateViewport);
+    window.visualViewport?.addEventListener("resize", updateViewport);
+    window.visualViewport?.addEventListener("scroll", updateViewport);
+
+    return () => {
+      window.removeEventListener("resize", updateViewport);
+      window.removeEventListener("orientationchange", updateViewport);
+      window.visualViewport?.removeEventListener("resize", updateViewport);
+      window.visualViewport?.removeEventListener("scroll", updateViewport);
+    };
+  }, []);
 
   const emitAcceptKong = (kongKey: string) => {
     const socket = getSocket();
@@ -1671,9 +1700,34 @@ export default function MahjongClient() {
     setActiveSides(ordered.filter((s) => sidesSet.has(s)));
   }, [roundPlayers, authUserId, selfSeatPosition]);
 
+  const isPortraitPhone =
+    viewport.width < 900 && viewport.height > viewport.width;
+  const portraitScale = isPortraitPhone
+    ? Math.min(2.6, Math.max(1, viewport.height / Math.max(1, viewport.width)))
+    : 1;
+  const stageStyle = isPortraitPhone
+    ? {
+        width: `${viewport.height}px`,
+        height: `${viewport.width}px`,
+        transform: `translate(-50%, -50%) rotate(90deg) scale(${portraitScale})`,
+        transformOrigin: "center center",
+      }
+    : {
+        width: "100vw",
+        height: "100dvh",
+        transform: "translate(-50%, -50%)",
+      };
+
   return (
-    <div className="relative w-screen h-screen overflow-hidden text-amber-100">
-      <div className="absolute inset-0 bg-[#00251b]" />
+    <div className="fixed inset-0 overflow-hidden bg-[#00251b] text-amber-100">
+      <div
+        className={`absolute left-1/2 top-1/2 overflow-hidden transition-opacity duration-150 ${
+          isViewportReady ? "opacity-100" : "opacity-0"
+        }`}
+        style={stageStyle}
+      >
+        <div className="relative h-full w-full overflow-hidden">
+          <div className="absolute inset-0 bg-[#00251b]" />
 
       <div className="absolute left-4 top-4 z-20 flex items-center gap-3">
         <button
@@ -1822,16 +1876,17 @@ export default function MahjongClient() {
             player: RoundPlayer;
             position: "bottom" | "right" | "top" | "left";
           }) => {
+            const isMobileSeat = isPortraitPhone || viewport.width < 520;
             const base =
               "absolute flex items-center gap-2 rounded-full border border-amber-100/20 bg-black/40 px-3 py-2 text-xs text-amber-100 shadow-[0_18px_40px_rgba(0,0,0,0.35)] backdrop-blur-sm";
             const pos =
               position === "bottom"
-                ? "left-1/2 bottom-2 -translate-x-1/2"
+                ? `left-1/2 -translate-x-1/2 ${isMobileSeat ? "bottom-1" : "bottom-2"}`
                 : position === "top"
-                  ? "left-1/2 top-6 -translate-x-1/2"
+                  ? `left-1/2 -translate-x-1/2 ${isMobileSeat ? "top-3" : "top-6"}`
                   : position === "left"
-                    ? "left-6 top-1/2 -translate-y-1/2"
-                    : "right-6 top-1/2 -translate-y-1/2";
+                    ? `${isMobileSeat ? "left-2" : "left-6"} top-1/2 -translate-y-1/2`
+                    : `${isMobileSeat ? "right-2" : "right-6"} top-1/2 -translate-y-1/2`;
 
             const name = player.name;
             const initials =
@@ -1861,23 +1916,35 @@ export default function MahjongClient() {
                   isHighlighted
                     ? "animate-[seat-pop_0.55s_ease-in-out_5] ring-4 ring-amber-200/80 shadow-[0_0_0_14px_rgba(255,210,125,0.18),0_34px_90px_rgba(0,0,0,0.55)]"
                     : ""
-                }`}
+                } ${isMobileSeat ? "px-2 py-1 text-[11px]" : ""}`}
               >
                 {isUserToPlay ? (
                   <div className="pointer-events-none absolute -inset-[2px] rounded-full">
                     <div className="absolute inset-0 rounded-full ring-3 ring-amber-200/70 shadow-[0_0_0_12px_rgba(255,210,125,0.14),0_0_40px_rgba(255,210,125,0.18)] animate-pulse" />
                   </div>
                 ) : null}
-                <Avatar className="size-8 border border-amber-100/20 bg-black/30">
+                <Avatar
+                  className={`border border-amber-100/20 bg-black/30 ${
+                    isMobileSeat ? "size-6" : "size-8"
+                  }`}
+                >
                   <AvatarFallback className="bg-black/30 text-amber-100 font-bold">
                     {initials}
                   </AvatarFallback>
                 </Avatar>
-                <div className="max-w-[140px] truncate font-semibold">
+                <div
+                  className={`truncate font-semibold ${
+                    isMobileSeat ? "max-w-[96px]" : "max-w-[140px]"
+                  }`}
+                >
                   {name}
                 </div>
                 {isActiveTurn ? (
-                  <div className="ml-1 rounded-full bg-amber-100/90 px-2 py-0.5 text-[11px] font-bold tabular-nums text-[#3b0500]">
+                  <div
+                    className={`ml-1 rounded-full bg-amber-100/90 font-bold tabular-nums text-[#3b0500] ${
+                      isMobileSeat ? "px-1.5 py-0 text-[10px]" : "px-2 py-0.5 text-[11px]"
+                    }`}
+                  >
                     {Math.max(0, Math.floor(turnCountdown?.remaining ?? 0))}s
                   </div>
                 ) : null}
@@ -2136,6 +2203,8 @@ export default function MahjongClient() {
           </div>
         </div>
       ) : null}
+        </div>
+      </div>
     </div>
   );
 }
