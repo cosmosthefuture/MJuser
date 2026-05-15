@@ -799,7 +799,8 @@ export default function MahjongClient() {
           }
         }
 
-        const discardedRaw = (p as { discarded_tiles?: unknown }).discarded_tiles;
+        const discardedRaw = (p as { discarded_tiles?: unknown })
+          .discarded_tiles;
         const sideDiscards: MahjongTile[] = [];
         if (Array.isArray(discardedRaw)) {
           for (const t of discardedRaw as WsTile[]) {
@@ -884,11 +885,7 @@ export default function MahjongClient() {
           if (!Number.isFinite(rank) || rank < 1 || rank > 9) continue;
           if (!Number.isFinite(id)) continue;
           const suit: MahjongTile["suit"] | null =
-            typeRaw === "bamboo"
-              ? "bamboo"
-              : typeRaw === "dot"
-                ? "dots"
-                : null;
+            typeRaw === "bamboo" ? "bamboo" : typeRaw === "dot" ? "dots" : null;
           if (!suit) continue;
           out.push({ id, suit, rank });
         }
@@ -1011,7 +1008,8 @@ export default function MahjongClient() {
       setActivePlayerUserId(userId);
       // Small pop animation each time the "user to play" changes.
       setFirstPlayerHighlightId(userId);
-      if (firstPlayerHighlightTimer) window.clearTimeout(firstPlayerHighlightTimer);
+      if (firstPlayerHighlightTimer)
+        window.clearTimeout(firstPlayerHighlightTimer);
       firstPlayerHighlightTimer = window.setTimeout(() => {
         setFirstPlayerHighlightId(null);
       }, 1200);
@@ -1031,7 +1029,9 @@ export default function MahjongClient() {
       setDrawPileCount(wallCount);
 
       applyInitialHandState((data as { handState?: unknown }).handState);
-      applyUserToPlay((data as { currentTurnPlayer?: unknown }).currentTurnPlayer);
+      applyUserToPlay(
+        (data as { currentTurnPlayer?: unknown }).currentTurnPlayer,
+      );
     };
 
     const doJoin = async (socket: ReturnType<typeof getSocket>) => {
@@ -1724,495 +1724,501 @@ export default function MahjongClient() {
         <div className="relative h-full w-full overflow-hidden">
           <div className="absolute inset-0 bg-[#00251b]" />
 
-      <div className="absolute left-4 top-4 z-20 flex items-center gap-3">
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="rounded-full bg-black/40 p-2 hover:bg-black/60"
-          aria-label="Back"
-        >
-          <ArrowLeft size={18} />
-        </button>
-        <div>
-          <div className="flex items-center gap-3">
-            <div className="text-lg font-semibold text-amber-200">
-              Mahjong (72 Tiles)
-            </div>
-            {roomId ? (
+          <div className="absolute left-4 top-4 z-20 flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className="rounded-full bg-black/40 p-2 hover:bg-black/60"
+              aria-label="Back"
+            >
+              <ArrowLeft size={18} />
+            </button>
+            <div>
+              <div className="flex items-center gap-3">
+                <div className="text-lg font-semibold text-amber-200">
+                  Mahjong (72 Tiles)
+                </div>
+                {roomId ? (
+                  <div className="text-xs text-amber-50/70">
+                    Room ID: {roomId}{" "}
+                    {joinError
+                      ? "(Join error)"
+                      : roomState
+                        ? "(Joined)"
+                        : "(Joining...)"}
+                  </div>
+                ) : null}
+              </div>
               <div className="text-xs text-amber-50/70">
-                Room ID: {roomId}{" "}
-                {joinError
-                  ? "(Join error)"
-                  : roomState
-                    ? "(Joined)"
-                    : "(Joining...)"}
+                Win = 4 melds + 1 pair
+              </div>
+            </div>
+          </div>
+
+          {/* Right-side control panel removed (WS drives game state). */}
+
+          <div className="absolute inset-0 z-10 flex items-center justify-center">
+            <div
+              style={{
+                width: `${viewport.width}px`,
+                height: `${viewport.height}px`,
+                transform: isPortraitPhone
+                  ? "translate(-100px, 100px)"
+                  : "none",
+                transformOrigin: "center center",
+              }}
+            >
+              <MahjongPixiTable
+                hand={hand}
+                melds={selfMelds}
+                discards={discards}
+                selfDiscardTiles={selfDiscardTiles}
+                rightDiscardTiles={rightDiscardTiles}
+                topDiscardTiles={topDiscardTiles}
+                leftDiscardTiles={leftDiscardTiles}
+                highlightDiscard={false}
+                centerMessage={centerMessage}
+                showDrawPile={showDrawPile}
+                drawPileCount={drawPileCount}
+                lastDiscardTile={lastDiscardTile}
+                activeSides={activeSides}
+                opponentHandCounts={opponentHandCounts}
+                opponentMelds={opponentMelds}
+                onDoubleClickTile={
+                  isDecisionModalOpen
+                    ? undefined
+                    : (tileId) => emitDiscardTile(tileId)
+                }
+              />
+            </div>
+          </div>
+
+          <div className="pointer-events-none absolute inset-0 z-20">
+            <div className="pointer-events-auto absolute right-28 bottom-[200px]">
+              <button
+                type="button"
+                onClick={emitSortHand}
+                className="rounded-full border border-amber-100/15 bg-black/45 px-4 py-2 text-xs font-semibold text-amber-100 shadow-[0_20px_60px_rgba(0,0,0,0.45)] backdrop-blur-sm hover:bg-black/60"
+              >
+                Sort
+              </button>
+            </div>
+          </div>
+
+          {/* Overlays (HTML) */}
+          <div className="pointer-events-none absolute inset-0 z-20">
+            {diceRolling || diceFaces ? (
+              <div
+                className="absolute left-1/2 top-1/2"
+                style={{
+                  transform: "translate(-50%, -50%) translateY(-70px)",
+                }}
+              >
+                <div className="rounded-[18px] bg-black/35 px-4 py-3 shadow-[0_22px_70px_rgba(0,0,0,0.45)] backdrop-blur-sm ring-1 ring-amber-100/10">
+                  <div className="flex items-center gap-4">
+                    <Dice3D face={diceFaces?.[0] ?? 1} rolling={diceRolling} />
+                    <Dice3D face={diceFaces?.[1] ?? 1} rolling={diceRolling} />
+                  </div>
+                </div>
               </div>
             ) : null}
+
+            {(() => {
+              if (roundPlayers.length === 0) return null;
+
+              const authPlayer =
+                authUserId != null
+                  ? (roundPlayers.find((p) => p.userId === authUserId) ?? null)
+                  : null;
+              const fallbackAuthPlayer =
+                authPlayer ??
+                (selfSeatPosition != null
+                  ? (roundPlayers.find(
+                      (p) => p.seatPosition === selfSeatPosition,
+                    ) ?? null)
+                  : null) ??
+                roundPlayers[0] ??
+                null;
+              const others = roundPlayers.filter(
+                (p) => p !== fallbackAuthPlayer,
+              );
+              const seats: Array<{
+                position: "bottom" | "right" | "top" | "left";
+                player: RoundPlayer;
+              }> = [];
+
+              if (fallbackAuthPlayer) {
+                seats.push({ position: "bottom", player: fallbackAuthPlayer });
+              }
+
+              const selfSeatNo = fallbackAuthPlayer?.seatPosition ?? null;
+              if (others.length === 1) {
+                const only = others[0];
+                if (only) seats.push({ position: "right", player: only });
+              } else {
+                const byDelta = [...others]
+                  .map((p) => {
+                    const otherSeatNo = p.seatPosition;
+                    const delta =
+                      selfSeatNo != null
+                        ? (((otherSeatNo - selfSeatNo) % 4) + 4) % 4
+                        : null;
+                    return { player: p, delta };
+                  })
+                  .filter((x) => x.delta != null && x.delta !== 0)
+                  .sort((a, b) => (a.delta ?? 99) - (b.delta ?? 99));
+
+                for (const item of byDelta) {
+                  const delta = item.delta;
+                  if (delta === 1)
+                    seats.push({ position: "right", player: item.player });
+                  if (delta === 2)
+                    seats.push({ position: "top", player: item.player });
+                  if (delta === 3)
+                    seats.push({ position: "left", player: item.player });
+                }
+              }
+
+              const Seat = ({
+                player,
+                position,
+              }: {
+                player: RoundPlayer;
+                position: "bottom" | "right" | "top" | "left";
+              }) => {
+                const isMobileSeat = viewport.width < 520;
+                const base =
+                  "absolute flex items-center gap-2 rounded-full border border-amber-100/20 bg-black/40 px-3 py-2 text-xs text-amber-100 shadow-[0_18px_40px_rgba(0,0,0,0.35)] backdrop-blur-sm";
+                const pos =
+                  position === "bottom"
+                    ? `left-1/2 -translate-x-1/2 ${isMobileSeat ? "bottom-1" : "bottom-2"}`
+                    : position === "top"
+                      ? `left-1/2 -translate-x-1/2 ${isMobileSeat ? "top-3" : "top-6"}`
+                      : position === "left"
+                        ? `${isMobileSeat ? "left-2" : "left-6"} top-1/2 -translate-y-1/2`
+                        : `${isMobileSeat ? "right-2" : "right-6"} top-1/2 -translate-y-1/2`;
+
+                const name = player.name;
+                const initials =
+                  (player.name || "")
+                    .trim()
+                    .split(/\s+/)
+                    .slice(0, 2)
+                    .map((s) => s[0]?.toUpperCase())
+                    .join("") || "?";
+
+                const isHighlighted =
+                  player != null && firstPlayerHighlightId != null
+                    ? player.userId === firstPlayerHighlightId
+                    : false;
+                const isActiveTurn =
+                  turnCountdown != null
+                    ? player.userId === turnCountdown.userId
+                    : false;
+                const isUserToPlay =
+                  activePlayerUserId != null
+                    ? player.userId === activePlayerUserId
+                    : false;
+
+                return (
+                  <div
+                    className={`${base} ${pos} ${
+                      isHighlighted
+                        ? "animate-[seat-pop_0.55s_ease-in-out_5] ring-4 ring-amber-200/80 shadow-[0_0_0_14px_rgba(255,210,125,0.18),0_34px_90px_rgba(0,0,0,0.55)]"
+                        : ""
+                    } ${isMobileSeat ? "px-2 py-1 text-[11px]" : ""}`}
+                  >
+                    {isUserToPlay ? (
+                      <div className="pointer-events-none absolute -inset-[2px] rounded-full">
+                        <div className="absolute inset-0 rounded-full ring-3 ring-amber-200/70 shadow-[0_0_0_12px_rgba(255,210,125,0.14),0_0_40px_rgba(255,210,125,0.18)] animate-pulse" />
+                      </div>
+                    ) : null}
+                    <Avatar
+                      className={`border border-amber-100/20 bg-black/30 ${
+                        isMobileSeat ? "size-6" : "size-8"
+                      }`}
+                    >
+                      <AvatarFallback className="bg-black/30 text-amber-100 font-bold">
+                        {initials}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div
+                      className={`truncate font-semibold ${
+                        isMobileSeat ? "max-w-[96px]" : "max-w-[140px]"
+                      }`}
+                    >
+                      {name}
+                    </div>
+                    {isActiveTurn ? (
+                      <div
+                        className={`ml-1 rounded-full bg-amber-100/90 font-bold tabular-nums text-[#3b0500] ${
+                          isMobileSeat
+                            ? "px-1.5 py-0 text-[10px]"
+                            : "px-2 py-0.5 text-[11px]"
+                        }`}
+                      >
+                        {Math.max(0, Math.floor(turnCountdown?.remaining ?? 0))}
+                        s
+                      </div>
+                    ) : null}
+                  </div>
+                );
+              };
+
+              return (
+                <>
+                  {seats.map((seat) => (
+                    <Seat
+                      key={`${seat.position}-${seat.player.userId}`}
+                      player={seat.player}
+                      position={seat.position}
+                    />
+                  ))}
+                </>
+              );
+            })()}
           </div>
-          <div className="text-xs text-amber-50/70">Win = 4 melds + 1 pair</div>
-        </div>
-      </div>
 
-      {/* Right-side control panel removed (WS drives game state). */}
+          {winnerReveal ? (
+            <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/70 p-4">
+              <div className="pointer-events-auto w-full max-w-[760px] rounded-2xl border border-amber-100/15 bg-black/75 p-5 shadow-[0_25px_80px_rgba(0,0,0,0.55)] backdrop-blur-sm">
+                <div className="grid grid-cols-3 items-start gap-4">
+                  <div />
+                  <div className="text-center">
+                    {winnerReveal.resultLabel ? (
+                      <div
+                        className={`text-3xl font-extrabold tracking-tight ${
+                          winnerReveal.resultLabel === "You Win"
+                            ? "text-emerald-200"
+                            : "text-rose-200"
+                        }`}
+                      >
+                        {winnerReveal.resultLabel}
+                      </div>
+                    ) : null}
+                    <div className="mt-1 text-sm text-amber-100/90">
+                      {winnerReveal.winnerName}
+                    </div>
+                  </div>
+                  <div className="flex justify-end">
+                    <button
+                      type="button"
+                      onClick={() => setWinnerReveal(null)}
+                      className="rounded-full border border-amber-100/15 bg-black/40 px-3 py-1.5 text-sm text-amber-100 hover:bg-black/60"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
 
-        <div className="absolute inset-0 z-10 flex items-center justify-center">
-          <div
-            style={{
-              width: `${viewport.width}px`,
-              height: `${viewport.height}px`,
-            }}
-          >
-          <MahjongPixiTable
-            hand={hand}
-            melds={selfMelds}
-            discards={discards}
-            selfDiscardTiles={selfDiscardTiles}
-            rightDiscardTiles={rightDiscardTiles}
-            topDiscardTiles={topDiscardTiles}
-            leftDiscardTiles={leftDiscardTiles}
-            highlightDiscard={false}
-            centerMessage={centerMessage}
-            showDrawPile={showDrawPile}
-            drawPileCount={drawPileCount}
-            lastDiscardTile={lastDiscardTile}
-            activeSides={activeSides}
-            opponentHandCounts={opponentHandCounts}
-            opponentMelds={opponentMelds}
-            onDoubleClickTile={
-              isDecisionModalOpen
-                ? undefined
-                : (tileId) => emitDiscardTile(tileId)
-            }
-          />
-        </div>
-      </div>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {winnerReveal.tiles.map((t, idx) => {
+                    return (
+                      <div key={`${t.suit}-${t.rank}-${idx}`} className="">
+                        <MahjongTileCard tile={t} />
+                      </div>
+                    );
+                  })}
+                </div>
 
-      <div className="pointer-events-none absolute inset-0 z-20">
-        <div className="pointer-events-auto absolute right-28 bottom-[200px]">
-          <button
-            type="button"
-            onClick={emitSortHand}
-            className="rounded-full border border-amber-100/15 bg-black/45 px-4 py-2 text-xs font-semibold text-amber-100 shadow-[0_20px_60px_rgba(0,0,0,0.45)] backdrop-blur-sm hover:bg-black/60"
-          >
-            Sort
-          </button>
-        </div>
-      </div>
+                {winnerReveal.melds.length > 0 ? (
+                  <div className="mt-5 flex flex-wrap items-start gap-8">
+                    {(() => {
+                      const kinds: Array<"chow" | "pong" | "kong"> = [
+                        "chow",
+                        "pong",
+                        "kong",
+                      ];
 
-      {/* Overlays (HTML) */}
-      <div className="pointer-events-none absolute inset-0 z-20">
-        {diceRolling || diceFaces ? (
-          <div
-            className="absolute left-1/2 top-1/2"
-            style={{
-              transform: "translate(-50%, -50%) translateY(-70px)",
-            }}
-          >
-            <div className="rounded-[18px] bg-black/35 px-4 py-3 shadow-[0_22px_70px_rgba(0,0,0,0.45)] backdrop-blur-sm ring-1 ring-amber-100/10">
-              <div className="flex items-center gap-4">
-                <Dice3D face={diceFaces?.[0] ?? 1} rolling={diceRolling} />
-                <Dice3D face={diceFaces?.[1] ?? 1} rolling={diceRolling} />
+                      return kinds
+                        .map((kind) => {
+                          const groups = winnerReveal.melds.filter(
+                            (m) => m.kind === kind,
+                          );
+                          if (groups.length === 0) return null;
+                          return (
+                            <div key={kind} className="min-w-[180px]">
+                              <div className="text-xs font-semibold uppercase tracking-wide text-amber-100/70">
+                                {kind}
+                              </div>
+                              <div className="mt-2 flex flex-wrap gap-6">
+                                {groups.map((g, gi) => (
+                                  <div
+                                    key={`${kind}-${gi}`}
+                                    className="flex gap-2"
+                                  >
+                                    {g.tiles.map((t, ti) => (
+                                      <MahjongTileCard
+                                        key={`${kind}-${gi}-${t.suit}-${t.rank}-${ti}`}
+                                        tile={t}
+                                      />
+                                    ))}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        })
+                        .filter(Boolean);
+                    })()}
+                  </div>
+                ) : null}
               </div>
             </div>
-          </div>
-        ) : null}
+          ) : null}
 
-        {(() => {
-          if (roundPlayers.length === 0) return null;
-
-          const authPlayer =
-            authUserId != null
-              ? (roundPlayers.find((p) => p.userId === authUserId) ?? null)
-              : null;
-          const fallbackAuthPlayer =
-            authPlayer ??
-            (selfSeatPosition != null
-              ? (roundPlayers.find(
-                  (p) => p.seatPosition === selfSeatPosition,
-                ) ?? null)
-              : null) ??
-            roundPlayers[0] ??
-            null;
-          const others = roundPlayers.filter((p) => p !== fallbackAuthPlayer);
-          const seats: Array<{
-            position: "bottom" | "right" | "top" | "left";
-            player: RoundPlayer;
-          }> = [];
-
-          if (fallbackAuthPlayer) {
-            seats.push({ position: "bottom", player: fallbackAuthPlayer });
-          }
-
-          const selfSeatNo = fallbackAuthPlayer?.seatPosition ?? null;
-          if (others.length === 1) {
-            const only = others[0];
-            if (only) seats.push({ position: "right", player: only });
-          } else {
-            const byDelta = [...others]
-              .map((p) => {
-                const otherSeatNo = p.seatPosition;
-                const delta =
-                  selfSeatNo != null
-                    ? (((otherSeatNo - selfSeatNo) % 4) + 4) % 4
-                    : null;
-                return { player: p, delta };
-              })
-              .filter((x) => x.delta != null && x.delta !== 0)
-              .sort((a, b) => (a.delta ?? 99) - (b.delta ?? 99));
-
-            for (const item of byDelta) {
-              const delta = item.delta;
-              if (delta === 1)
-                seats.push({ position: "right", player: item.player });
-              if (delta === 2)
-                seats.push({ position: "top", player: item.player });
-              if (delta === 3)
-                seats.push({ position: "left", player: item.player });
-            }
-          }
-
-          const Seat = ({
-            player,
-            position,
-          }: {
-            player: RoundPlayer;
-            position: "bottom" | "right" | "top" | "left";
-          }) => {
-            const isMobileSeat = viewport.width < 520;
-            const base =
-              "absolute flex items-center gap-2 rounded-full border border-amber-100/20 bg-black/40 px-3 py-2 text-xs text-amber-100 shadow-[0_18px_40px_rgba(0,0,0,0.35)] backdrop-blur-sm";
-            const pos =
-              position === "bottom"
-                ? `left-1/2 -translate-x-1/2 ${isMobileSeat ? "bottom-1" : "bottom-2"}`
-                : position === "top"
-                  ? `left-1/2 -translate-x-1/2 ${isMobileSeat ? "top-3" : "top-6"}`
-                  : position === "left"
-                    ? `${isMobileSeat ? "left-2" : "left-6"} top-1/2 -translate-y-1/2`
-                    : `${isMobileSeat ? "right-2" : "right-6"} top-1/2 -translate-y-1/2`;
-
-            const name = player.name;
-            const initials =
-              (player.name || "")
-                .trim()
-                .split(/\s+/)
-                .slice(0, 2)
-                .map((s) => s[0]?.toUpperCase())
-                .join("") || "?";
-
-            const isHighlighted =
-              player != null && firstPlayerHighlightId != null
-                ? player.userId === firstPlayerHighlightId
-                : false;
-            const isActiveTurn =
-              turnCountdown != null
-                ? player.userId === turnCountdown.userId
-                : false;
-            const isUserToPlay =
-              activePlayerUserId != null
-                ? player.userId === activePlayerUserId
-                : false;
-
-            return (
-              <div
-                className={`${base} ${pos} ${
-                  isHighlighted
-                    ? "animate-[seat-pop_0.55s_ease-in-out_5] ring-4 ring-amber-200/80 shadow-[0_0_0_14px_rgba(255,210,125,0.18),0_34px_90px_rgba(0,0,0,0.55)]"
-                    : ""
-                } ${isMobileSeat ? "px-2 py-1 text-[11px]" : ""}`}
-              >
-                {isUserToPlay ? (
-                  <div className="pointer-events-none absolute -inset-[2px] rounded-full">
-                    <div className="absolute inset-0 rounded-full ring-3 ring-amber-200/70 shadow-[0_0_0_12px_rgba(255,210,125,0.14),0_0_40px_rgba(255,210,125,0.18)] animate-pulse" />
-                  </div>
-                ) : null}
-                <Avatar
-                  className={`border border-amber-100/20 bg-black/30 ${
-                    isMobileSeat ? "size-6" : "size-8"
-                  }`}
-                >
-                  <AvatarFallback className="bg-black/30 text-amber-100 font-bold">
-                    {initials}
-                  </AvatarFallback>
-                </Avatar>
-                <div
-                  className={`truncate font-semibold ${
-                    isMobileSeat ? "max-w-[96px]" : "max-w-[140px]"
-                  }`}
-                >
-                  {name}
-                </div>
-                {isActiveTurn ? (
-                  <div
-                    className={`ml-1 rounded-full bg-amber-100/90 font-bold tabular-nums text-[#3b0500] ${
-                      isMobileSeat ? "px-1.5 py-0 text-[10px]" : "px-2 py-0.5 text-[11px]"
-                    }`}
-                  >
-                    {Math.max(0, Math.floor(turnCountdown?.remaining ?? 0))}s
-                  </div>
-                ) : null}
+          {kongDecision ? (
+            <div className="pointer-events-none absolute inset-0 z-30">
+              <div className="pointer-events-auto absolute left-1/2 -translate-x-1/2 bottom-[118px] flex items-center gap-3 rounded-2xl border border-amber-100/15 bg-black/55 px-4 py-3 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-sm">
+                {(() => {
+                  const g = kongDecision.groups[0];
+                  if (!g) return null;
+                  return (
+                    <>
+                      <div className="flex items-center gap-2">
+                        {g.tiles.slice(0, 4).map((t, ti) => (
+                          <MahjongTileCard
+                            key={`${t.suit}-${t.rank}-${ti}`}
+                            tile={t}
+                            size="xs"
+                          />
+                        ))}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (kongDecision.kind === "interrupt_kong") {
+                              emitAcceptInterruptKong(g.kongKey);
+                            } else if (kongDecision.kind === "normal_kong") {
+                              emitAcceptNormalKong(g.kongKey);
+                            } else {
+                              emitAcceptKong(g.kongKey);
+                            }
+                            setKongDecision(null);
+                          }}
+                          className="rounded-full bg-amber-100/90 px-4 py-2 text-xs font-semibold text-[#3b0500] hover:bg-amber-100"
+                        >
+                          Accept
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (kongDecision.kind === "kong") {
+                              emitPassKong();
+                            } else if (kongDecision.kind === "normal_kong") {
+                              emitPassNormalKong();
+                            }
+                            setKongDecision(null);
+                          }}
+                          className="rounded-full border border-amber-100/15 bg-black/40 px-4 py-2 text-xs font-semibold text-amber-100 hover:bg-black/60"
+                        >
+                          Pass
+                        </button>
+                      </div>
+                    </>
+                  );
+                })()}
               </div>
-            );
-          };
+            </div>
+          ) : null}
 
-          return (
-            <>
-              {seats.map((seat) => (
-                <Seat
-                  key={`${seat.position}-${seat.player.userId}`}
-                  player={seat.player}
-                  position={seat.position}
-                />
-              ))}
-            </>
-          );
-        })()}
-      </div>
-
-      {winnerReveal ? (
-        <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/70 p-4">
-          <div
-            className="pointer-events-auto w-full max-w-[760px] rounded-2xl border border-amber-100/15 bg-black/75 p-5 shadow-[0_25px_80px_rgba(0,0,0,0.55)] backdrop-blur-sm"
-          >
-            <div className="grid grid-cols-3 items-start gap-4">
-              <div />
-              <div className="text-center">
-                {winnerReveal.resultLabel ? (
-                  <div
-                    className={`text-3xl font-extrabold tracking-tight ${
-                      winnerReveal.resultLabel === "You Win"
-                        ? "text-emerald-200"
-                        : "text-rose-200"
-                    }`}
-                  >
-                    {winnerReveal.resultLabel}
-                  </div>
-                ) : null}
-                <div className="mt-1 text-sm text-amber-100/90">
-                  {winnerReveal.winnerName}
-                </div>
+          {pongDecision ? (
+            <div className="pointer-events-none absolute inset-0 z-30">
+              <div className="pointer-events-auto absolute left-1/2 -translate-x-1/2 bottom-[118px] flex items-center gap-3 rounded-2xl border border-amber-100/15 bg-black/55 px-4 py-3 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-sm">
+                {(() => {
+                  const g = pongDecision.groups[0];
+                  if (!g) return null;
+                  return (
+                    <>
+                      <div className="flex items-center gap-2">
+                        {g.tiles.slice(0, 3).map((t, ti) => (
+                          <MahjongTileCard
+                            key={`${t.suit}-${t.rank}-${ti}`}
+                            tile={t}
+                            size="xs"
+                          />
+                        ))}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (pongDecision.kind === "normal_pong") {
+                              emitAcceptNormalPong(g.pongKey);
+                            } else {
+                              emitAcceptInterruptPong(g.pongKey);
+                            }
+                            setPongDecision(null);
+                          }}
+                          className="rounded-full bg-amber-100/90 px-4 py-2 text-xs font-semibold text-[#3b0500] hover:bg-amber-100"
+                        >
+                          Accept
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (pongDecision.kind === "normal_pong") {
+                              emitPassNormalPong();
+                            }
+                            setPongDecision(null);
+                          }}
+                          className="rounded-full border border-amber-100/15 bg-black/40 px-4 py-2 text-xs font-semibold text-amber-100 hover:bg-black/60"
+                        >
+                          Pass
+                        </button>
+                      </div>
+                    </>
+                  );
+                })()}
               </div>
-              <div className="flex justify-end">
+            </div>
+          ) : null}
+
+          {chowDecision ? (
+            <div className="pointer-events-none absolute inset-0 z-30">
+              <div className="pointer-events-auto absolute left-1/2 -translate-x-1/2 bottom-[118px] flex items-center gap-3 rounded-2xl border border-amber-100/15 bg-black/55 px-4 py-3 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-sm">
+                <div className="flex flex-col gap-2">
+                  {chowDecision.groups.map((g, gi) => (
+                    <div
+                      key={`${g.chowKey}-${gi}`}
+                      className="flex items-center gap-3"
+                    >
+                      <div className="flex items-center gap-2">
+                        {g.tiles.slice(0, 3).map((t, ti) => (
+                          <MahjongTileCard
+                            key={`${t.suit}-${t.rank}-${gi}-${ti}`}
+                            tile={t}
+                            size="xs"
+                          />
+                        ))}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          emitAcceptNormalChow(g.chowKey);
+                          setChowDecision(null);
+                        }}
+                        className="rounded-full bg-amber-100/90 px-4 py-2 text-xs font-semibold text-[#3b0500] hover:bg-amber-100"
+                      >
+                        Accept
+                      </button>
+                    </div>
+                  ))}
+                </div>
                 <button
                   type="button"
-                  onClick={() => setWinnerReveal(null)}
-                  className="rounded-full border border-amber-100/15 bg-black/40 px-3 py-1.5 text-sm text-amber-100 hover:bg-black/60"
+                  onClick={() => {
+                    emitPassNormalChow();
+                    setChowDecision(null);
+                  }}
+                  className="rounded-full border border-amber-100/15 bg-black/40 px-4 py-2 text-xs font-semibold text-amber-100 hover:bg-black/60"
                 >
-                  Close
+                  Pass
                 </button>
               </div>
             </div>
-
-            <div className="mt-4 flex flex-wrap gap-2">
-              {winnerReveal.tiles.map((t, idx) => {
-                return (
-                  <div key={`${t.suit}-${t.rank}-${idx}`} className="">
-                    <MahjongTileCard tile={t} />
-                  </div>
-                );
-              })}
-            </div>
-
-            {winnerReveal.melds.length > 0 ? (
-              <div className="mt-5 flex flex-wrap items-start gap-8">
-                {(() => {
-                  const kinds: Array<"chow" | "pong" | "kong"> = [
-                    "chow",
-                    "pong",
-                    "kong",
-                  ];
-
-                  return kinds
-                    .map((kind) => {
-                      const groups = winnerReveal.melds.filter(
-                        (m) => m.kind === kind,
-                      );
-                      if (groups.length === 0) return null;
-                      return (
-                        <div key={kind} className="min-w-[180px]">
-                          <div className="text-xs font-semibold uppercase tracking-wide text-amber-100/70">
-                            {kind}
-                          </div>
-                          <div className="mt-2 flex flex-wrap gap-6">
-                            {groups.map((g, gi) => (
-                              <div key={`${kind}-${gi}`} className="flex gap-2">
-                                {g.tiles.map((t, ti) => (
-                                  <MahjongTileCard
-                                    key={`${kind}-${gi}-${t.suit}-${t.rank}-${ti}`}
-                                    tile={t}
-                                  />
-                                ))}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      );
-                    })
-                    .filter(Boolean);
-                })()}
-              </div>
-            ) : null}
-          </div>
-        </div>
-      ) : null}
-
-      {kongDecision ? (
-        <div className="pointer-events-none absolute inset-0 z-30">
-          <div
-            className="pointer-events-auto absolute left-1/2 -translate-x-1/2 bottom-[118px] flex items-center gap-3 rounded-2xl border border-amber-100/15 bg-black/55 px-4 py-3 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-sm"
-          >
-            {(() => {
-              const g = kongDecision.groups[0];
-              if (!g) return null;
-              return (
-                <>
-                  <div className="flex items-center gap-2">
-                    {g.tiles.slice(0, 4).map((t, ti) => (
-                      <MahjongTileCard
-                        key={`${t.suit}-${t.rank}-${ti}`}
-                        tile={t}
-                        size="xs"
-                      />
-                    ))}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (kongDecision.kind === "interrupt_kong") {
-                          emitAcceptInterruptKong(g.kongKey);
-                        } else if (kongDecision.kind === "normal_kong") {
-                          emitAcceptNormalKong(g.kongKey);
-                        } else {
-                          emitAcceptKong(g.kongKey);
-                        }
-                        setKongDecision(null);
-                      }}
-                      className="rounded-full bg-amber-100/90 px-4 py-2 text-xs font-semibold text-[#3b0500] hover:bg-amber-100"
-                    >
-                      Accept
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (kongDecision.kind === "kong") {
-                          emitPassKong();
-                        } else if (kongDecision.kind === "normal_kong") {
-                          emitPassNormalKong();
-                        }
-                        setKongDecision(null);
-                      }}
-                      className="rounded-full border border-amber-100/15 bg-black/40 px-4 py-2 text-xs font-semibold text-amber-100 hover:bg-black/60"
-                    >
-                      Pass
-                    </button>
-                  </div>
-                </>
-              );
-            })()}
-          </div>
-        </div>
-      ) : null}
-
-      {pongDecision ? (
-        <div className="pointer-events-none absolute inset-0 z-30">
-          <div
-            className="pointer-events-auto absolute left-1/2 -translate-x-1/2 bottom-[118px] flex items-center gap-3 rounded-2xl border border-amber-100/15 bg-black/55 px-4 py-3 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-sm"
-          >
-            {(() => {
-              const g = pongDecision.groups[0];
-              if (!g) return null;
-              return (
-                <>
-                  <div className="flex items-center gap-2">
-                    {g.tiles.slice(0, 3).map((t, ti) => (
-                      <MahjongTileCard
-                        key={`${t.suit}-${t.rank}-${ti}`}
-                        tile={t}
-                        size="xs"
-                      />
-                    ))}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (pongDecision.kind === "normal_pong") {
-                          emitAcceptNormalPong(g.pongKey);
-                        } else {
-                          emitAcceptInterruptPong(g.pongKey);
-                        }
-                        setPongDecision(null);
-                      }}
-                      className="rounded-full bg-amber-100/90 px-4 py-2 text-xs font-semibold text-[#3b0500] hover:bg-amber-100"
-                    >
-                      Accept
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (pongDecision.kind === "normal_pong") {
-                          emitPassNormalPong();
-                        }
-                        setPongDecision(null);
-                      }}
-                      className="rounded-full border border-amber-100/15 bg-black/40 px-4 py-2 text-xs font-semibold text-amber-100 hover:bg-black/60"
-                    >
-                      Pass
-                    </button>
-                  </div>
-                </>
-              );
-            })()}
-          </div>
-        </div>
-      ) : null}
-
-      {chowDecision ? (
-        <div className="pointer-events-none absolute inset-0 z-30">
-          <div
-            className="pointer-events-auto absolute left-1/2 -translate-x-1/2 bottom-[118px] flex items-center gap-3 rounded-2xl border border-amber-100/15 bg-black/55 px-4 py-3 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-sm"
-          >
-            <div className="flex flex-col gap-2">
-              {chowDecision.groups.map((g, gi) => (
-                <div
-                  key={`${g.chowKey}-${gi}`}
-                  className="flex items-center gap-3"
-                >
-                  <div className="flex items-center gap-2">
-                    {g.tiles.slice(0, 3).map((t, ti) => (
-                      <MahjongTileCard
-                        key={`${t.suit}-${t.rank}-${gi}-${ti}`}
-                        tile={t}
-                        size="xs"
-                      />
-                    ))}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      emitAcceptNormalChow(g.chowKey);
-                      setChowDecision(null);
-                    }}
-                    className="rounded-full bg-amber-100/90 px-4 py-2 text-xs font-semibold text-[#3b0500] hover:bg-amber-100"
-                  >
-                    Accept
-                  </button>
-                </div>
-              ))}
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                emitPassNormalChow();
-                setChowDecision(null);
-              }}
-              className="rounded-full border border-amber-100/15 bg-black/40 px-4 py-2 text-xs font-semibold text-amber-100 hover:bg-black/60"
-            >
-              Pass
-            </button>
-          </div>
-        </div>
-      ) : null}
+          ) : null}
         </div>
       </div>
     </div>
