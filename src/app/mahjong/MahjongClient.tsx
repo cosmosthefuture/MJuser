@@ -1866,13 +1866,25 @@ export default function MahjongClient() {
             {diceRolling || diceFaces ? (
               <div
                 className="absolute left-1/2 top-1/2"
-                style={isPortraitPhone ? (portraitUiStyle ?? undefined) : undefined}
+                style={
+                  isPortraitPhone ? (portraitUiStyle ?? undefined) : undefined
+                }
               >
-                <div style={{ transform: "translate(-50%, -50%) translateY(-70px)" }}>
+                <div
+                  style={{
+                    transform: "translate(-50%, -50%) translateY(-70px)",
+                  }}
+                >
                   <div className="rounded-[18px] bg-black/35 px-4 py-3 shadow-[0_22px_70px_rgba(0,0,0,0.45)] backdrop-blur-sm ring-1 ring-amber-100/10">
                     <div className="flex items-center gap-4">
-                      <Dice3D face={diceFaces?.[0] ?? 1} rolling={diceRolling} />
-                      <Dice3D face={diceFaces?.[1] ?? 1} rolling={diceRolling} />
+                      <Dice3D
+                        face={diceFaces?.[0] ?? 1}
+                        rolling={diceRolling}
+                      />
+                      <Dice3D
+                        face={diceFaces?.[1] ?? 1}
+                        rolling={diceRolling}
+                      />
                     </div>
                   </div>
                 </div>
