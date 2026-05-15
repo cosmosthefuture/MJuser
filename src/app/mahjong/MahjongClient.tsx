@@ -1700,10 +1700,17 @@ export default function MahjongClient() {
     setActiveSides(ordered.filter((s) => sidesSet.has(s)));
   }, [roundPlayers, authUserId, selfSeatPosition]);
 
+  const isPortraitPhone =
+    viewport.width < 900 && viewport.height > viewport.width;
+  const tableStageWidth = isPortraitPhone ? viewport.height : viewport.width;
+  const tableStageHeight = isPortraitPhone ? viewport.width : viewport.height;
   const stageStyle = {
-    width: "100vw",
-    height: "100dvh",
-    transform: "translate(-50%, -50%)",
+    width: `${tableStageWidth}px`,
+    height: `${tableStageHeight}px`,
+    transform: isPortraitPhone
+      ? "translate(-50%, -50%) rotate(90deg)"
+      : "translate(-50%, -50%)",
+    transformOrigin: "center center",
   };
 
   return (
@@ -1748,13 +1755,13 @@ export default function MahjongClient() {
 
       {/* Right-side control panel removed (WS drives game state). */}
 
-      <div className="absolute inset-0 z-10 flex items-center justify-center">
-        <div
-          style={{
-            width: `${viewport.width}px`,
-            height: `${viewport.height}px`,
-          }}
-        >
+        <div className="absolute inset-0 z-10 flex items-center justify-center">
+          <div
+            style={{
+              width: `${viewport.width}px`,
+              height: `${viewport.height}px`,
+            }}
+          >
           <MahjongPixiTable
             hand={hand}
             melds={selfMelds}
