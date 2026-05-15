@@ -15,3 +15,9 @@
 #user seat position before shuffling 
 
 #အပူးက သူများဖဲနိုင်လား
+
+
+  transform: isPortraitPhone
+                  ? "translate(-110px, 110px)"
+                  : "none",
+                transformOrigin: "center center",

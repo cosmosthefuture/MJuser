@@ -1763,7 +1763,7 @@ export default function MahjongClient() {
                 width: `${viewport.width}px`,
                 height: `${viewport.height}px`,
                 transform: isPortraitPhone
-                  ? "translate(-100px, 100px)"
+                  ? "translate(-110px, 110px)"
                   : "none",
                 transformOrigin: "center center",
               }}
