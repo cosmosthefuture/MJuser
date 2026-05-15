@@ -1712,8 +1712,8 @@ export default function MahjongClient() {
     viewport.width < 900 && viewport.height > viewport.width;
   const stageStyle = isPortraitPhone
     ? {
-        width: `${viewport.height}px`,
-        height: `${viewport.width}px`,
+        width: "100dvh",
+        height: "100vw",
         transform: "translate(-50%, -50%) rotate(90deg)",
         transformOrigin: "center center",
       }
