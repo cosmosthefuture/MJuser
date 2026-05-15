@@ -42,6 +42,7 @@ type Props = {
       Array<{ kind: "pong" | "chow" | "kong"; tiles: MahjongTile[] }>
     >
   >;
+  rotateForPortrait?: boolean;
 };
 
 extend({ Container, Graphics, Sprite, Text });
@@ -130,6 +131,7 @@ export default function MahjongPixiTable({
   activeSides,
   opponentHandCounts,
   opponentMelds,
+  rotateForPortrait = false,
 }: Props) {
   const designWidth = 1200;
   const designHeight = 720;
@@ -163,7 +165,9 @@ export default function MahjongPixiTable({
     const now =
       typeof performance !== "undefined" ? performance.now() : Date.now();
     const last = lastTileTapRef.current;
-    const withinMs = 320;
+    // Desktop double-click delays and mobile double-tap timing vary a lot,
+    // so keep this window a bit more forgiving.
+    const withinMs = 520;
 
     if (last && last.tileId === tileId && now - last.ts <= withinMs) {
       onDoubleClickTile?.(tileId);
@@ -201,19 +205,24 @@ export default function MahjongPixiTable({
     return () => window.removeEventListener("resize", syncDpr);
   }, []);
 
-  const scale = useMemo(() => {
-    const sx = viewport.width / designWidth;
-    const sy = viewport.height / designHeight;
-    return Math.min(sx, sy);
-  }, [viewport.width, viewport.height, designWidth, designHeight]);
+  const { stageScale, stageX, stageY, stageRotation } = useMemo(() => {
+    const w = viewport.width;
+    const h = viewport.height;
 
-  const offsetX = useMemo(() => {
-    return Math.floor((viewport.width - designWidth * scale) / 2);
-  }, [viewport.width, designWidth, scale]);
+    // When the phone is portrait but we want a landscape table, we rotate the
+    // Pixi scene itself. This keeps hit-testing aligned (unlike CSS-rotating the
+    // <canvas>, which can desync pointer coordinates).
+    const sx = rotateForPortrait ? h / designWidth : w / designWidth;
+    const sy = rotateForPortrait ? w / designHeight : h / designHeight;
+    const s = Math.min(sx, sy);
 
-  const offsetY = useMemo(() => {
-    return Math.floor((viewport.height - designHeight * scale) / 2);
-  }, [viewport.height, designHeight, scale]);
+    return {
+      stageScale: s,
+      stageX: Math.floor(w / 2),
+      stageY: Math.floor(h / 2),
+      stageRotation: rotateForPortrait ? Math.PI / 2 : 0,
+    };
+  }, [viewport.width, viewport.height, designWidth, designHeight, rotateForPortrait]);
 
   const width = viewport.width;
   const height = viewport.height;
@@ -367,7 +376,8 @@ export default function MahjongPixiTable({
         antialias
         className="w-full h-full"
       >
-        <pixiContainer x={offsetX} y={offsetY} scale={scale}>
+        <pixiContainer x={stageX} y={stageY} scale={stageScale} rotation={stageRotation}>
+          <pixiContainer x={-designWidth / 2} y={-designHeight / 2}>
           <pixiGraphics
             draw={(g) => {
               g.clear();
@@ -1260,6 +1270,7 @@ export default function MahjongPixiTable({
                 return containers;
               });
           })()}
+          </pixiContainer>
         </pixiContainer>
       </Application>
     </div>

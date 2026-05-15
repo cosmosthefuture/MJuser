@@ -1702,16 +1702,20 @@ export default function MahjongClient() {
 
   const isPortraitPhone =
     viewport.width < 900 && viewport.height > viewport.width;
-  const tableStageWidth = isPortraitPhone ? viewport.height : viewport.width;
-  const tableStageHeight = isPortraitPhone ? viewport.width : viewport.height;
   const stageStyle = {
-    width: `${tableStageWidth}px`,
-    height: `${tableStageHeight}px`,
-    transform: isPortraitPhone
-      ? "translate(-50%, -50%) rotate(90deg)"
-      : "translate(-50%, -50%)",
-    transformOrigin: "center center",
+    width: "100vw",
+    height: "100dvh",
+    transform: "translate(-50%, -50%)",
   };
+
+  const portraitUiStyle = isPortraitPhone
+    ? {
+        width: `${viewport.height}px`,
+        height: `${viewport.width}px`,
+        transform: "translate(-50%, -50%) rotate(90deg)",
+        transformOrigin: "center center",
+      }
+    : null;
 
   return (
     <div className="fixed inset-0 overflow-hidden bg-[#00251b] text-amber-100">
@@ -1724,36 +1728,74 @@ export default function MahjongClient() {
         <div className="relative h-full w-full overflow-hidden">
           <div className="absolute inset-0 bg-[#00251b]" />
 
-          <div className="absolute left-4 top-4 z-20 flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => router.back()}
-              className="rounded-full bg-black/40 p-2 hover:bg-black/60"
-              aria-label="Back"
+          {isPortraitPhone ? (
+            <div
+              className="absolute left-1/2 top-1/2 z-20"
+              style={portraitUiStyle ?? undefined}
             >
-              <ArrowLeft size={18} />
-            </button>
-            <div>
-              <div className="flex items-center gap-3">
-                <div className="text-lg font-semibold text-amber-200">
-                  Mahjong (72 Tiles)
-                </div>
-                {roomId ? (
-                  <div className="text-xs text-amber-50/70">
-                    Room ID: {roomId}{" "}
-                    {joinError
-                      ? "(Join error)"
-                      : roomState
-                        ? "(Joined)"
-                        : "(Joining...)"}
+              <div className="absolute left-4 top-4 flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => router.back()}
+                  className="rounded-full bg-black/40 p-2 hover:bg-black/60"
+                  aria-label="Back"
+                >
+                  <ArrowLeft size={18} />
+                </button>
+                <div>
+                  <div className="flex items-center gap-3">
+                    <div className="text-lg font-semibold text-amber-200">
+                      Mahjong (72 Tiles)
+                    </div>
+                    {roomId ? (
+                      <div className="text-xs text-amber-50/70">
+                        Room ID: {roomId}{" "}
+                        {joinError
+                          ? "(Join error)"
+                          : roomState
+                            ? "(Joined)"
+                            : "(Joining...)"}
+                      </div>
+                    ) : null}
                   </div>
-                ) : null}
-              </div>
-              <div className="text-xs text-amber-50/70">
-                Win = 4 melds + 1 pair
+                  <div className="text-xs text-amber-50/70">
+                    Win = 4 melds + 1 pair
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
+          ) : (
+            <div className="absolute left-4 top-4 z-20 flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => router.back()}
+                className="rounded-full bg-black/40 p-2 hover:bg-black/60"
+                aria-label="Back"
+              >
+                <ArrowLeft size={18} />
+              </button>
+              <div>
+                <div className="flex items-center gap-3">
+                  <div className="text-lg font-semibold text-amber-200">
+                    Mahjong (72 Tiles)
+                  </div>
+                  {roomId ? (
+                    <div className="text-xs text-amber-50/70">
+                      Room ID: {roomId}{" "}
+                      {joinError
+                        ? "(Join error)"
+                        : roomState
+                          ? "(Joined)"
+                          : "(Joining...)"}
+                    </div>
+                  ) : null}
+                </div>
+                <div className="text-xs text-amber-50/70">
+                  Win = 4 melds + 1 pair
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Right-side control panel removed (WS drives game state). */}
 
@@ -1762,10 +1804,6 @@ export default function MahjongClient() {
               style={{
                 width: `${viewport.width}px`,
                 height: `${viewport.height}px`,
-                transform: isPortraitPhone
-                  ? "translate(-110px, 110px)"
-                  : "none",
-                transformOrigin: "center center",
               }}
             >
               <MahjongPixiTable
@@ -1784,6 +1822,7 @@ export default function MahjongClient() {
                 activeSides={activeSides}
                 opponentHandCounts={opponentHandCounts}
                 opponentMelds={opponentMelds}
+                rotateForPortrait={isPortraitPhone}
                 onDoubleClickTile={
                   isDecisionModalOpen
                     ? undefined
@@ -1794,15 +1833,32 @@ export default function MahjongClient() {
           </div>
 
           <div className="pointer-events-none absolute inset-0 z-20">
-            <div className="pointer-events-auto absolute right-28 bottom-[200px]">
-              <button
-                type="button"
-                onClick={emitSortHand}
-                className="rounded-full border border-amber-100/15 bg-black/45 px-4 py-2 text-xs font-semibold text-amber-100 shadow-[0_20px_60px_rgba(0,0,0,0.45)] backdrop-blur-sm hover:bg-black/60"
+            {isPortraitPhone ? (
+              <div
+                className="pointer-events-auto absolute left-1/2 top-1/2"
+                style={portraitUiStyle ?? undefined}
               >
-                Sort
-              </button>
-            </div>
+                <div className="absolute right-28 bottom-[200px]">
+                  <button
+                    type="button"
+                    onClick={emitSortHand}
+                    className="rounded-full border border-amber-100/15 bg-black/45 px-4 py-2 text-xs font-semibold text-amber-100 shadow-[0_20px_60px_rgba(0,0,0,0.45)] backdrop-blur-sm hover:bg-black/60"
+                  >
+                    Sort
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="pointer-events-auto absolute right-28 bottom-[200px]">
+                <button
+                  type="button"
+                  onClick={emitSortHand}
+                  className="rounded-full border border-amber-100/15 bg-black/45 px-4 py-2 text-xs font-semibold text-amber-100 shadow-[0_20px_60px_rgba(0,0,0,0.45)] backdrop-blur-sm hover:bg-black/60"
+                >
+                  Sort
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Overlays (HTML) */}
@@ -1810,14 +1866,14 @@ export default function MahjongClient() {
             {diceRolling || diceFaces ? (
               <div
                 className="absolute left-1/2 top-1/2"
-                style={{
-                  transform: "translate(-50%, -50%) translateY(-70px)",
-                }}
+                style={isPortraitPhone ? (portraitUiStyle ?? undefined) : undefined}
               >
-                <div className="rounded-[18px] bg-black/35 px-4 py-3 shadow-[0_22px_70px_rgba(0,0,0,0.45)] backdrop-blur-sm ring-1 ring-amber-100/10">
-                  <div className="flex items-center gap-4">
-                    <Dice3D face={diceFaces?.[0] ?? 1} rolling={diceRolling} />
-                    <Dice3D face={diceFaces?.[1] ?? 1} rolling={diceRolling} />
+                <div style={{ transform: "translate(-50%, -50%) translateY(-70px)" }}>
+                  <div className="rounded-[18px] bg-black/35 px-4 py-3 shadow-[0_22px_70px_rgba(0,0,0,0.45)] backdrop-blur-sm ring-1 ring-amber-100/10">
+                    <div className="flex items-center gap-4">
+                      <Dice3D face={diceFaces?.[0] ?? 1} rolling={diceRolling} />
+                      <Dice3D face={diceFaces?.[1] ?? 1} rolling={diceRolling} />
+                    </div>
                   </div>
                 </div>
               </div>
