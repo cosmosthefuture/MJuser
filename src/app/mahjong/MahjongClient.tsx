@@ -1895,14 +1895,24 @@ export default function MahjongClient() {
             position: "bottom" | "right" | "top" | "left";
           }) => {
             const isMobileSeat = isPortraitPhone || viewport.width < 520;
+            const displayPosition: "bottom" | "right" | "top" | "left" =
+              isPortraitPhone
+                ? position === "bottom"
+                  ? "left"
+                  : position === "left"
+                    ? "top"
+                    : position === "top"
+                      ? "right"
+                      : "bottom"
+                : position;
             const base =
               "absolute flex items-center gap-2 rounded-full border border-amber-100/20 bg-black/40 px-3 py-2 text-xs text-amber-100 shadow-[0_18px_40px_rgba(0,0,0,0.35)] backdrop-blur-sm";
             const pos =
-              position === "bottom"
+              displayPosition === "bottom"
                 ? `left-1/2 -translate-x-1/2 ${isMobileSeat ? "bottom-1" : "bottom-2"}`
-                : position === "top"
+                : displayPosition === "top"
                   ? `left-1/2 -translate-x-1/2 ${isMobileSeat ? "top-3" : "top-6"}`
-                  : position === "left"
+                  : displayPosition === "left"
                     ? `${isMobileSeat ? "left-2" : "left-6"} top-1/2 -translate-y-1/2`
                     : `${isMobileSeat ? "right-2" : "right-6"} top-1/2 -translate-y-1/2`;
 
