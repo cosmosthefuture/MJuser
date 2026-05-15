@@ -1996,7 +1996,13 @@ export default function MahjongClient() {
 
       {winnerReveal ? (
         <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/70 p-4">
-          <div className="pointer-events-auto w-full max-w-[760px] rounded-2xl border border-amber-100/15 bg-black/75 p-5 shadow-[0_25px_80px_rgba(0,0,0,0.55)] backdrop-blur-sm">
+          <div
+            className="pointer-events-auto w-full max-w-[760px] rounded-2xl border border-amber-100/15 bg-black/75 p-5 shadow-[0_25px_80px_rgba(0,0,0,0.55)] backdrop-blur-sm"
+            style={{
+              transform: isPortraitPhone ? "rotate(90deg)" : "none",
+              transformOrigin: "center center",
+            }}
+          >
             <div className="grid grid-cols-3 items-start gap-4">
               <div />
               <div className="text-center">
@@ -2081,7 +2087,13 @@ export default function MahjongClient() {
 
       {kongDecision ? (
         <div className="pointer-events-none absolute inset-0 z-30">
-          <div className="pointer-events-auto absolute left-1/2 -translate-x-1/2 bottom-[118px] flex items-center gap-3 rounded-2xl border border-amber-100/15 bg-black/55 px-4 py-3 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-sm">
+          <div
+            className="pointer-events-auto absolute left-1/2 -translate-x-1/2 bottom-[118px] flex items-center gap-3 rounded-2xl border border-amber-100/15 bg-black/55 px-4 py-3 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-sm"
+            style={{
+              transform: isPortraitPhone ? "rotate(90deg)" : "none",
+              transformOrigin: "center center",
+            }}
+          >
             {(() => {
               const g = kongDecision.groups[0];
               if (!g) return null;
@@ -2137,7 +2149,13 @@ export default function MahjongClient() {
 
       {pongDecision ? (
         <div className="pointer-events-none absolute inset-0 z-30">
-          <div className="pointer-events-auto absolute left-1/2 -translate-x-1/2 bottom-[118px] flex items-center gap-3 rounded-2xl border border-amber-100/15 bg-black/55 px-4 py-3 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-sm">
+          <div
+            className="pointer-events-auto absolute left-1/2 -translate-x-1/2 bottom-[118px] flex items-center gap-3 rounded-2xl border border-amber-100/15 bg-black/55 px-4 py-3 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-sm"
+            style={{
+              transform: isPortraitPhone ? "rotate(90deg)" : "none",
+              transformOrigin: "center center",
+            }}
+          >
             {(() => {
               const g = pongDecision.groups[0];
               if (!g) return null;
@@ -2189,7 +2207,13 @@ export default function MahjongClient() {
 
       {chowDecision ? (
         <div className="pointer-events-none absolute inset-0 z-30">
-          <div className="pointer-events-auto absolute left-1/2 -translate-x-1/2 bottom-[118px] flex items-center gap-3 rounded-2xl border border-amber-100/15 bg-black/55 px-4 py-3 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-sm">
+          <div
+            className="pointer-events-auto absolute left-1/2 -translate-x-1/2 bottom-[118px] flex items-center gap-3 rounded-2xl border border-amber-100/15 bg-black/55 px-4 py-3 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-sm"
+            style={{
+              transform: isPortraitPhone ? "rotate(90deg)" : "none",
+              transformOrigin: "center center",
+            }}
+          >
             <div className="flex flex-col gap-2">
               {chowDecision.groups.map((g, gi) => (
                 <div
