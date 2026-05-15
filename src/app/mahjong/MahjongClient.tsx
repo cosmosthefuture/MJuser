@@ -140,14 +140,6 @@ export default function MahjongClient() {
       setIsViewportReady(true);
     };
 
-    const orientationApi = screen.orientation as ScreenOrientation & {
-      lock?: (orientation: "landscape") => Promise<void>;
-    };
-
-    if (typeof orientationApi.lock === "function") {
-      void orientationApi.lock("landscape").catch(() => undefined);
-    }
-
     updateViewport();
     window.addEventListener("resize", updateViewport);
     window.addEventListener("orientationchange", updateViewport);
@@ -1710,18 +1702,13 @@ export default function MahjongClient() {
 
   const isPortraitPhone =
     viewport.width < 900 && viewport.height > viewport.width;
-  const stageStyle = isPortraitPhone
-    ? {
-        width: "100dvh",
-        height: "100vw",
-        transform: "translate(-50%, -50%) rotate(90deg)",
-        transformOrigin: "center center",
-      }
-    : {
-        width: "100vw",
-        height: "100dvh",
-        transform: "translate(-50%, -50%)",
-      };
+  const tableStageWidth = isPortraitPhone ? viewport.height : viewport.width;
+  const tableStageHeight = isPortraitPhone ? viewport.width : viewport.height;
+  const stageStyle = {
+    width: "100vw",
+    height: "100dvh",
+    transform: "translate(-50%, -50%)",
+  };
 
   return (
     <div className="fixed inset-0 overflow-hidden bg-[#00251b] text-amber-100">
@@ -1734,7 +1721,15 @@ export default function MahjongClient() {
         <div className="relative h-full w-full overflow-hidden">
           <div className="absolute inset-0 bg-[#00251b]" />
 
-      <div className="absolute left-4 top-4 z-20 flex items-center gap-3">
+      <div
+        className={`absolute top-4 z-20 flex items-center gap-3 ${
+          isPortraitPhone ? "right-4" : "left-4"
+        }`}
+        style={{
+          transform: isPortraitPhone ? "rotate(90deg)" : "none",
+          transformOrigin: isPortraitPhone ? "right top" : "left top",
+        }}
+      >
         <button
           type="button"
           onClick={() => router.back()}
@@ -1766,32 +1761,47 @@ export default function MahjongClient() {
       {/* Right-side control panel removed (WS drives game state). */}
 
       <div className="absolute inset-0 z-10 flex items-center justify-center">
-        <MahjongPixiTable
-          hand={hand}
-          melds={selfMelds}
-          discards={discards}
-          selfDiscardTiles={selfDiscardTiles}
-          rightDiscardTiles={rightDiscardTiles}
-          topDiscardTiles={topDiscardTiles}
-          leftDiscardTiles={leftDiscardTiles}
-          highlightDiscard={false}
-          centerMessage={centerMessage}
-          showDrawPile={showDrawPile}
-          drawPileCount={drawPileCount}
-          lastDiscardTile={lastDiscardTile}
-          activeSides={activeSides}
-          opponentHandCounts={opponentHandCounts}
-          opponentMelds={opponentMelds}
-          onDoubleClickTile={
-            isDecisionModalOpen
-              ? undefined
-              : (tileId) => emitDiscardTile(tileId)
-          }
-        />
+        <div
+          style={{
+            width: `${tableStageWidth}px`,
+            height: `${tableStageHeight}px`,
+            transform: isPortraitPhone ? "rotate(90deg)" : "none",
+            transformOrigin: "center center",
+          }}
+        >
+          <MahjongPixiTable
+            hand={hand}
+            melds={selfMelds}
+            discards={discards}
+            selfDiscardTiles={selfDiscardTiles}
+            rightDiscardTiles={rightDiscardTiles}
+            topDiscardTiles={topDiscardTiles}
+            leftDiscardTiles={leftDiscardTiles}
+            highlightDiscard={false}
+            centerMessage={centerMessage}
+            showDrawPile={showDrawPile}
+            drawPileCount={drawPileCount}
+            lastDiscardTile={lastDiscardTile}
+            activeSides={activeSides}
+            opponentHandCounts={opponentHandCounts}
+            opponentMelds={opponentMelds}
+            onDoubleClickTile={
+              isDecisionModalOpen
+                ? undefined
+                : (tileId) => emitDiscardTile(tileId)
+            }
+          />
+        </div>
       </div>
 
       <div className="pointer-events-none absolute inset-0 z-20">
-        <div className="pointer-events-auto absolute right-28 bottom-[200px]">
+        <div
+          className="pointer-events-auto absolute right-28 bottom-[200px]"
+          style={{
+            transform: isPortraitPhone ? "rotate(90deg)" : "none",
+            transformOrigin: "center center",
+          }}
+        >
           <button
             type="button"
             onClick={emitSortHand}
@@ -1808,7 +1818,10 @@ export default function MahjongClient() {
           <div
             className="absolute left-1/2 top-1/2"
             style={{
-              transform: "translate(-50%, -50%) translateY(-70px)",
+              transform: isPortraitPhone
+                ? "translate(-50%, -50%) translateY(-70px) rotate(90deg)"
+                : "translate(-50%, -50%) translateY(-70px)",
+              transformOrigin: "center center",
             }}
           >
             <div className="rounded-[18px] bg-black/35 px-4 py-3 shadow-[0_22px_70px_rgba(0,0,0,0.45)] backdrop-blur-sm ring-1 ring-amber-100/10">
