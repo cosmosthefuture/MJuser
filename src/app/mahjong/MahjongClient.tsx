@@ -1702,6 +1702,7 @@ export default function MahjongClient() {
 
   const isPortraitPhone =
     viewport.width < 900 && viewport.height > viewport.width;
+  const isMobileUi = viewport.width < 520;
   const stageStyle = {
     width: "100vw",
     height: "100dvh",
@@ -1863,108 +1864,129 @@ export default function MahjongClient() {
 
           {/* Overlays (HTML) */}
           <div className="pointer-events-none absolute inset-0 z-20">
-            {diceRolling || diceFaces ? (
+            {isPortraitPhone ? (
               <div
-                className="absolute left-1/2 top-1/2"
-                style={
-                  isPortraitPhone ? (portraitUiStyle ?? undefined) : undefined
-                }
+                className="pointer-events-none absolute left-1/2 top-1/2"
+                style={portraitUiStyle ?? undefined}
               >
-                <div
-                  style={{
-                    transform: "translate(-50%, -50%) translateY(-70px)",
-                  }}
-                >
-                  <div className="rounded-[18px] bg-black/35 px-4 py-3 shadow-[0_22px_70px_rgba(0,0,0,0.45)] backdrop-blur-sm ring-1 ring-amber-100/10">
-                    <div className="flex items-center gap-4">
-                      <Dice3D
-                        face={diceFaces?.[0] ?? 1}
-                        rolling={diceRolling}
-                      />
-                      <Dice3D
-                        face={diceFaces?.[1] ?? 1}
-                        rolling={diceRolling}
-                      />
+                <div className="absolute inset-0">
+                  {diceRolling || diceFaces ? (
+                    <div
+                      className="absolute left-1/2 top-1/2"
+                      style={{
+                        transform: "translate(-50%, -50%) translateY(-70px)",
+                      }}
+                    >
+                      <div
+                        className={`rounded-[18px] bg-black/35 shadow-[0_22px_70px_rgba(0,0,0,0.45)] backdrop-blur-sm ring-1 ring-amber-100/10 ${
+                          isMobileUi ? "px-3 py-2" : "px-4 py-3"
+                        }`}
+                      >
+                        <div className="flex items-center gap-4">
+                          <Dice3D
+                            face={diceFaces?.[0] ?? 1}
+                            rolling={diceRolling}
+                          />
+                          <Dice3D
+                            face={diceFaces?.[1] ?? 1}
+                            rolling={diceRolling}
+                          />
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              </div>
-            ) : null}
+                  ) : null}
 
-            {(() => {
-              if (roundPlayers.length === 0) return null;
+                  {(() => {
+                    if (roundPlayers.length === 0) return null;
 
-              const authPlayer =
-                authUserId != null
-                  ? (roundPlayers.find((p) => p.userId === authUserId) ?? null)
-                  : null;
-              const fallbackAuthPlayer =
-                authPlayer ??
-                (selfSeatPosition != null
-                  ? (roundPlayers.find(
-                      (p) => p.seatPosition === selfSeatPosition,
-                    ) ?? null)
-                  : null) ??
-                roundPlayers[0] ??
-                null;
-              const others = roundPlayers.filter(
-                (p) => p !== fallbackAuthPlayer,
-              );
-              const seats: Array<{
-                position: "bottom" | "right" | "top" | "left";
-                player: RoundPlayer;
-              }> = [];
-
-              if (fallbackAuthPlayer) {
-                seats.push({ position: "bottom", player: fallbackAuthPlayer });
-              }
-
-              const selfSeatNo = fallbackAuthPlayer?.seatPosition ?? null;
-              if (others.length === 1) {
-                const only = others[0];
-                if (only) seats.push({ position: "right", player: only });
-              } else {
-                const byDelta = [...others]
-                  .map((p) => {
-                    const otherSeatNo = p.seatPosition;
-                    const delta =
-                      selfSeatNo != null
-                        ? (((otherSeatNo - selfSeatNo) % 4) + 4) % 4
+                    const authPlayer =
+                      authUserId != null
+                        ? (roundPlayers.find((p) => p.userId === authUserId) ??
+                          null)
                         : null;
-                    return { player: p, delta };
-                  })
-                  .filter((x) => x.delta != null && x.delta !== 0)
-                  .sort((a, b) => (a.delta ?? 99) - (b.delta ?? 99));
+                    const fallbackAuthPlayer =
+                      authPlayer ??
+                      (selfSeatPosition != null
+                        ? (roundPlayers.find(
+                            (p) => p.seatPosition === selfSeatPosition,
+                          ) ?? null)
+                        : null) ??
+                      roundPlayers[0] ??
+                      null;
+                    const others = roundPlayers.filter(
+                      (p) => p !== fallbackAuthPlayer,
+                    );
+                    const seats: Array<{
+                      position: "bottom" | "right" | "top" | "left";
+                      player: RoundPlayer;
+                    }> = [];
 
-                for (const item of byDelta) {
-                  const delta = item.delta;
-                  if (delta === 1)
-                    seats.push({ position: "right", player: item.player });
-                  if (delta === 2)
-                    seats.push({ position: "top", player: item.player });
-                  if (delta === 3)
-                    seats.push({ position: "left", player: item.player });
-                }
-              }
+                    if (fallbackAuthPlayer) {
+                      seats.push({
+                        position: "bottom",
+                        player: fallbackAuthPlayer,
+                      });
+                    }
 
-              const Seat = ({
-                player,
-                position,
-              }: {
-                player: RoundPlayer;
-                position: "bottom" | "right" | "top" | "left";
-              }) => {
-                const isMobileSeat = viewport.width < 520;
-                const base =
-                  "absolute flex items-center gap-2 rounded-full border border-amber-100/20 bg-black/40 px-3 py-2 text-xs text-amber-100 shadow-[0_18px_40px_rgba(0,0,0,0.35)] backdrop-blur-sm";
-                const pos =
-                  position === "bottom"
-                    ? `left-1/2 -translate-x-1/2 ${isMobileSeat ? "bottom-1" : "bottom-2"}`
-                    : position === "top"
-                      ? `left-1/2 -translate-x-1/2 ${isMobileSeat ? "top-3" : "top-6"}`
-                      : position === "left"
-                        ? `${isMobileSeat ? "left-2" : "left-6"} top-1/2 -translate-y-1/2`
-                        : `${isMobileSeat ? "right-2" : "right-6"} top-1/2 -translate-y-1/2`;
+                    const selfSeatNo = fallbackAuthPlayer?.seatPosition ?? null;
+                    if (others.length === 1) {
+                      const only = others[0];
+                      if (only) seats.push({ position: "right", player: only });
+                    } else {
+                      const byDelta = [...others]
+                        .map((p) => {
+                          const otherSeatNo = p.seatPosition;
+                          const delta =
+                            selfSeatNo != null
+                              ? (((otherSeatNo - selfSeatNo) % 4) + 4) % 4
+                              : null;
+                          return { player: p, delta };
+                        })
+                        .filter((x) => x.delta != null && x.delta !== 0)
+                        .sort((a, b) => (a.delta ?? 99) - (b.delta ?? 99));
+
+                      for (const item of byDelta) {
+                        const delta = item.delta;
+                        if (delta === 1)
+                          seats.push({
+                            position: "right",
+                            player: item.player,
+                          });
+                        if (delta === 2)
+                          seats.push({ position: "top", player: item.player });
+                        if (delta === 3)
+                          seats.push({
+                            position: "left",
+                            player: item.player,
+                          });
+                      }
+                    }
+
+                    const Seat = ({
+                      player,
+                      position,
+                    }: {
+                      player: RoundPlayer;
+                      position: "bottom" | "right" | "top" | "left";
+                    }) => {
+                      const base =
+                        "absolute flex items-center gap-2 rounded-full border border-amber-100/20 bg-black/40 px-3 py-2 text-xs text-amber-100 shadow-[0_18px_40px_rgba(0,0,0,0.35)] backdrop-blur-sm";
+                      const pos =
+                        position === "bottom"
+                          ? `left-1/2 -translate-x-1/2 ${
+                              isMobileUi ? "bottom-1" : "bottom-2"
+                            }`
+                          : position === "top"
+                            ? `left-1/2 -translate-x-1/2 ${
+                                isMobileUi ? "top-3" : "top-6"
+                              }`
+                            : position === "left"
+                              ? `${
+                                  isMobileUi ? "left-2" : "left-6"
+                                } top-1/2 -translate-y-1/2`
+                              : `${
+                                  isMobileUi ? "right-2" : "right-6"
+                                } top-1/2 -translate-y-1/2`;
 
                 const name = player.name;
                 const initials =
@@ -1988,39 +2010,39 @@ export default function MahjongClient() {
                     ? player.userId === activePlayerUserId
                     : false;
 
-                return (
-                  <div
-                    className={`${base} ${pos} ${
-                      isHighlighted
-                        ? "animate-[seat-pop_0.55s_ease-in-out_5] ring-4 ring-amber-200/80 shadow-[0_0_0_14px_rgba(255,210,125,0.18),0_34px_90px_rgba(0,0,0,0.55)]"
-                        : ""
-                    } ${isMobileSeat ? "px-2 py-1 text-[11px]" : ""}`}
-                  >
+                      return (
+                        <div
+                          className={`${base} ${pos} ${
+                            isHighlighted
+                              ? "animate-[seat-pop_0.55s_ease-in-out_5] ring-4 ring-amber-200/80 shadow-[0_0_0_14px_rgba(255,210,125,0.18),0_34px_90px_rgba(0,0,0,0.55)]"
+                              : ""
+                          } ${isMobileUi ? "px-2 py-1 text-[11px]" : ""}`}
+                        >
                     {isUserToPlay ? (
                       <div className="pointer-events-none absolute -inset-[2px] rounded-full">
                         <div className="absolute inset-0 rounded-full ring-3 ring-amber-200/70 shadow-[0_0_0_12px_rgba(255,210,125,0.14),0_0_40px_rgba(255,210,125,0.18)] animate-pulse" />
                       </div>
                     ) : null}
-                    <Avatar
-                      className={`border border-amber-100/20 bg-black/30 ${
-                        isMobileSeat ? "size-6" : "size-8"
-                      }`}
-                    >
+                          <Avatar
+                            className={`border border-amber-100/20 bg-black/30 ${
+                              isMobileUi ? "size-6" : "size-8"
+                            }`}
+                          >
                       <AvatarFallback className="bg-black/30 text-amber-100 font-bold">
                         {initials}
                       </AvatarFallback>
                     </Avatar>
-                    <div
-                      className={`truncate font-semibold ${
-                        isMobileSeat ? "max-w-[96px]" : "max-w-[140px]"
-                      }`}
-                    >
+                          <div
+                            className={`truncate font-semibold ${
+                              isMobileUi ? "max-w-[96px]" : "max-w-[140px]"
+                            }`}
+                          >
                       {name}
                     </div>
                     {isActiveTurn ? (
                       <div
                         className={`ml-1 rounded-full bg-amber-100/90 font-bold tabular-nums text-[#3b0500] ${
-                          isMobileSeat
+                          isMobileUi
                             ? "px-1.5 py-0 text-[10px]"
                             : "px-2 py-0.5 text-[11px]"
                         }`}
@@ -2029,22 +2051,219 @@ export default function MahjongClient() {
                         s
                       </div>
                     ) : null}
-                  </div>
-                );
-              };
+                        </div>
+                      );
+                    };
 
-              return (
-                <>
-                  {seats.map((seat) => (
-                    <Seat
-                      key={`${seat.position}-${seat.player.userId}`}
-                      player={seat.player}
-                      position={seat.position}
-                    />
-                  ))}
-                </>
-              );
-            })()}
+                    return (
+                      <>
+                        {seats.map((seat) => (
+                          <Seat
+                            key={`${seat.position}-${seat.player.userId}`}
+                            player={seat.player}
+                            position={seat.position}
+                          />
+                        ))}
+                      </>
+                    );
+                  })()}
+                </div>
+              </div>
+            ) : (
+              <>
+                {diceRolling || diceFaces ? (
+                  <div className="absolute left-1/2 top-1/2">
+                    <div
+                      style={{
+                        transform: "translate(-50%, -50%) translateY(-70px)",
+                      }}
+                    >
+                      <div className="rounded-[18px] bg-black/35 px-4 py-3 shadow-[0_22px_70px_rgba(0,0,0,0.45)] backdrop-blur-sm ring-1 ring-amber-100/10">
+                        <div className="flex items-center gap-4">
+                          <Dice3D
+                            face={diceFaces?.[0] ?? 1}
+                            rolling={diceRolling}
+                          />
+                          <Dice3D
+                            face={diceFaces?.[1] ?? 1}
+                            rolling={diceRolling}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+
+                {(() => {
+                  if (roundPlayers.length === 0) return null;
+
+                  const authPlayer =
+                    authUserId != null
+                      ? (roundPlayers.find((p) => p.userId === authUserId) ??
+                        null)
+                      : null;
+                  const fallbackAuthPlayer =
+                    authPlayer ??
+                    (selfSeatPosition != null
+                      ? (roundPlayers.find(
+                          (p) => p.seatPosition === selfSeatPosition,
+                        ) ?? null)
+                      : null) ??
+                    roundPlayers[0] ??
+                    null;
+                  const others = roundPlayers.filter(
+                    (p) => p !== fallbackAuthPlayer,
+                  );
+                  const seats: Array<{
+                    position: "bottom" | "right" | "top" | "left";
+                    player: RoundPlayer;
+                  }> = [];
+
+                  if (fallbackAuthPlayer) {
+                    seats.push({
+                      position: "bottom",
+                      player: fallbackAuthPlayer,
+                    });
+                  }
+
+                  const selfSeatNo = fallbackAuthPlayer?.seatPosition ?? null;
+                  if (others.length === 1) {
+                    const only = others[0];
+                    if (only) seats.push({ position: "right", player: only });
+                  } else {
+                    const byDelta = [...others]
+                      .map((p) => {
+                        const otherSeatNo = p.seatPosition;
+                        const delta =
+                          selfSeatNo != null
+                            ? (((otherSeatNo - selfSeatNo) % 4) + 4) % 4
+                            : null;
+                        return { player: p, delta };
+                      })
+                      .filter((x) => x.delta != null && x.delta !== 0)
+                      .sort((a, b) => (a.delta ?? 99) - (b.delta ?? 99));
+
+                    for (const item of byDelta) {
+                      const delta = item.delta;
+                      if (delta === 1)
+                        seats.push({ position: "right", player: item.player });
+                      if (delta === 2)
+                        seats.push({ position: "top", player: item.player });
+                      if (delta === 3)
+                        seats.push({ position: "left", player: item.player });
+                    }
+                  }
+
+                  const Seat = ({
+                    player,
+                    position,
+                  }: {
+                    player: RoundPlayer;
+                    position: "bottom" | "right" | "top" | "left";
+                  }) => {
+                    const base =
+                      "absolute flex items-center gap-2 rounded-full border border-amber-100/20 bg-black/40 px-3 py-2 text-xs text-amber-100 shadow-[0_18px_40px_rgba(0,0,0,0.35)] backdrop-blur-sm";
+                    const pos =
+                      position === "bottom"
+                        ? `left-1/2 -translate-x-1/2 ${
+                            isMobileUi ? "bottom-1" : "bottom-2"
+                          }`
+                        : position === "top"
+                          ? `left-1/2 -translate-x-1/2 ${
+                              isMobileUi ? "top-3" : "top-6"
+                            }`
+                          : position === "left"
+                            ? `${
+                                isMobileUi ? "left-2" : "left-6"
+                              } top-1/2 -translate-y-1/2`
+                            : `${
+                                isMobileUi ? "right-2" : "right-6"
+                              } top-1/2 -translate-y-1/2`;
+
+                    const name = player.name;
+                    const initials =
+                      (player.name || "")
+                        .trim()
+                        .split(/\s+/)
+                        .slice(0, 2)
+                        .map((s) => s[0]?.toUpperCase())
+                        .join("") || "?";
+
+                    const isHighlighted =
+                      player != null && firstPlayerHighlightId != null
+                        ? player.userId === firstPlayerHighlightId
+                        : false;
+                    const isActiveTurn =
+                      turnCountdown != null
+                        ? player.userId === turnCountdown.userId
+                        : false;
+                    const isUserToPlay =
+                      activePlayerUserId != null
+                        ? player.userId === activePlayerUserId
+                        : false;
+
+                    return (
+                      <div
+                        className={`${base} ${pos} ${
+                          isHighlighted
+                            ? "animate-[seat-pop_0.55s_ease-in-out_5] ring-4 ring-amber-200/80 shadow-[0_0_0_14px_rgba(255,210,125,0.18),0_34px_90px_rgba(0,0,0,0.55)]"
+                            : ""
+                        } ${isMobileUi ? "px-2 py-1 text-[11px]" : ""}`}
+                      >
+                        {isUserToPlay ? (
+                          <div className="pointer-events-none absolute -inset-[2px] rounded-full">
+                            <div className="absolute inset-0 rounded-full ring-3 ring-amber-200/70 shadow-[0_0_0_12px_rgba(255,210,125,0.14),0_0_40px_rgba(255,210,125,0.18)] animate-pulse" />
+                          </div>
+                        ) : null}
+                        <Avatar
+                          className={`border border-amber-100/20 bg-black/30 ${
+                            isMobileUi ? "size-6" : "size-8"
+                          }`}
+                        >
+                          <AvatarFallback className="bg-black/30 text-amber-100 font-bold">
+                            {initials}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div
+                          className={`truncate font-semibold ${
+                            isMobileUi ? "max-w-[96px]" : "max-w-[140px]"
+                          }`}
+                        >
+                          {name}
+                        </div>
+                        {isActiveTurn ? (
+                          <div
+                            className={`ml-1 rounded-full bg-amber-100/90 font-bold tabular-nums text-[#3b0500] ${
+                              isMobileUi
+                                ? "px-1.5 py-0 text-[10px]"
+                                : "px-2 py-0.5 text-[11px]"
+                            }`}
+                          >
+                            {Math.max(
+                              0,
+                              Math.floor(turnCountdown?.remaining ?? 0),
+                            )}
+                            s
+                          </div>
+                        ) : null}
+                      </div>
+                    );
+                  };
+
+                  return (
+                    <>
+                      {seats.map((seat) => (
+                        <Seat
+                          key={`${seat.position}-${seat.player.userId}`}
+                          player={seat.player}
+                          position={seat.position}
+                        />
+                      ))}
+                    </>
+                  );
+                })()}
+              </>
+            )}
           </div>
 
           {winnerReveal ? (
@@ -2057,13 +2276,19 @@ export default function MahjongClient() {
                   isPortraitPhone ? (portraitUiStyle ?? undefined) : undefined
                 }
               >
-                <div className="pointer-events-auto w-full max-w-[760px] rounded-2xl border border-amber-100/15 bg-black/75 p-5 shadow-[0_25px_80px_rgba(0,0,0,0.55)] backdrop-blur-sm">
+                <div
+                  className={`pointer-events-auto w-full rounded-2xl border border-amber-100/15 bg-black/75 shadow-[0_25px_80px_rgba(0,0,0,0.55)] backdrop-blur-sm ${
+                    isMobileUi ? "max-w-[520px] p-4" : "max-w-[760px] p-5"
+                  }`}
+                >
                 <div className="grid grid-cols-3 items-start gap-4">
                   <div />
                   <div className="text-center">
                     {winnerReveal.resultLabel ? (
                       <div
-                        className={`text-3xl font-extrabold tracking-tight ${
+                        className={`font-extrabold tracking-tight ${
+                          isMobileUi ? "text-2xl" : "text-3xl"
+                        } ${
                           winnerReveal.resultLabel === "You Win"
                             ? "text-emerald-200"
                             : "text-rose-200"
@@ -2156,7 +2381,11 @@ export default function MahjongClient() {
                   isPortraitPhone ? (portraitUiStyle ?? undefined) : undefined
                 }
               >
-                <div className="pointer-events-auto flex items-center gap-3 rounded-2xl border border-amber-100/15 bg-black/55 px-4 py-3 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-sm">
+                <div
+                  className={`pointer-events-auto flex items-center gap-3 rounded-2xl border border-amber-100/15 bg-black/55 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-sm ${
+                    isMobileUi ? "px-3 py-2" : "px-4 py-3"
+                  }`}
+                >
                   {(() => {
                     const g = kongDecision.groups[0];
                     if (!g) return null;
@@ -2223,7 +2452,11 @@ export default function MahjongClient() {
                   isPortraitPhone ? (portraitUiStyle ?? undefined) : undefined
                 }
               >
-                <div className="pointer-events-auto flex items-center gap-3 rounded-2xl border border-amber-100/15 bg-black/55 px-4 py-3 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-sm">
+                <div
+                  className={`pointer-events-auto flex items-center gap-3 rounded-2xl border border-amber-100/15 bg-black/55 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-sm ${
+                    isMobileUi ? "px-3 py-2" : "px-4 py-3"
+                  }`}
+                >
                   {(() => {
                     const g = pongDecision.groups[0];
                     if (!g) return null;
@@ -2286,7 +2519,11 @@ export default function MahjongClient() {
                   isPortraitPhone ? (portraitUiStyle ?? undefined) : undefined
                 }
               >
-                <div className="pointer-events-auto flex items-center gap-3 rounded-2xl border border-amber-100/15 bg-black/55 px-4 py-3 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-sm">
+                <div
+                  className={`pointer-events-auto flex items-center gap-3 rounded-2xl border border-amber-100/15 bg-black/55 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-sm ${
+                    isMobileUi ? "px-3 py-2" : "px-4 py-3"
+                  }`}
+                >
                   <div className="flex flex-col gap-2">
                     {chowDecision.groups.map((g, gi) => (
                       <div
