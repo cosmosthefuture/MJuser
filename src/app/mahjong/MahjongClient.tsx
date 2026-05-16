@@ -60,6 +60,17 @@ type CanChowPayload = {
   groups?: unknown;
 };
 
+type WinnerRevealState = {
+  winnerUserId: number;
+  winnerName: string;
+  resultLabel: string;
+  tiles: MahjongTile[];
+  melds: Array<{
+    kind: "chow" | "pong" | "kong";
+    tiles: MahjongTile[];
+  }>;
+};
+
 const MahjongPixiTable = dynamic(() => import("./MahjongPixiTable"), {
   ssr: false,
 });
@@ -91,16 +102,9 @@ export default function MahjongClient() {
     remaining: number;
     duration: number;
   } | null>(null);
-  const [winnerReveal, setWinnerReveal] = useState<{
-    winnerUserId: number;
-    winnerName: string;
-    resultLabel: string;
-    tiles: MahjongTile[];
-    melds: Array<{
-      kind: "chow" | "pong" | "kong";
-      tiles: MahjongTile[];
-    }>;
-  } | null>(null);
+  const [winnerReveal, setWinnerReveal] = useState<WinnerRevealState | null>(
+    null,
+  );
   const [kongDecision, setKongDecision] = useState<{
     kind: "kong" | "interrupt_kong" | "normal_kong";
     groups: Array<{
@@ -2526,7 +2530,7 @@ function WinnerRevealModal({
   isMobileUi,
   onClose,
 }: {
-  winnerReveal: WinnerReveal;
+  winnerReveal: WinnerRevealState;
   isMobileUi: boolean;
   onClose: () => void;
 }) {
