@@ -33,7 +33,6 @@ const LayoutWrapper: React.FC<LayoutWrapperProps> = ({ children }) => {
 
   // For fullscreen game views, skip the phone frame + footer wrapper
   if (
-    pathname.startsWith("/domino") ||
     pathname.startsWith("/mahjong") ||
     isGameRulesRoute ||
     isGameRoomsRoute

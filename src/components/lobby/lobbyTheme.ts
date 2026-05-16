@@ -90,7 +90,7 @@ export function getGamePresentation(gameId: number, gameName: string) {
   if (normalized.includes("domino")) {
     return {
       eyebrow: "House Classic",
-      href: "/domino",
+      href: `/game-rooms?game_id=${gameId}`,
       imageAlt: gameName,
       imageSrc: "/images/img/cardlogo.png",
       subtitle: "Classic table play with clean felt visuals and steady bets.",
