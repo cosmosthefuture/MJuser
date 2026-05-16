@@ -2316,7 +2316,9 @@ export default function MahjongClient() {
               >
                 <div
                   className={
-                    isPortraitPhone && isMobileUi ? "-translate-x-3" : undefined
+                    isPortraitPhone && isMobileUi
+                      ? "-translate-x-0 translate-y-10"
+                      : undefined
                   }
                 >
                   <div
@@ -2401,7 +2403,9 @@ export default function MahjongClient() {
               >
                 <div
                   className={
-                    isPortraitPhone && isMobileUi ? "-translate-x-3" : undefined
+                    isPortraitPhone && isMobileUi
+                      ? "-translate-x-0 translate-y-10"
+                      : undefined
                   }
                 >
                   <div
@@ -2478,7 +2482,9 @@ export default function MahjongClient() {
               >
                 <div
                   className={
-                    isPortraitPhone && isMobileUi ? "-translate-x-3" : undefined
+                    isPortraitPhone && isMobileUi
+                      ? "-translate-x-0 translate-y-10"
+                      : undefined
                   }
                 >
                   <div
@@ -2574,10 +2580,14 @@ function WinnerRevealModal({
   return (
     <div
       className={`pointer-events-auto w-full rounded-2xl border border-amber-100/15 bg-black/75 shadow-[0_25px_80px_rgba(0,0,0,0.55)] backdrop-blur-sm ${
-        isMobileUi ? "max-w-[520px] p-4" : "max-w-[760px] p-5"
+        isMobileUi ? "max-w-[520px] p-3" : "max-w-[760px] p-5"
       }`}
     >
-      <div className="grid grid-cols-3 items-start gap-4">
+      <div
+        className={`grid grid-cols-3 items-start ${
+          isMobileUi ? "gap-3" : "gap-4"
+        }`}
+      >
         <div />
         <div className="text-center">
           {winnerReveal.resultLabel ? (
@@ -2609,7 +2619,7 @@ function WinnerRevealModal({
       </div>
 
       <div
-        className={`mt-4 flex flex-wrap gap-2 ${
+        className={`${isMobileUi ? "mt-3" : "mt-4"} flex flex-wrap gap-2 ${
           isMobileUi ? "scale-[0.60] origin-top-left" : ""
         }`}
       >
@@ -2621,7 +2631,11 @@ function WinnerRevealModal({
       </div>
 
       {winnerReveal.melds.length > 0 ? (
-        <div className="mt-5 flex flex-wrap items-start gap-8">
+        <div
+          className={`flex flex-wrap items-start ${
+            isMobileUi ? "mt-4 gap-4" : "mt-5 gap-8"
+          }`}
+        >
           {(() => {
             const kinds: Array<"chow" | "pong" | "kong"> = [
               "chow",
@@ -2636,14 +2650,17 @@ function WinnerRevealModal({
                 );
                 if (groups.length === 0) return null;
                 return (
-                  <div key={kind} className="min-w-[180px]">
+                  <div
+                    key={kind}
+                    className={isMobileUi ? "min-w-[140px]" : "min-w-[180px]"}
+                  >
                     <div className="text-xs font-semibold uppercase tracking-wide text-amber-100/70">
                       {kind}
                     </div>
                     <div
-                      className={`mt-2 flex flex-wrap gap-6 ${
-                        isMobileUi ? "scale-[0.60] origin-left" : ""
-                      }`}
+                      className={`mt-2 flex flex-wrap ${
+                        isMobileUi ? "gap-3" : "gap-6"
+                      } ${isMobileUi ? "scale-[0.60] origin-left" : ""}`}
                     >
                       {groups.map((g, gi) => (
                         <div key={`${kind}-${gi}`} className="flex gap-2">
