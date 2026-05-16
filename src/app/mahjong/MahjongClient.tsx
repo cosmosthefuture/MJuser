@@ -1874,7 +1874,9 @@ export default function MahjongClient() {
                     <div
                       className="absolute left-1/2 top-1/2"
                       style={{
-                        transform: "translate(-50%, -50%) translateY(-70px)",
+                        transform: `translate(-50%, -50%) translateY(-70px) ${
+                          isMobileUi ? "scale(0.8)" : ""
+                        }`,
                       }}
                     >
                       <div
@@ -2268,104 +2270,28 @@ export default function MahjongClient() {
 
           {winnerReveal ? (
             <div className="absolute inset-0 z-30 bg-black/70">
-              <div
-                className={`absolute inset-0 p-4 ${
-                  isPortraitPhone ? "" : "flex items-center justify-center"
-                }`}
-                style={
-                  isPortraitPhone ? (portraitUiStyle ?? undefined) : undefined
-                }
-              >
+              {isPortraitPhone ? (
                 <div
-                  className={`pointer-events-auto w-full rounded-2xl border border-amber-100/15 bg-black/75 shadow-[0_25px_80px_rgba(0,0,0,0.55)] backdrop-blur-sm ${
-                    isMobileUi ? "max-w-[520px] p-4" : "max-w-[760px] p-5"
-                  }`}
+                  className="pointer-events-none absolute left-1/2 top-1/2"
+                  style={portraitUiStyle ?? undefined}
                 >
-                <div className="grid grid-cols-3 items-start gap-4">
-                  <div />
-                  <div className="text-center">
-                    {winnerReveal.resultLabel ? (
-                      <div
-                        className={`font-extrabold tracking-tight ${
-                          isMobileUi ? "text-2xl" : "text-3xl"
-                        } ${
-                          winnerReveal.resultLabel === "You Win"
-                            ? "text-emerald-200"
-                            : "text-rose-200"
-                        }`}
-                      >
-                        {winnerReveal.resultLabel}
-                      </div>
-                    ) : null}
-                    <div className="mt-1 text-sm text-amber-100/90">
-                      {winnerReveal.winnerName}
-                    </div>
-                  </div>
-                  <div className="flex justify-end">
-                    <button
-                      type="button"
-                      onClick={() => setWinnerReveal(null)}
-                      className="rounded-full border border-amber-100/15 bg-black/40 px-3 py-1.5 text-sm text-amber-100 hover:bg-black/60"
-                    >
-                      Close
-                    </button>
+                  <div className="pointer-events-none absolute inset-0 flex items-center justify-center p-4">
+                    <WinnerRevealModal
+                      winnerReveal={winnerReveal}
+                      isMobileUi={isMobileUi}
+                      onClose={() => setWinnerReveal(null)}
+                    />
                   </div>
                 </div>
-
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {winnerReveal.tiles.map((t, idx) => {
-                    return (
-                      <div key={`${t.suit}-${t.rank}-${idx}`} className="">
-                        <MahjongTileCard tile={t} />
-                      </div>
-                    );
-                  })}
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center p-4">
+                  <WinnerRevealModal
+                    winnerReveal={winnerReveal}
+                    isMobileUi={isMobileUi}
+                    onClose={() => setWinnerReveal(null)}
+                  />
                 </div>
-
-                {winnerReveal.melds.length > 0 ? (
-                  <div className="mt-5 flex flex-wrap items-start gap-8">
-                    {(() => {
-                      const kinds: Array<"chow" | "pong" | "kong"> = [
-                        "chow",
-                        "pong",
-                        "kong",
-                      ];
-
-                      return kinds
-                        .map((kind) => {
-                          const groups = winnerReveal.melds.filter(
-                            (m) => m.kind === kind,
-                          );
-                          if (groups.length === 0) return null;
-                          return (
-                            <div key={kind} className="min-w-[180px]">
-                              <div className="text-xs font-semibold uppercase tracking-wide text-amber-100/70">
-                                {kind}
-                              </div>
-                              <div className="mt-2 flex flex-wrap gap-6">
-                                {groups.map((g, gi) => (
-                                  <div
-                                    key={`${kind}-${gi}`}
-                                    className="flex gap-2"
-                                  >
-                                    {g.tiles.map((t, ti) => (
-                                      <MahjongTileCard
-                                        key={`${kind}-${gi}-${t.suit}-${t.rank}-${ti}`}
-                                        tile={t}
-                                      />
-                                    ))}
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          );
-                        })
-                        .filter(Boolean);
-                    })()}
-                  </div>
-                ) : null}
-                </div>
-              </div>
+              )}
             </div>
           ) : null}
 
@@ -2591,6 +2517,101 @@ function Dice3D({ face, rolling }: { face: number; rolling: boolean }) {
           <div className="dice3d-face dice3d-face-back">6</div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function WinnerRevealModal({
+  winnerReveal,
+  isMobileUi,
+  onClose,
+}: {
+  winnerReveal: WinnerReveal;
+  isMobileUi: boolean;
+  onClose: () => void;
+}) {
+  return (
+    <div
+      className={`pointer-events-auto w-full rounded-2xl border border-amber-100/15 bg-black/75 shadow-[0_25px_80px_rgba(0,0,0,0.55)] backdrop-blur-sm ${
+        isMobileUi ? "max-w-[520px] p-4" : "max-w-[760px] p-5"
+      }`}
+    >
+      <div className="grid grid-cols-3 items-start gap-4">
+        <div />
+        <div className="text-center">
+          {winnerReveal.resultLabel ? (
+            <div
+              className={`font-extrabold tracking-tight ${
+                isMobileUi ? "text-2xl" : "text-3xl"
+              } ${
+                winnerReveal.resultLabel === "You Win"
+                  ? "text-emerald-200"
+                  : "text-rose-200"
+              }`}
+            >
+              {winnerReveal.resultLabel}
+            </div>
+          ) : null}
+          <div className="mt-1 text-sm text-amber-100/90">
+            {winnerReveal.winnerName}
+          </div>
+        </div>
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-full border border-amber-100/15 bg-black/40 px-3 py-1.5 text-sm text-amber-100 hover:bg-black/60"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+
+      <div className="mt-4 flex flex-wrap gap-2">
+        {winnerReveal.tiles.map((t, idx) => (
+          <div key={`${t.suit}-${t.rank}-${idx}`}>
+            <MahjongTileCard tile={t} />
+          </div>
+        ))}
+      </div>
+
+      {winnerReveal.melds.length > 0 ? (
+        <div className="mt-5 flex flex-wrap items-start gap-8">
+          {(() => {
+            const kinds: Array<"chow" | "pong" | "kong"> = [
+              "chow",
+              "pong",
+              "kong",
+            ];
+
+            return kinds
+              .map((kind) => {
+                const groups = winnerReveal.melds.filter((m) => m.kind === kind);
+                if (groups.length === 0) return null;
+                return (
+                  <div key={kind} className="min-w-[180px]">
+                    <div className="text-xs font-semibold uppercase tracking-wide text-amber-100/70">
+                      {kind}
+                    </div>
+                    <div className="mt-2 flex flex-wrap gap-6">
+                      {groups.map((g, gi) => (
+                        <div key={`${kind}-${gi}`} className="flex gap-2">
+                          {g.tiles.map((tile, ti) => (
+                            <MahjongTileCard
+                              key={`${kind}-${gi}-${tile.suit}-${tile.rank}-${ti}`}
+                              tile={tile}
+                            />
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })
+              .filter(Boolean);
+          })()}
+        </div>
+      ) : null}
     </div>
   );
 }
