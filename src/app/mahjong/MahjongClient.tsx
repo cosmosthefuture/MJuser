@@ -2610,7 +2610,7 @@ function WinnerRevealModal({
 
       <div
         className={`mt-4 flex flex-wrap gap-2 ${
-          isMobileUi ? "scale-[0.75] origin-top-left" : ""
+          isMobileUi ? "scale-[0.60] origin-top-left" : ""
         }`}
       >
         {winnerReveal.tiles.map((t, idx) => (
