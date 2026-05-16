@@ -1994,27 +1994,27 @@ export default function MahjongClient() {
                                   isMobileUi ? "right-2" : "right-6"
                                 } top-1/2 -translate-y-1/2`;
 
-                const name = player.name;
-                const initials =
-                  (player.name || "")
-                    .trim()
-                    .split(/\s+/)
-                    .slice(0, 2)
-                    .map((s) => s[0]?.toUpperCase())
-                    .join("") || "?";
+                      const name = player.name;
+                      const initials =
+                        (player.name || "")
+                          .trim()
+                          .split(/\s+/)
+                          .slice(0, 2)
+                          .map((s) => s[0]?.toUpperCase())
+                          .join("") || "?";
 
-                const isHighlighted =
-                  player != null && firstPlayerHighlightId != null
-                    ? player.userId === firstPlayerHighlightId
-                    : false;
-                const isActiveTurn =
-                  turnCountdown != null
-                    ? player.userId === turnCountdown.userId
-                    : false;
-                const isUserToPlay =
-                  activePlayerUserId != null
-                    ? player.userId === activePlayerUserId
-                    : false;
+                      const isHighlighted =
+                        player != null && firstPlayerHighlightId != null
+                          ? player.userId === firstPlayerHighlightId
+                          : false;
+                      const isActiveTurn =
+                        turnCountdown != null
+                          ? player.userId === turnCountdown.userId
+                          : false;
+                      const isUserToPlay =
+                        activePlayerUserId != null
+                          ? player.userId === activePlayerUserId
+                          : false;
 
                       return (
                         <div
@@ -2024,39 +2024,42 @@ export default function MahjongClient() {
                               : ""
                           } ${isMobileUi ? "px-2 py-1 text-[11px]" : ""}`}
                         >
-                    {isUserToPlay ? (
-                      <div className="pointer-events-none absolute -inset-[2px] rounded-full">
-                        <div className="absolute inset-0 rounded-full ring-3 ring-amber-200/70 shadow-[0_0_0_12px_rgba(255,210,125,0.14),0_0_40px_rgba(255,210,125,0.18)] animate-pulse" />
-                      </div>
-                    ) : null}
+                          {isUserToPlay ? (
+                            <div className="pointer-events-none absolute -inset-[2px] rounded-full">
+                              <div className="absolute inset-0 rounded-full ring-3 ring-amber-200/70 shadow-[0_0_0_12px_rgba(255,210,125,0.14),0_0_40px_rgba(255,210,125,0.18)] animate-pulse" />
+                            </div>
+                          ) : null}
                           <Avatar
                             className={`border border-amber-100/20 bg-black/30 ${
                               isMobileUi ? "size-6" : "size-8"
                             }`}
                           >
-                      <AvatarFallback className="bg-black/30 text-amber-100 font-bold">
-                        {initials}
-                      </AvatarFallback>
-                    </Avatar>
+                            <AvatarFallback className="bg-black/30 text-amber-100 font-bold">
+                              {initials}
+                            </AvatarFallback>
+                          </Avatar>
                           <div
                             className={`truncate font-semibold ${
                               isMobileUi ? "max-w-[96px]" : "max-w-[140px]"
                             }`}
                           >
-                      {name}
-                    </div>
-                    {isActiveTurn ? (
-                      <div
-                        className={`ml-1 rounded-full bg-amber-100/90 font-bold tabular-nums text-[#3b0500] ${
-                          isMobileUi
-                            ? "px-1.5 py-0 text-[10px]"
-                            : "px-2 py-0.5 text-[11px]"
-                        }`}
-                      >
-                        {Math.max(0, Math.floor(turnCountdown?.remaining ?? 0))}
-                        s
-                      </div>
-                    ) : null}
+                            {name}
+                          </div>
+                          {isActiveTurn ? (
+                            <div
+                              className={`ml-1 rounded-full bg-amber-100/90 font-bold tabular-nums text-[#3b0500] ${
+                                isMobileUi
+                                  ? "px-1.5 py-0 text-[10px]"
+                                  : "px-2 py-0.5 text-[11px]"
+                              }`}
+                            >
+                              {Math.max(
+                                0,
+                                Math.floor(turnCountdown?.remaining ?? 0),
+                              )}
+                              s
+                            </div>
+                          ) : null}
                         </div>
                       );
                     };
@@ -2312,59 +2315,73 @@ export default function MahjongClient() {
                 }
               >
                 <div
-                  className={`pointer-events-auto flex items-center gap-3 rounded-2xl border border-amber-100/15 bg-black/55 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-sm ${
-                    isMobileUi ? "px-3 py-2" : "px-4 py-3"
-                  }`}
+                  className={
+                    isPortraitPhone && isMobileUi ? "-translate-x-3" : undefined
+                  }
                 >
-                  {(() => {
-                    const g = kongDecision.groups[0];
-                    if (!g) return null;
-                    return (
-                      <>
-                        <div className="flex items-center gap-2">
-                          {g.tiles.slice(0, 4).map((t, ti) => (
-                            <MahjongTileCard
-                              key={`${t.suit}-${t.rank}-${ti}`}
-                              tile={t}
-                              size="xs"
-                            />
-                          ))}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              if (kongDecision.kind === "interrupt_kong") {
-                                emitAcceptInterruptKong(g.kongKey);
-                              } else if (kongDecision.kind === "normal_kong") {
-                                emitAcceptNormalKong(g.kongKey);
-                              } else {
-                                emitAcceptKong(g.kongKey);
-                              }
-                              setKongDecision(null);
-                            }}
-                            className="rounded-full bg-amber-100/90 px-4 py-2 text-xs font-semibold text-[#3b0500] hover:bg-amber-100"
+                  <div
+                    className={`pointer-events-auto flex items-center gap-3 rounded-2xl border border-amber-100/15 bg-black/55 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-sm ${
+                      isMobileUi ? "px-3 py-2" : "px-4 py-3"
+                    }`}
+                  >
+                    {(() => {
+                      const g = kongDecision.groups[0];
+                      if (!g) return null;
+                      return (
+                        <>
+                          <div
+                            className={`flex items-center gap-2 ${
+                              isMobileUi ? "scale-90 origin-left" : ""
+                            }`}
                           >
-                            Accept
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              if (kongDecision.kind === "kong") {
-                                emitPassKong();
-                              } else if (kongDecision.kind === "normal_kong") {
-                                emitPassNormalKong();
-                              }
-                              setKongDecision(null);
-                            }}
-                            className="rounded-full border border-amber-100/15 bg-black/40 px-4 py-2 text-xs font-semibold text-amber-100 hover:bg-black/60"
-                          >
-                            Pass
-                          </button>
-                        </div>
-                      </>
-                    );
-                  })()}
+                            {g.tiles.slice(0, 4).map((t, ti) => (
+                              <MahjongTileCard
+                                key={`${t.suit}-${t.rank}-${ti}`}
+                                tile={t}
+                                size="xs"
+                              />
+                            ))}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (kongDecision.kind === "interrupt_kong") {
+                                  emitAcceptInterruptKong(g.kongKey);
+                                } else if (
+                                  kongDecision.kind === "normal_kong"
+                                ) {
+                                  emitAcceptNormalKong(g.kongKey);
+                                } else {
+                                  emitAcceptKong(g.kongKey);
+                                }
+                                setKongDecision(null);
+                              }}
+                              className="rounded-full bg-amber-100/90 px-4 py-2 text-xs font-semibold text-[#3b0500] hover:bg-amber-100"
+                            >
+                              Accept
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (kongDecision.kind === "kong") {
+                                  emitPassKong();
+                                } else if (
+                                  kongDecision.kind === "normal_kong"
+                                ) {
+                                  emitPassNormalKong();
+                                }
+                                setKongDecision(null);
+                              }}
+                              className="rounded-full border border-amber-100/15 bg-black/40 px-4 py-2 text-xs font-semibold text-amber-100 hover:bg-black/60"
+                            >
+                              Pass
+                            </button>
+                          </div>
+                        </>
+                      );
+                    })()}
+                  </div>
                 </div>
               </div>
             </div>
@@ -2383,55 +2400,65 @@ export default function MahjongClient() {
                 }
               >
                 <div
-                  className={`pointer-events-auto flex items-center gap-3 rounded-2xl border border-amber-100/15 bg-black/55 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-sm ${
-                    isMobileUi ? "px-3 py-2" : "px-4 py-3"
-                  }`}
+                  className={
+                    isPortraitPhone && isMobileUi ? "-translate-x-3" : undefined
+                  }
                 >
-                  {(() => {
-                    const g = pongDecision.groups[0];
-                    if (!g) return null;
-                    return (
-                      <>
-                        <div className="flex items-center gap-2">
-                          {g.tiles.slice(0, 3).map((t, ti) => (
-                            <MahjongTileCard
-                              key={`${t.suit}-${t.rank}-${ti}`}
-                              tile={t}
-                              size="xs"
-                            />
-                          ))}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              if (pongDecision.kind === "normal_pong") {
-                                emitAcceptNormalPong(g.pongKey);
-                              } else {
-                                emitAcceptInterruptPong(g.pongKey);
-                              }
-                              setPongDecision(null);
-                            }}
-                            className="rounded-full bg-amber-100/90 px-4 py-2 text-xs font-semibold text-[#3b0500] hover:bg-amber-100"
+                  <div
+                    className={`pointer-events-auto flex items-center gap-3 rounded-2xl border border-amber-100/15 bg-black/55 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-sm ${
+                      isMobileUi ? "px-3 py-2" : "px-4 py-3"
+                    }`}
+                  >
+                    {(() => {
+                      const g = pongDecision.groups[0];
+                      if (!g) return null;
+                      return (
+                        <>
+                          <div
+                            className={`flex items-center gap-2 ${
+                              isMobileUi ? "scale-90 origin-left" : ""
+                            }`}
                           >
-                            Accept
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              if (pongDecision.kind === "normal_pong") {
-                                emitPassNormalPong();
-                              }
-                              setPongDecision(null);
-                            }}
-                            className="rounded-full border border-amber-100/15 bg-black/40 px-4 py-2 text-xs font-semibold text-amber-100 hover:bg-black/60"
-                          >
-                            Pass
-                          </button>
-                        </div>
-                      </>
-                    );
-                  })()}
+                            {g.tiles.slice(0, 3).map((t, ti) => (
+                              <MahjongTileCard
+                                key={`${t.suit}-${t.rank}-${ti}`}
+                                tile={t}
+                                size="xs"
+                              />
+                            ))}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (pongDecision.kind === "normal_pong") {
+                                  emitAcceptNormalPong(g.pongKey);
+                                } else {
+                                  emitAcceptInterruptPong(g.pongKey);
+                                }
+                                setPongDecision(null);
+                              }}
+                              className="rounded-full bg-amber-100/90 px-4 py-2 text-xs font-semibold text-[#3b0500] hover:bg-amber-100"
+                            >
+                              Accept
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (pongDecision.kind === "normal_pong") {
+                                  emitPassNormalPong();
+                                }
+                                setPongDecision(null);
+                              }}
+                              className="rounded-full border border-amber-100/15 bg-black/40 px-4 py-2 text-xs font-semibold text-amber-100 hover:bg-black/60"
+                            >
+                              Pass
+                            </button>
+                          </div>
+                        </>
+                      );
+                    })()}
+                  </div>
                 </div>
               </div>
             </div>
@@ -2450,48 +2477,58 @@ export default function MahjongClient() {
                 }
               >
                 <div
-                  className={`pointer-events-auto flex items-center gap-3 rounded-2xl border border-amber-100/15 bg-black/55 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-sm ${
-                    isMobileUi ? "px-3 py-2" : "px-4 py-3"
-                  }`}
+                  className={
+                    isPortraitPhone && isMobileUi ? "-translate-x-3" : undefined
+                  }
                 >
-                  <div className="flex flex-col gap-2">
-                    {chowDecision.groups.map((g, gi) => (
-                      <div
-                        key={`${g.chowKey}-${gi}`}
-                        className="flex items-center gap-3"
-                      >
-                        <div className="flex items-center gap-2">
-                          {g.tiles.slice(0, 3).map((t, ti) => (
-                            <MahjongTileCard
-                              key={`${t.suit}-${t.rank}-${gi}-${ti}`}
-                              tile={t}
-                              size="xs"
-                            />
-                          ))}
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            emitAcceptNormalChow(g.chowKey);
-                            setChowDecision(null);
-                          }}
-                          className="rounded-full bg-amber-100/90 px-4 py-2 text-xs font-semibold text-[#3b0500] hover:bg-amber-100"
-                        >
-                          Accept
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      emitPassNormalChow();
-                      setChowDecision(null);
-                    }}
-                    className="rounded-full border border-amber-100/15 bg-black/40 px-4 py-2 text-xs font-semibold text-amber-100 hover:bg-black/60"
+                  <div
+                    className={`pointer-events-auto flex items-center gap-3 rounded-2xl border border-amber-100/15 bg-black/55 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-sm ${
+                      isMobileUi ? "px-3 py-2" : "px-4 py-3"
+                    }`}
                   >
-                    Pass
-                  </button>
+                    <div className="flex flex-col gap-2">
+                      {chowDecision.groups.map((g, gi) => (
+                        <div
+                          key={`${g.chowKey}-${gi}`}
+                          className="flex items-center gap-3"
+                        >
+                          <div
+                            className={`flex items-center gap-2 ${
+                              isMobileUi ? "scale-90 origin-left" : ""
+                            }`}
+                          >
+                            {g.tiles.slice(0, 3).map((t, ti) => (
+                              <MahjongTileCard
+                                key={`${t.suit}-${t.rank}-${gi}-${ti}`}
+                                tile={t}
+                                size="xs"
+                              />
+                            ))}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              emitAcceptNormalChow(g.chowKey);
+                              setChowDecision(null);
+                            }}
+                            className="rounded-full bg-amber-100/90 px-4 py-2 text-xs font-semibold text-[#3b0500] hover:bg-amber-100"
+                          >
+                            Accept
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        emitPassNormalChow();
+                        setChowDecision(null);
+                      }}
+                      className="rounded-full border border-amber-100/15 bg-black/40 px-4 py-2 text-xs font-semibold text-amber-100 hover:bg-black/60"
+                    >
+                      Pass
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -2571,7 +2608,11 @@ function WinnerRevealModal({
         </div>
       </div>
 
-      <div className="mt-4 flex flex-wrap gap-2">
+      <div
+        className={`mt-4 flex flex-wrap gap-2 ${
+          isMobileUi ? "scale-[0.75] origin-top-left" : ""
+        }`}
+      >
         {winnerReveal.tiles.map((t, idx) => (
           <div key={`${t.suit}-${t.rank}-${idx}`}>
             <MahjongTileCard tile={t} />
@@ -2590,14 +2631,20 @@ function WinnerRevealModal({
 
             return kinds
               .map((kind) => {
-                const groups = winnerReveal.melds.filter((m) => m.kind === kind);
+                const groups = winnerReveal.melds.filter(
+                  (m) => m.kind === kind,
+                );
                 if (groups.length === 0) return null;
                 return (
                   <div key={kind} className="min-w-[180px]">
                     <div className="text-xs font-semibold uppercase tracking-wide text-amber-100/70">
                       {kind}
                     </div>
-                    <div className="mt-2 flex flex-wrap gap-6">
+                    <div
+                      className={`mt-2 flex flex-wrap gap-6 ${
+                        isMobileUi ? "scale-[0.60] origin-left" : ""
+                      }`}
+                    >
                       {groups.map((g, gi) => (
                         <div key={`${kind}-${gi}`} className="flex gap-2">
                           {g.tiles.map((tile, ti) => (
