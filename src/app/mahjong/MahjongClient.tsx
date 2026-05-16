@@ -1749,11 +1749,19 @@ export default function MahjongClient() {
                 </button>
                 <div>
                   <div className="flex items-center gap-3">
-                    <div className="text-lg font-semibold text-amber-200">
+                    <div
+                      className={`font-semibold text-amber-200 ${
+                        isMobileUi ? "text-xs" : "text-lg"
+                      }`}
+                    >
                       Mahjong (72 Tiles)
                     </div>
                     {roomId ? (
-                      <div className="text-xs text-amber-50/70">
+                      <div
+                        className={`text-amber-50/70 ${
+                          isMobileUi ? "text-[10px]" : "text-xs"
+                        }`}
+                      >
                         Room ID: {roomId}{" "}
                         {joinError
                           ? "(Join error)"
@@ -1763,9 +1771,11 @@ export default function MahjongClient() {
                       </div>
                     ) : null}
                   </div>
-                  <div className="text-xs text-amber-50/70">
-                    Win = 4 melds + 1 pair
-                  </div>
+                  {viewport.width >= 900 ? (
+                    <div className="text-xs text-amber-50/70">
+                      Win = 4 melds + 1 pair
+                    </div>
+                  ) : null}
                 </div>
               </div>
             </div>
@@ -1795,9 +1805,11 @@ export default function MahjongClient() {
                     </div>
                   ) : null}
                 </div>
-                <div className="text-xs text-amber-50/70">
-                  Win = 4 melds + 1 pair
-                </div>
+                {viewport.width >= 900 ? (
+                  <div className="text-xs text-amber-50/70">
+                    Win = 4 melds + 1 pair
+                  </div>
+                ) : null}
               </div>
             </div>
           )}
