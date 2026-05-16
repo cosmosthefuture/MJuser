@@ -1730,10 +1730,10 @@ export default function MahjongClient() {
 
           {isPortraitPhone ? (
             <div
-              className="absolute left-1/2 top-1/2 z-20"
+              className="pointer-events-none absolute left-1/2 top-1/2 z-20"
               style={portraitUiStyle ?? undefined}
             >
-              <div className="absolute left-4 top-4 flex items-center gap-3">
+              <div className="pointer-events-auto absolute left-4 top-4 flex items-center gap-3">
                 <button
                   type="button"
                   onClick={() => router.back()}
@@ -1835,10 +1835,10 @@ export default function MahjongClient() {
           <div className="pointer-events-none absolute inset-0 z-20">
             {isPortraitPhone ? (
               <div
-                className="pointer-events-auto absolute left-1/2 top-1/2"
+                className="pointer-events-none absolute left-1/2 top-1/2"
                 style={portraitUiStyle ?? undefined}
               >
-                <div className="absolute right-28 bottom-[200px]">
+                <div className="pointer-events-auto absolute right-28 bottom-[200px]">
                   <button
                     type="button"
                     onClick={emitSortHand}
@@ -2048,8 +2048,16 @@ export default function MahjongClient() {
           </div>
 
           {winnerReveal ? (
-            <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/70 p-4">
-              <div className="pointer-events-auto w-full max-w-[760px] rounded-2xl border border-amber-100/15 bg-black/75 p-5 shadow-[0_25px_80px_rgba(0,0,0,0.55)] backdrop-blur-sm">
+            <div className="absolute inset-0 z-30 bg-black/70">
+              <div
+                className={`absolute inset-0 p-4 ${
+                  isPortraitPhone ? "" : "flex items-center justify-center"
+                }`}
+                style={
+                  isPortraitPhone ? (portraitUiStyle ?? undefined) : undefined
+                }
+              >
+                <div className="pointer-events-auto w-full max-w-[760px] rounded-2xl border border-amber-100/15 bg-black/75 p-5 shadow-[0_25px_80px_rgba(0,0,0,0.55)] backdrop-blur-sm">
                 <div className="grid grid-cols-3 items-start gap-4">
                   <div />
                   <div className="text-center">
@@ -2131,159 +2139,193 @@ export default function MahjongClient() {
                     })()}
                   </div>
                 ) : null}
+                </div>
               </div>
             </div>
           ) : null}
 
           {kongDecision ? (
             <div className="pointer-events-none absolute inset-0 z-30">
-              <div className="pointer-events-auto absolute left-1/2 -translate-x-1/2 bottom-[118px] flex items-center gap-3 rounded-2xl border border-amber-100/15 bg-black/55 px-4 py-3 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-sm">
-                {(() => {
-                  const g = kongDecision.groups[0];
-                  if (!g) return null;
-                  return (
-                    <>
-                      <div className="flex items-center gap-2">
-                        {g.tiles.slice(0, 4).map((t, ti) => (
-                          <MahjongTileCard
-                            key={`${t.suit}-${t.rank}-${ti}`}
-                            tile={t}
-                            size="xs"
-                          />
-                        ))}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (kongDecision.kind === "interrupt_kong") {
-                              emitAcceptInterruptKong(g.kongKey);
-                            } else if (kongDecision.kind === "normal_kong") {
-                              emitAcceptNormalKong(g.kongKey);
-                            } else {
-                              emitAcceptKong(g.kongKey);
-                            }
-                            setKongDecision(null);
-                          }}
-                          className="rounded-full bg-amber-100/90 px-4 py-2 text-xs font-semibold text-[#3b0500] hover:bg-amber-100"
-                        >
-                          Accept
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (kongDecision.kind === "kong") {
-                              emitPassKong();
-                            } else if (kongDecision.kind === "normal_kong") {
-                              emitPassNormalKong();
-                            }
-                            setKongDecision(null);
-                          }}
-                          className="rounded-full border border-amber-100/15 bg-black/40 px-4 py-2 text-xs font-semibold text-amber-100 hover:bg-black/60"
-                        >
-                          Pass
-                        </button>
-                      </div>
-                    </>
-                  );
-                })()}
+              <div
+                className={`pointer-events-none absolute flex items-center gap-3 ${
+                  isPortraitPhone
+                    ? "left-1/2 top-1/2"
+                    : "left-1/2 bottom-[118px] -translate-x-1/2"
+                }`}
+                style={
+                  isPortraitPhone ? (portraitUiStyle ?? undefined) : undefined
+                }
+              >
+                <div className="pointer-events-auto flex items-center gap-3 rounded-2xl border border-amber-100/15 bg-black/55 px-4 py-3 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-sm">
+                  {(() => {
+                    const g = kongDecision.groups[0];
+                    if (!g) return null;
+                    return (
+                      <>
+                        <div className="flex items-center gap-2">
+                          {g.tiles.slice(0, 4).map((t, ti) => (
+                            <MahjongTileCard
+                              key={`${t.suit}-${t.rank}-${ti}`}
+                              tile={t}
+                              size="xs"
+                            />
+                          ))}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (kongDecision.kind === "interrupt_kong") {
+                                emitAcceptInterruptKong(g.kongKey);
+                              } else if (kongDecision.kind === "normal_kong") {
+                                emitAcceptNormalKong(g.kongKey);
+                              } else {
+                                emitAcceptKong(g.kongKey);
+                              }
+                              setKongDecision(null);
+                            }}
+                            className="rounded-full bg-amber-100/90 px-4 py-2 text-xs font-semibold text-[#3b0500] hover:bg-amber-100"
+                          >
+                            Accept
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (kongDecision.kind === "kong") {
+                                emitPassKong();
+                              } else if (kongDecision.kind === "normal_kong") {
+                                emitPassNormalKong();
+                              }
+                              setKongDecision(null);
+                            }}
+                            className="rounded-full border border-amber-100/15 bg-black/40 px-4 py-2 text-xs font-semibold text-amber-100 hover:bg-black/60"
+                          >
+                            Pass
+                          </button>
+                        </div>
+                      </>
+                    );
+                  })()}
+                </div>
               </div>
             </div>
           ) : null}
 
           {pongDecision ? (
             <div className="pointer-events-none absolute inset-0 z-30">
-              <div className="pointer-events-auto absolute left-1/2 -translate-x-1/2 bottom-[118px] flex items-center gap-3 rounded-2xl border border-amber-100/15 bg-black/55 px-4 py-3 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-sm">
-                {(() => {
-                  const g = pongDecision.groups[0];
-                  if (!g) return null;
-                  return (
-                    <>
-                      <div className="flex items-center gap-2">
-                        {g.tiles.slice(0, 3).map((t, ti) => (
-                          <MahjongTileCard
-                            key={`${t.suit}-${t.rank}-${ti}`}
-                            tile={t}
-                            size="xs"
-                          />
-                        ))}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (pongDecision.kind === "normal_pong") {
-                              emitAcceptNormalPong(g.pongKey);
-                            } else {
-                              emitAcceptInterruptPong(g.pongKey);
-                            }
-                            setPongDecision(null);
-                          }}
-                          className="rounded-full bg-amber-100/90 px-4 py-2 text-xs font-semibold text-[#3b0500] hover:bg-amber-100"
-                        >
-                          Accept
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (pongDecision.kind === "normal_pong") {
-                              emitPassNormalPong();
-                            }
-                            setPongDecision(null);
-                          }}
-                          className="rounded-full border border-amber-100/15 bg-black/40 px-4 py-2 text-xs font-semibold text-amber-100 hover:bg-black/60"
-                        >
-                          Pass
-                        </button>
-                      </div>
-                    </>
-                  );
-                })()}
+              <div
+                className={`pointer-events-none absolute flex items-center gap-3 ${
+                  isPortraitPhone
+                    ? "left-1/2 top-1/2"
+                    : "left-1/2 bottom-[118px] -translate-x-1/2"
+                }`}
+                style={
+                  isPortraitPhone ? (portraitUiStyle ?? undefined) : undefined
+                }
+              >
+                <div className="pointer-events-auto flex items-center gap-3 rounded-2xl border border-amber-100/15 bg-black/55 px-4 py-3 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-sm">
+                  {(() => {
+                    const g = pongDecision.groups[0];
+                    if (!g) return null;
+                    return (
+                      <>
+                        <div className="flex items-center gap-2">
+                          {g.tiles.slice(0, 3).map((t, ti) => (
+                            <MahjongTileCard
+                              key={`${t.suit}-${t.rank}-${ti}`}
+                              tile={t}
+                              size="xs"
+                            />
+                          ))}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (pongDecision.kind === "normal_pong") {
+                                emitAcceptNormalPong(g.pongKey);
+                              } else {
+                                emitAcceptInterruptPong(g.pongKey);
+                              }
+                              setPongDecision(null);
+                            }}
+                            className="rounded-full bg-amber-100/90 px-4 py-2 text-xs font-semibold text-[#3b0500] hover:bg-amber-100"
+                          >
+                            Accept
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (pongDecision.kind === "normal_pong") {
+                                emitPassNormalPong();
+                              }
+                              setPongDecision(null);
+                            }}
+                            className="rounded-full border border-amber-100/15 bg-black/40 px-4 py-2 text-xs font-semibold text-amber-100 hover:bg-black/60"
+                          >
+                            Pass
+                          </button>
+                        </div>
+                      </>
+                    );
+                  })()}
+                </div>
               </div>
             </div>
           ) : null}
 
           {chowDecision ? (
             <div className="pointer-events-none absolute inset-0 z-30">
-              <div className="pointer-events-auto absolute left-1/2 -translate-x-1/2 bottom-[118px] flex items-center gap-3 rounded-2xl border border-amber-100/15 bg-black/55 px-4 py-3 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-sm">
-                <div className="flex flex-col gap-2">
-                  {chowDecision.groups.map((g, gi) => (
-                    <div
-                      key={`${g.chowKey}-${gi}`}
-                      className="flex items-center gap-3"
-                    >
-                      <div className="flex items-center gap-2">
-                        {g.tiles.slice(0, 3).map((t, ti) => (
-                          <MahjongTileCard
-                            key={`${t.suit}-${t.rank}-${gi}-${ti}`}
-                            tile={t}
-                            size="xs"
-                          />
-                        ))}
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          emitAcceptNormalChow(g.chowKey);
-                          setChowDecision(null);
-                        }}
-                        className="rounded-full bg-amber-100/90 px-4 py-2 text-xs font-semibold text-[#3b0500] hover:bg-amber-100"
+              <div
+                className={`pointer-events-none absolute flex items-center gap-3 ${
+                  isPortraitPhone
+                    ? "left-1/2 top-1/2"
+                    : "left-1/2 bottom-[118px] -translate-x-1/2"
+                }`}
+                style={
+                  isPortraitPhone ? (portraitUiStyle ?? undefined) : undefined
+                }
+              >
+                <div className="pointer-events-auto flex items-center gap-3 rounded-2xl border border-amber-100/15 bg-black/55 px-4 py-3 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-sm">
+                  <div className="flex flex-col gap-2">
+                    {chowDecision.groups.map((g, gi) => (
+                      <div
+                        key={`${g.chowKey}-${gi}`}
+                        className="flex items-center gap-3"
                       >
-                        Accept
-                      </button>
-                    </div>
-                  ))}
+                        <div className="flex items-center gap-2">
+                          {g.tiles.slice(0, 3).map((t, ti) => (
+                            <MahjongTileCard
+                              key={`${t.suit}-${t.rank}-${gi}-${ti}`}
+                              tile={t}
+                              size="xs"
+                            />
+                          ))}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            emitAcceptNormalChow(g.chowKey);
+                            setChowDecision(null);
+                          }}
+                          className="rounded-full bg-amber-100/90 px-4 py-2 text-xs font-semibold text-[#3b0500] hover:bg-amber-100"
+                        >
+                          Accept
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      emitPassNormalChow();
+                      setChowDecision(null);
+                    }}
+                    className="rounded-full border border-amber-100/15 bg-black/40 px-4 py-2 text-xs font-semibold text-amber-100 hover:bg-black/60"
+                  >
+                    Pass
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    emitPassNormalChow();
-                    setChowDecision(null);
-                  }}
-                  className="rounded-full border border-amber-100/15 bg-black/40 px-4 py-2 text-xs font-semibold text-amber-100 hover:bg-black/60"
-                >
-                  Pass
-                </button>
               </div>
             </div>
           ) : null}
