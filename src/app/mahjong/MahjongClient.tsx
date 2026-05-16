@@ -1840,7 +1840,7 @@ export default function MahjongClient() {
           <div className="pointer-events-none absolute inset-0 z-20">
             {isPortraitPhone ? (
               <div
-                className="pointer-events-none absolute left-1/2 top-1/2"
+                className="pointer-events-none absolute left-1/4 top-1/2"
                 style={portraitUiStyle ?? undefined}
               >
                 <div className="pointer-events-auto absolute right-28 bottom-[200px]">
