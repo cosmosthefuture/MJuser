@@ -1536,6 +1536,14 @@ export default function MahjongClient() {
         applyUserToPlay(payload);
       };
 
+      const handleRoundEnd = () => {
+        if (cancelled) return;
+        setCenterMessage("Round Over!");
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      };
+
       socket.off("mahjong:waiting_for_players", handleWaitingForPlayers);
       socket.on("mahjong:waiting_for_players", handleWaitingForPlayers);
 
@@ -1617,6 +1625,9 @@ export default function MahjongClient() {
       socket.off("mahjong:user_to_play", handleUserToPlay);
       socket.on("mahjong:user_to_play", handleUserToPlay);
 
+      socket.off("mahjong:round_end", handleRoundEnd);
+      socket.on("mahjong:round_end", handleRoundEnd);
+
       if (socket.connected) {
         void doJoin(socket);
       } else {
@@ -1658,6 +1669,7 @@ export default function MahjongClient() {
       socket?.off("mahjong:initial_hand_state");
       socket?.off("mahjong:start_shuffling");
       socket?.off("mahjong:user_to_play");
+      socket?.off("mahjong:round_end");
     };
   }, [token, roomId, authUserId]);
 
