@@ -1988,12 +1988,10 @@ export default function MahjongClient() {
                       position: "bottom" | "right" | "top" | "left";
                     }) => {
                       const base =
-                        "absolute flex items-center gap-2 rounded-full border border-amber-100/20 bg-black/40 px-3 py-2 text-xs text-amber-100 shadow-[0_18px_40px_rgba(0,0,0,0.35)] backdrop-blur-sm";
+                        "absolute flex items-center gap-1.5 rounded-full border border-amber-100/20 bg-black/40 px-2 py-1 text-[10px] text-amber-100 shadow-[0_12px_30px_rgba(0,0,0,0.35)] backdrop-blur-sm";
                       const pos =
                         position === "bottom"
-                          ? `left-1/2 -translate-x-1/2 ${
-                              isMobileUi ? "bottom-1" : "bottom-2"
-                            }`
+                          ? `${isMobileUi ? "right-5 bottom-[85px]" : "right-8 bottom-[140px]"}`
                           : position === "top"
                             ? `left-1/2 -translate-x-1/2 ${
                                 isMobileUi ? "top-3" : "top-6"
@@ -2034,25 +2032,25 @@ export default function MahjongClient() {
                             isHighlighted
                               ? "animate-[seat-pop_0.55s_ease-in-out_5] ring-4 ring-amber-200/80 shadow-[0_0_0_14px_rgba(255,210,125,0.18),0_34px_90px_rgba(0,0,0,0.55)]"
                               : ""
-                          } ${isMobileUi ? "px-2 py-1 text-[11px]" : ""}`}
+                          } ${isMobileUi ? "px-1.5 py-0.5 text-[9px]" : ""}`}
                         >
                           {isUserToPlay ? (
                             <div className="pointer-events-none absolute -inset-[2px] rounded-full">
-                              <div className="absolute inset-0 rounded-full ring-3 ring-amber-200/70 shadow-[0_0_0_12px_rgba(255,210,125,0.14),0_0_40px_rgba(255,210,125,0.18)] animate-pulse" />
+                              <div className="absolute inset-0 rounded-full ring-2 ring-amber-200/70 shadow-[0_0_0_8px_rgba(255,210,125,0.14),0_0_30px_rgba(255,210,125,0.18)] animate-pulse" />
                             </div>
                           ) : null}
                           <Avatar
                             className={`border border-amber-100/20 bg-black/30 ${
-                              isMobileUi ? "size-6" : "size-8"
+                              isMobileUi ? "size-4" : "size-5"
                             }`}
                           >
-                            <AvatarFallback className="bg-black/30 text-amber-100 font-bold">
+                            <AvatarFallback className="bg-black/30 text-amber-100 font-bold text-[8px]">
                               {initials}
                             </AvatarFallback>
                           </Avatar>
                           <div
                             className={`truncate font-semibold ${
-                              isMobileUi ? "max-w-[96px]" : "max-w-[140px]"
+                              isMobileUi ? "max-w-[70px]" : "max-w-[100px]"
                             }`}
                           >
                             {name}
@@ -2183,12 +2181,10 @@ export default function MahjongClient() {
                     position: "bottom" | "right" | "top" | "left";
                   }) => {
                     const base =
-                      "absolute flex items-center gap-2 rounded-full border border-amber-100/20 bg-black/40 px-3 py-2 text-xs text-amber-100 shadow-[0_18px_40px_rgba(0,0,0,0.35)] backdrop-blur-sm";
+                      "absolute flex items-center gap-1.5 rounded-full border border-amber-100/20 bg-black/40 px-2 py-1 text-[10px] text-amber-100 shadow-[0_12px_30px_rgba(0,0,0,0.35)] backdrop-blur-sm";
                     const pos =
                       position === "bottom"
-                        ? `left-1/2 -translate-x-1/2 ${
-                            isMobileUi ? "bottom-1" : "bottom-2"
-                          }`
+                        ? `${isMobileUi ? "right-2 bottom-[100px]" : "right-4 bottom-[140px]"}`
                         : position === "top"
                           ? `left-1/2 -translate-x-1/2 ${
                               isMobileUi ? "top-3" : "top-6"
@@ -2229,25 +2225,25 @@ export default function MahjongClient() {
                           isHighlighted
                             ? "animate-[seat-pop_0.55s_ease-in-out_5] ring-4 ring-amber-200/80 shadow-[0_0_0_14px_rgba(255,210,125,0.18),0_34px_90px_rgba(0,0,0,0.55)]"
                             : ""
-                        } ${isMobileUi ? "px-2 py-1 text-[11px]" : ""}`}
+                        } ${isMobileUi ? "px-1.5 py-0.5 text-[9px]" : ""}`}
                       >
                         {isUserToPlay ? (
                           <div className="pointer-events-none absolute -inset-[2px] rounded-full">
-                            <div className="absolute inset-0 rounded-full ring-3 ring-amber-200/70 shadow-[0_0_0_12px_rgba(255,210,125,0.14),0_0_40px_rgba(255,210,125,0.18)] animate-pulse" />
+                            <div className="absolute inset-0 rounded-full ring-2 ring-amber-200/70 shadow-[0_0_0_8px_rgba(255,210,125,0.14),0_0_30px_rgba(255,210,125,0.18)] animate-pulse" />
                           </div>
                         ) : null}
                         <Avatar
                           className={`border border-amber-100/20 bg-black/30 ${
-                            isMobileUi ? "size-6" : "size-8"
+                            isMobileUi ? "size-4" : "size-5"
                           }`}
                         >
-                          <AvatarFallback className="bg-black/30 text-amber-100 font-bold">
+                          <AvatarFallback className="bg-black/30 text-amber-100 font-bold text-[8px]">
                             {initials}
                           </AvatarFallback>
                         </Avatar>
                         <div
                           className={`truncate font-semibold ${
-                            isMobileUi ? "max-w-[96px]" : "max-w-[140px]"
+                            isMobileUi ? "max-w-[70px]" : "max-w-[100px]"
                           }`}
                         >
                           {name}
