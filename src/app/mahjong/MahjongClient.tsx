@@ -753,14 +753,16 @@ export default function MahjongClient() {
         if (!side) continue;
 
         const tilesRaw = (p as { tiles?: unknown }).tiles;
-        const tileCountFromTiles = Array.isArray(tilesRaw)
-          ? tilesRaw.length
+        const hiddenTileCount = Array.isArray(tilesRaw)
+          ? (tilesRaw as WsTile[]).filter((t) => t && t.type === "hidden")
+              .length
           : NaN;
         const tileCountRaw = (p as { tileCount?: unknown }).tileCount;
         const tileCountFromField = Number(tileCountRaw);
-        const tileCount = Number.isFinite(tileCountFromTiles)
-          ? tileCountFromTiles
-          : tileCountFromField;
+        const tileCount =
+          Number.isFinite(hiddenTileCount) && hiddenTileCount > 0
+            ? hiddenTileCount
+            : tileCountFromField;
         if (Number.isFinite(tileCount) && tileCount > 0) {
           nextOpponentCounts[side] = tileCount;
         }

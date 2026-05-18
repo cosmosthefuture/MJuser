@@ -222,7 +222,13 @@ export default function MahjongPixiTable({
       stageY: Math.floor(h / 2),
       stageRotation: rotateForPortrait ? Math.PI / 2 : 0,
     };
-  }, [viewport.width, viewport.height, designWidth, designHeight, rotateForPortrait]);
+  }, [
+    viewport.width,
+    viewport.height,
+    designWidth,
+    designHeight,
+    rotateForPortrait,
+  ]);
 
   const width = viewport.width;
   const height = viewport.height;
@@ -376,537 +382,662 @@ export default function MahjongPixiTable({
         antialias
         className="w-full h-full"
       >
-        <pixiContainer x={stageX} y={stageY} scale={stageScale} rotation={stageRotation}>
+        <pixiContainer
+          x={stageX}
+          y={stageY}
+          scale={stageScale}
+          rotation={stageRotation}
+        >
           <pixiContainer x={-designWidth / 2} y={-designHeight / 2}>
-          <pixiGraphics
-            draw={(g) => {
-              g.clear();
-              g.beginFill(0x3a2a16);
-              g.drawRect(tableX - 18, tableY - 18, tableW + 36, tableH + 36);
-              g.endFill();
-
-              g.beginFill(0x1f6a41);
-              g.drawRect(tableX, tableY, tableW, tableH);
-              g.endFill();
-
-              g.lineStyle(4, 0x0b3a24, 1);
-              g.drawRect(tableX, tableY, tableW, tableH);
-            }}
-          />
-
-          <pixiGraphics
-            draw={(g) => {
-              g.clear();
-              const felt = 0x1d7b49;
-              const wall = 0x0a6a3a;
-              const back = 0x1a120c;
-
-              const showTop = sides.size === 0 || sides.has("top");
-              const showLeft = sides.size === 0 || sides.has("left");
-              const showRight = sides.size === 0 || sides.has("right");
-              const showBottom = sides.size === 0 || sides.has("bottom");
-
-              if (showTop) {
-                g.beginFill(wall);
-                g.drawRoundedRect(
-                  tableX + 24,
-                  tableY + 10,
-                  tableW - 48,
-                  wallThickness,
-                  8,
-                );
+            <pixiGraphics
+              draw={(g) => {
+                g.clear();
+                g.beginFill(0x3a2a16);
+                g.drawRect(tableX - 18, tableY - 18, tableW + 36, tableH + 36);
                 g.endFill();
-              }
 
-              if (showLeft) {
-                g.beginFill(wall);
-                g.drawRoundedRect(
-                  tableX + 10,
-                  tableY + 24,
-                  wallThickness,
-                  tableH - 48,
-                  8,
-                );
+                g.beginFill(0x1f6a41);
+                g.drawRect(tableX, tableY, tableW, tableH);
                 g.endFill();
-              }
 
-              if (showRight) {
-                g.beginFill(wall);
-                g.drawRoundedRect(
-                  tableX + tableW - wallThickness - 10,
-                  tableY + 24,
-                  wallThickness,
-                  tableH - 48,
-                  8,
-                );
-                g.endFill();
-              }
+                g.lineStyle(4, 0x0b3a24, 1);
+                g.drawRect(tableX, tableY, tableW, tableH);
+              }}
+            />
 
-              if (showBottom) {
-                g.beginFill(wall);
-                g.drawRoundedRect(
-                  tableX + 24,
-                  tableY + tableH - wallThickness - 10,
-                  tableW - 48,
-                  wallThickness,
-                  8,
-                );
-                g.endFill();
-              }
+            <pixiGraphics
+              draw={(g) => {
+                g.clear();
+                const felt = 0x1d7b49;
+                const wall = 0x0a6a3a;
+                const back = 0x1a120c;
 
-              g.beginFill(felt);
-              g.drawRoundedRect(
-                tableX + 110,
-                tableY + 110,
-                tableW - 220,
-                tableH - 220,
-                14,
-              );
-              g.endFill();
+                const showTop = sides.size === 0 || sides.has("top");
+                const showLeft = sides.size === 0 || sides.has("left");
+                const showRight = sides.size === 0 || sides.has("right");
+                const showBottom = sides.size === 0 || sides.has("bottom");
 
-              g.beginFill(back);
-              g.drawRect(rackX, rackY, rackW, rackH);
-              g.endFill();
-
-              g.beginFill(0xd0b07a);
-              g.drawRect(rackX + 6, rackY + 6, rackW - 12, rackH - 12);
-              g.endFill();
-
-              g.lineStyle(4, 0x7a4b12, 1);
-              g.drawRect(rackX, rackY, rackW, rackH);
-            }}
-          />
-
-          {showDrawPile ? (
-            <>
-              <pixiGraphics
-                draw={(g) => {
-                  g.clear();
-                  const cx = Math.floor(designWidth / 2);
-                  const cy = Math.floor(tableY + tableH / 2);
-                  g.beginFill(0xd8b27a);
-                  g.drawRoundedRect(cx - 80, cy - 55, 160, 110, 10);
+                if (showTop) {
+                  g.beginFill(wall);
+                  g.drawRoundedRect(
+                    tableX + 24,
+                    tableY + 10,
+                    tableW - 48,
+                    wallThickness,
+                    8,
+                  );
                   g.endFill();
-                  g.lineStyle(3, 0x7a4b12, 1);
-                  g.drawRoundedRect(cx - 80, cy - 55, 160, 110, 10);
-                }}
-              />
-              <pixiText
-                text={
-                  drawPileCount != null
-                    ? `Draw Pile: ${drawPileCount}`
-                    : "Draw Pile"
                 }
-                x={Math.floor(designWidth / 2) - 60}
-                y={Math.floor(tableY + tableH / 2) - 50}
-                style={labelStyle}
-              />
 
-              {rightDiscardTiles.length > 0
-                ? (() => {
-                    const rowsPerCol = 5;
-                    const tileW = 28;
-                    const tileH = 40;
-                    const tileGapX = 10;
-                    const tileGapY = -8;
-                    const depthX = 3;
-                    const depthY = 3;
-                    const pad = 10;
-
-                    const cx = Math.floor(designWidth / 2);
-                    const cy = Math.floor(tableY + tableH / 2);
-                    const boxX = cx + 95;
-                    const boxY = cy - 90;
-
-                    return (
-                      <pixiContainer x={boxX} y={boxY}>
-                        {rightDiscardTiles.map((t, i) => {
-                          const row = i % rowsPerCol;
-                          const col = Math.floor(i / rowsPerCol);
-                          const x = pad + col * (tileW + tileGapX);
-                          const y = pad + row * (tileH + tileGapY);
-                          const spritePath = `${tileSpriteBasePath}/${tileSpriteFileName(t)}`;
-                          const tex = textures[spritePath];
-
-                          return (
-                            <pixiContainer
-                              key={`rd-${t.suit}-${t.rank}-${i}`}
-                              x={x + tileW / 2}
-                              y={y + tileH / 2}
-                              rotation={-Math.PI / 2}
-                            >
-                              <pixiGraphics
-                                x={-tileW / 2}
-                                y={-tileH / 2}
-                                draw={(g) => {
-                                  drawMahjongBlock(g, {
-                                    width: tileW,
-                                    height: tileH,
-                                    depthX,
-                                    depthY,
-                                    faceColor: 0xe7e8eb,
-                                    borderColor: 0xb8bcc3,
-                                  });
-                                }}
-                              />
-                              {tex ? (
-                                <pixiSprite
-                                  texture={tex}
-                                  x={-tileW / 2 + 3}
-                                  y={-tileH / 2 + 4}
-                                  width={tileW - depthX - 6}
-                                  height={tileH - depthY - 8}
-                                />
-                              ) : null}
-                            </pixiContainer>
-                          );
-                        })}
-                      </pixiContainer>
-                    );
-                  })()
-                : null}
-
-              {topDiscardTiles.length > 0
-                ? (() => {
-                  const cols = 5;
-                  const tileW = 28;
-                  const tileH = 40;
-                    const tileGap = 4;
-                    const depthX = 3;
-                    const depthY = 3;
-                    const orderedTopDiscards = [...topDiscardTiles].reverse();
-                    const rows = Math.ceil(orderedTopDiscards.length / cols);
-                    const contentW =
-                      cols * tileW + Math.max(0, cols - 1) * tileGap;
-                    const pad = 10;
-                    const boxW = contentW + pad * 2;
-
-                    const cx = Math.floor(designWidth / 2);
-                    const cy = Math.floor(tableY + tableH / 2);
-                    const boxX = cx - Math.floor(boxW / 2);
-                    const boxY = cy - 155;
-
-                    return (
-                      <pixiContainer x={boxX} y={boxY}>
-                        {orderedTopDiscards.map((t, i) => {
-                          const col = i % cols;
-                          const rowFromTop = Math.floor(i / cols);
-                          const row = rows - 1 - rowFromTop;
-                          const x = pad + col * (tileW + tileGap);
-                          const y = pad + row * (tileH + tileGap);
-                          const spritePath = `${tileSpriteBasePath}/${tileSpriteFileName(t)}`;
-                          const tex = textures[spritePath];
-
-                          return (
-                            <pixiContainer
-                              key={`td-${t.suit}-${t.rank}-${i}`}
-                              x={x}
-                              y={y}
-                            >
-                              <pixiGraphics
-                                draw={(g) => {
-                                  drawMahjongBlock(g, {
-                                    width: tileW,
-                                    height: tileH,
-                                    depthX,
-                                    depthY,
-                                    faceColor: 0xe7e8eb,
-                                    borderColor: 0xb8bcc3,
-                                  });
-                                }}
-                              />
-                              {tex ? (
-                                <pixiSprite
-                                  texture={tex}
-                                  x={3}
-                                  y={4}
-                                  width={tileW - depthX - 6}
-                                  height={tileH - depthY - 8}
-                                />
-                              ) : null}
-                            </pixiContainer>
-                          );
-                        })}
-                      </pixiContainer>
-                    );
-                  })()
-                : null}
-
-              {leftDiscardTiles.length > 0
-                ? (() => {
-                    const rowsPerCol = 5;
-                    const tileW = 28;
-                    const tileH = 40;
-                    const tileGapX = 10;
-                    const tileGapY = -8;
-                    const depthX = 3;
-                    const depthY = 3;
-                    const pad = 10;
-
-                    const cx = Math.floor(designWidth / 2);
-                    const cy = Math.floor(tableY + tableH / 2);
-                    const boxX = cx - 95;
-                    const boxY = cy - 90;
-
-                    return (
-                      <pixiContainer x={boxX} y={boxY}>
-                        {leftDiscardTiles.map((t, i) => {
-                          const row = i % rowsPerCol;
-                          const col = Math.floor(i / rowsPerCol);
-                          const x = pad + col * (tileW + tileGapX);
-                          const y = pad + row * (tileH + tileGapY);
-                          const spritePath = `${tileSpriteBasePath}/${tileSpriteFileName(t)}`;
-                          const tex = textures[spritePath];
-
-                          return (
-                            <pixiContainer
-                              key={`ld-${t.suit}-${t.rank}-${i}`}
-                              x={-(x + tileW / 2)}
-                              y={y + tileH / 2}
-                              rotation={Math.PI / 2}
-                            >
-                              <pixiGraphics
-                                x={-tileW / 2}
-                                y={-tileH / 2}
-                                draw={(g) => {
-                                  drawMahjongBlock(g, {
-                                    width: tileW,
-                                    height: tileH,
-                                    depthX,
-                                    depthY,
-                                    faceColor: 0xe7e8eb,
-                                    borderColor: 0xb8bcc3,
-                                  });
-                                }}
-                              />
-                              {tex ? (
-                                <pixiSprite
-                                  texture={tex}
-                                  x={-tileW / 2 + 3}
-                                  y={-tileH / 2 + 4}
-                                  width={tileW - depthX - 6}
-                                  height={tileH - depthY - 8}
-                                />
-                              ) : null}
-                            </pixiContainer>
-                          );
-                        })}
-                      </pixiContainer>
-                    );
-                  })()
-                : null}
-
-              {selfDiscardTiles.length > 0
-                ? (() => {
-                    const cols = 5;
-                    const tileW = 28;
-                    const tileH = 40;
-                    const tileGap = 3;
-                    const depthX = 3;
-                    const depthY = 3;
-                    const contentW = cols * tileW + (cols - 1) * tileGap;
-
-                    const cx = Math.floor(designWidth / 2);
-                    const cy = Math.floor(tableY + tableH / 2);
-                    const startX = cx - Math.floor(contentW / 2);
-                    const startY = cy + 58;
-
-                    return (
-                      <pixiContainer x={startX} y={startY}>
-                        {selfDiscardTiles.map((t, i) => {
-                          const col = i % cols;
-                          const row = Math.floor(i / cols);
-                          const x = col * (tileW + tileGap);
-                          const y = row * (tileH + tileGap);
-                          const spritePath = `${tileSpriteBasePath}/${tileSpriteFileName(t)}`;
-                          const tex = textures[spritePath];
-
-                          return (
-                            <pixiContainer
-                              key={`sd-${t.suit}-${t.rank}-${i}`}
-                              x={x}
-                              y={y}
-                            >
-                              <pixiGraphics
-                                draw={(g) => {
-                                  drawMahjongBlock(g, {
-                                    width: tileW,
-                                    height: tileH,
-                                    depthX,
-                                    depthY,
-                                    faceColor: 0xe7e8eb,
-                                    borderColor: 0xb8bcc3,
-                                  });
-                                }}
-                              />
-                              {tex ? (
-                                <pixiSprite
-                                  texture={tex}
-                                  x={3}
-                                  y={4}
-                                  width={tileW - depthX - 6}
-                                  height={tileH - depthY - 8}
-                                />
-                              ) : null}
-                            </pixiContainer>
-                          );
-                        })}
-                      </pixiContainer>
-                    );
-                  })()
-                : null}
-
-              {lastDiscardTile
-                ? (() => {
-                    const spritePath = `${tileSpriteBasePath}/${tileSpriteFileName(
-                      lastDiscardTile,
-                    )}`;
-                    const tex = textures[spritePath];
-                    if (!tex) return null;
-                    const cx = Math.floor(designWidth / 2);
-                    const cy = Math.floor(tableY + tableH / 2);
-                    return (
-                      <pixiContainer x={cx - 23} y={cy - 28}>
-                        <pixiGraphics
-                          draw={(g) => {
-                            drawMahjongBlock(g, {
-                              width: 46,
-                              height: 64,
-                              depthX: 4,
-                              depthY: 4,
-                              faceColor: 0xe7e8eb,
-                              borderColor: 0xb8bcc3,
-                            });
-                          }}
-                        />
-                        <pixiSprite
-                          texture={tex}
-                          x={4}
-                          y={5}
-                          width={46 - 4 - 8}
-                          height={64 - 4 - 10}
-                        />
-                      </pixiContainer>
-                    );
-                  })()
-                : null}
-            </>
-          ) : null}
-
-          {centerMessage ? (
-            <pixiContainer
-              x={Math.floor(designWidth / 2)}
-              y={Math.floor(tableY + tableH / 2)}
-            >
-              <pixiGraphics
-                draw={(g) => {
-                  g.clear();
-                  g.beginFill(0x000000, 0.55);
-                  g.drawRoundedRect(-220, -34, 440, 68, 18);
+                if (showLeft) {
+                  g.beginFill(wall);
+                  g.drawRoundedRect(
+                    tableX + 10,
+                    tableY + 24,
+                    wallThickness,
+                    tableH - 48,
+                    8,
+                  );
                   g.endFill();
-                  g.lineStyle(2, 0xf6e3b4, 0.22);
-                  g.drawRoundedRect(-220, -34, 440, 68, 18);
-                }}
-              />
-              <pixiText
-                text={centerMessage}
-                anchor={0.5}
-                x={0}
-                y={0}
-                style={
-                  new TextStyle({
-                    fill: 0xf6e3b4,
-                    fontSize: 22,
-                    fontWeight: "700",
-                    letterSpacing: 1,
-                  })
                 }
-              />
-            </pixiContainer>
-          ) : null}
 
-          {discards.map((t, i) => {
-            const col = i % discardCols;
-            const row = Math.floor(i / discardCols);
-            const x = discardStartX + col * (discardTileW + discardGap);
-            const y = discardStartY + row * (discardTileH + discardGap);
-            const spritePath = `${tileSpriteBasePath}/${tileSpriteFileName(t)}`;
-            const tex = textures[spritePath];
+                if (showRight) {
+                  g.beginFill(wall);
+                  g.drawRoundedRect(
+                    tableX + tableW - wallThickness - 10,
+                    tableY + 24,
+                    wallThickness,
+                    tableH - 48,
+                    8,
+                  );
+                  g.endFill();
+                }
 
-            return (
-              <pixiContainer key={`d-${t.suit}-${t.rank}-${i}`} x={x} y={y}>
+                if (showBottom) {
+                  g.beginFill(wall);
+                  g.drawRoundedRect(
+                    tableX + 24,
+                    tableY + tableH - wallThickness - 10,
+                    tableW - 48,
+                    wallThickness,
+                    8,
+                  );
+                  g.endFill();
+                }
+
+                g.beginFill(felt);
+                g.drawRoundedRect(
+                  tableX + 110,
+                  tableY + 110,
+                  tableW - 220,
+                  tableH - 220,
+                  14,
+                );
+                g.endFill();
+
+                g.beginFill(back);
+                g.drawRect(rackX, rackY, rackW, rackH);
+                g.endFill();
+
+                g.beginFill(0xd0b07a);
+                g.drawRect(rackX + 6, rackY + 6, rackW - 12, rackH - 12);
+                g.endFill();
+
+                g.lineStyle(4, 0x7a4b12, 1);
+                g.drawRect(rackX, rackY, rackW, rackH);
+              }}
+            />
+
+            {showDrawPile ? (
+              <>
                 <pixiGraphics
                   draw={(g) => {
-                    drawMahjongBlock(g, {
-                      width: discardTileW,
-                      height: discardTileH,
-                      depthX: discardDepthX,
-                      depthY: discardDepthY,
-                      faceColor: 0xe7e8eb,
-                      borderColor: 0xb8bcc3,
-                    });
+                    g.clear();
+                    const cx = Math.floor(designWidth / 2);
+                    const cy = Math.floor(tableY + tableH / 2);
+                    g.beginFill(0xd8b27a);
+                    g.drawRoundedRect(cx - 80, cy - 55, 160, 110, 10);
+                    g.endFill();
+                    g.lineStyle(3, 0x7a4b12, 1);
+                    g.drawRoundedRect(cx - 80, cy - 55, 160, 110, 10);
                   }}
                 />
-                {tex ? (
-                  <pixiSprite
-                    texture={tex}
-                    x={3}
-                    y={4}
-                    width={discardTileW - discardDepthX - 6}
-                    height={discardTileH - discardDepthY - 8}
-                  />
-                ) : null}
-              </pixiContainer>
-            );
-          })}
+                <pixiText
+                  text={
+                    drawPileCount != null
+                      ? `Draw Pile: ${drawPileCount}`
+                      : "Draw Pile"
+                  }
+                  x={Math.floor(designWidth / 2) - 60}
+                  y={Math.floor(tableY + tableH / 2) - 50}
+                  style={labelStyle}
+                />
 
-          <pixiGraphics
-            draw={(g) => {
-              g.clear();
-              const back = 0x0e5a35;
-              const edge = 0x06311e;
+                {rightDiscardTiles.length > 0
+                  ? (() => {
+                      const rowsPerCol = 5;
+                      const tileW = 28;
+                      const tileH = 40;
+                      const tileGapX = 10;
+                      const tileGapY = -8;
+                      const depthX = 3;
+                      const depthY = 3;
+                      const pad = 10;
+
+                      const cx = Math.floor(designWidth / 2);
+                      const cy = Math.floor(tableY + tableH / 2);
+                      const boxX = cx + 95;
+                      const boxY = cy - 90;
+
+                      return (
+                        <pixiContainer x={boxX} y={boxY}>
+                          {rightDiscardTiles.map((t, i) => {
+                            const row = i % rowsPerCol;
+                            const col = Math.floor(i / rowsPerCol);
+                            const x = pad + col * (tileW + tileGapX);
+                            const y = pad + row * (tileH + tileGapY);
+                            const spritePath = `${tileSpriteBasePath}/${tileSpriteFileName(t)}`;
+                            const tex = textures[spritePath];
+
+                            return (
+                              <pixiContainer
+                                key={`rd-${t.suit}-${t.rank}-${i}`}
+                                x={x + tileW / 2}
+                                y={y + tileH / 2}
+                                rotation={-Math.PI / 2}
+                              >
+                                <pixiGraphics
+                                  x={-tileW / 2}
+                                  y={-tileH / 2}
+                                  draw={(g) => {
+                                    drawMahjongBlock(g, {
+                                      width: tileW,
+                                      height: tileH,
+                                      depthX,
+                                      depthY,
+                                      faceColor: 0xe7e8eb,
+                                      borderColor: 0xb8bcc3,
+                                    });
+                                  }}
+                                />
+                                {tex ? (
+                                  <pixiSprite
+                                    texture={tex}
+                                    x={-tileW / 2 + 3}
+                                    y={-tileH / 2 + 4}
+                                    width={tileW - depthX - 6}
+                                    height={tileH - depthY - 8}
+                                  />
+                                ) : null}
+                              </pixiContainer>
+                            );
+                          })}
+                        </pixiContainer>
+                      );
+                    })()
+                  : null}
+
+                {topDiscardTiles.length > 0
+                  ? (() => {
+                      const cols = 5;
+                      const tileW = 28;
+                      const tileH = 40;
+                      const tileGap = 4;
+                      const depthX = 3;
+                      const depthY = 3;
+                      const orderedTopDiscards = [...topDiscardTiles].reverse();
+                      const rows = Math.ceil(orderedTopDiscards.length / cols);
+                      const contentW =
+                        cols * tileW + Math.max(0, cols - 1) * tileGap;
+                      const pad = 10;
+                      const boxW = contentW + pad * 2;
+
+                      const cx = Math.floor(designWidth / 2);
+                      const cy = Math.floor(tableY + tableH / 2);
+                      const boxX = cx - Math.floor(boxW / 2);
+                      const boxY = cy - 155;
+
+                      return (
+                        <pixiContainer x={boxX} y={boxY}>
+                          {orderedTopDiscards.map((t, i) => {
+                            const col = i % cols;
+                            const rowFromTop = Math.floor(i / cols);
+                            const row = rows - 1 - rowFromTop;
+                            const x = pad + col * (tileW + tileGap);
+                            const y = pad + row * (tileH + tileGap);
+                            const spritePath = `${tileSpriteBasePath}/${tileSpriteFileName(t)}`;
+                            const tex = textures[spritePath];
+
+                            return (
+                              <pixiContainer
+                                key={`td-${t.suit}-${t.rank}-${i}`}
+                                x={x}
+                                y={y}
+                              >
+                                <pixiGraphics
+                                  draw={(g) => {
+                                    drawMahjongBlock(g, {
+                                      width: tileW,
+                                      height: tileH,
+                                      depthX,
+                                      depthY,
+                                      faceColor: 0xe7e8eb,
+                                      borderColor: 0xb8bcc3,
+                                    });
+                                  }}
+                                />
+                                {tex ? (
+                                  <pixiSprite
+                                    texture={tex}
+                                    x={3}
+                                    y={4}
+                                    width={tileW - depthX - 6}
+                                    height={tileH - depthY - 8}
+                                  />
+                                ) : null}
+                              </pixiContainer>
+                            );
+                          })}
+                        </pixiContainer>
+                      );
+                    })()
+                  : null}
+
+                {leftDiscardTiles.length > 0
+                  ? (() => {
+                      const rowsPerCol = 5;
+                      const tileW = 28;
+                      const tileH = 40;
+                      const tileGapX = 10;
+                      const tileGapY = -8;
+                      const depthX = 3;
+                      const depthY = 3;
+                      const pad = 10;
+
+                      const cx = Math.floor(designWidth / 2);
+                      const cy = Math.floor(tableY + tableH / 2);
+                      const boxX = cx - 95;
+                      const boxY = cy - 90;
+
+                      return (
+                        <pixiContainer x={boxX} y={boxY}>
+                          {leftDiscardTiles.map((t, i) => {
+                            const row = i % rowsPerCol;
+                            const col = Math.floor(i / rowsPerCol);
+                            const x = pad + col * (tileW + tileGapX);
+                            const y = pad + row * (tileH + tileGapY);
+                            const spritePath = `${tileSpriteBasePath}/${tileSpriteFileName(t)}`;
+                            const tex = textures[spritePath];
+
+                            return (
+                              <pixiContainer
+                                key={`ld-${t.suit}-${t.rank}-${i}`}
+                                x={-(x + tileW / 2)}
+                                y={y + tileH / 2}
+                                rotation={Math.PI / 2}
+                              >
+                                <pixiGraphics
+                                  x={-tileW / 2}
+                                  y={-tileH / 2}
+                                  draw={(g) => {
+                                    drawMahjongBlock(g, {
+                                      width: tileW,
+                                      height: tileH,
+                                      depthX,
+                                      depthY,
+                                      faceColor: 0xe7e8eb,
+                                      borderColor: 0xb8bcc3,
+                                    });
+                                  }}
+                                />
+                                {tex ? (
+                                  <pixiSprite
+                                    texture={tex}
+                                    x={-tileW / 2 + 3}
+                                    y={-tileH / 2 + 4}
+                                    width={tileW - depthX - 6}
+                                    height={tileH - depthY - 8}
+                                  />
+                                ) : null}
+                              </pixiContainer>
+                            );
+                          })}
+                        </pixiContainer>
+                      );
+                    })()
+                  : null}
+
+                {selfDiscardTiles.length > 0
+                  ? (() => {
+                      const cols = 5;
+                      const tileW = 28;
+                      const tileH = 40;
+                      const tileGap = 3;
+                      const depthX = 3;
+                      const depthY = 3;
+                      const contentW = cols * tileW + (cols - 1) * tileGap;
+
+                      const cx = Math.floor(designWidth / 2);
+                      const cy = Math.floor(tableY + tableH / 2);
+                      const startX = cx - Math.floor(contentW / 2);
+                      const startY = cy + 58;
+
+                      return (
+                        <pixiContainer x={startX} y={startY}>
+                          {selfDiscardTiles.map((t, i) => {
+                            const col = i % cols;
+                            const row = Math.floor(i / cols);
+                            const x = col * (tileW + tileGap);
+                            const y = row * (tileH + tileGap);
+                            const spritePath = `${tileSpriteBasePath}/${tileSpriteFileName(t)}`;
+                            const tex = textures[spritePath];
+
+                            return (
+                              <pixiContainer
+                                key={`sd-${t.suit}-${t.rank}-${i}`}
+                                x={x}
+                                y={y}
+                              >
+                                <pixiGraphics
+                                  draw={(g) => {
+                                    drawMahjongBlock(g, {
+                                      width: tileW,
+                                      height: tileH,
+                                      depthX,
+                                      depthY,
+                                      faceColor: 0xe7e8eb,
+                                      borderColor: 0xb8bcc3,
+                                    });
+                                  }}
+                                />
+                                {tex ? (
+                                  <pixiSprite
+                                    texture={tex}
+                                    x={3}
+                                    y={4}
+                                    width={tileW - depthX - 6}
+                                    height={tileH - depthY - 8}
+                                  />
+                                ) : null}
+                              </pixiContainer>
+                            );
+                          })}
+                        </pixiContainer>
+                      );
+                    })()
+                  : null}
+
+                {lastDiscardTile
+                  ? (() => {
+                      const spritePath = `${tileSpriteBasePath}/${tileSpriteFileName(
+                        lastDiscardTile,
+                      )}`;
+                      const tex = textures[spritePath];
+                      if (!tex) return null;
+                      const cx = Math.floor(designWidth / 2);
+                      const cy = Math.floor(tableY + tableH / 2);
+                      return (
+                        <pixiContainer x={cx - 23} y={cy - 28}>
+                          <pixiGraphics
+                            draw={(g) => {
+                              drawMahjongBlock(g, {
+                                width: 46,
+                                height: 64,
+                                depthX: 4,
+                                depthY: 4,
+                                faceColor: 0xe7e8eb,
+                                borderColor: 0xb8bcc3,
+                              });
+                            }}
+                          />
+                          <pixiSprite
+                            texture={tex}
+                            x={4}
+                            y={5}
+                            width={46 - 4 - 8}
+                            height={64 - 4 - 10}
+                          />
+                        </pixiContainer>
+                      );
+                    })()
+                  : null}
+              </>
+            ) : null}
+
+            {centerMessage ? (
+              <pixiContainer
+                x={Math.floor(designWidth / 2)}
+                y={Math.floor(tableY + tableH / 2)}
+              >
+                <pixiGraphics
+                  draw={(g) => {
+                    g.clear();
+                    g.beginFill(0x000000, 0.55);
+                    g.drawRoundedRect(-220, -34, 440, 68, 18);
+                    g.endFill();
+                    g.lineStyle(2, 0xf6e3b4, 0.22);
+                    g.drawRoundedRect(-220, -34, 440, 68, 18);
+                  }}
+                />
+                <pixiText
+                  text={centerMessage}
+                  anchor={0.5}
+                  x={0}
+                  y={0}
+                  style={
+                    new TextStyle({
+                      fill: 0xf6e3b4,
+                      fontSize: 22,
+                      fontWeight: "700",
+                      letterSpacing: 1,
+                    })
+                  }
+                />
+              </pixiContainer>
+            ) : null}
+
+            {discards.map((t, i) => {
+              const col = i % discardCols;
+              const row = Math.floor(i / discardCols);
+              const x = discardStartX + col * (discardTileW + discardGap);
+              const y = discardStartY + row * (discardTileH + discardGap);
+              const spritePath = `${tileSpriteBasePath}/${tileSpriteFileName(t)}`;
+              const tex = textures[spritePath];
+
+              return (
+                <pixiContainer key={`d-${t.suit}-${t.rank}-${i}`} x={x} y={y}>
+                  <pixiGraphics
+                    draw={(g) => {
+                      drawMahjongBlock(g, {
+                        width: discardTileW,
+                        height: discardTileH,
+                        depthX: discardDepthX,
+                        depthY: discardDepthY,
+                        faceColor: 0xe7e8eb,
+                        borderColor: 0xb8bcc3,
+                      });
+                    }}
+                  />
+                  {tex ? (
+                    <pixiSprite
+                      texture={tex}
+                      x={3}
+                      y={4}
+                      width={discardTileW - discardDepthX - 6}
+                      height={discardTileH - discardDepthY - 8}
+                    />
+                  ) : null}
+                </pixiContainer>
+              );
+            })}
+
+            <pixiGraphics
+              draw={(g) => {
+                g.clear();
+                const back = 0x0e5a35;
+                const edge = 0x06311e;
+                const showTop = sides.size === 0 || sides.has("top");
+                const showLeft = sides.size === 0 || sides.has("left");
+                const showRight = sides.size === 0 || sides.has("right");
+                // No small wall blocks for the auth user's side (bottom).
+                const showBottom = false;
+
+                const topCount = counts.top ?? 7;
+                const smallW = 26;
+                const smallH = 34;
+                const topStartX = Math.floor(
+                  designWidth / 2 -
+                    (topCount * smallW + (topCount - 1) * 2) / 2,
+                );
+                const topY = tableY + 18;
+                const bottomY = tableY + tableH - 18 - smallH;
+
+                g.beginFill(back);
+                if (showTop) {
+                  for (let i = 0; i < topCount; i++) {
+                    g.drawRoundedRect(
+                      topStartX + i * (smallW + 2),
+                      topY,
+                      smallW,
+                      smallH,
+                      4,
+                    );
+                  }
+                }
+                if (showBottom) {
+                  for (let i = 0; i < topCount; i++) {
+                    g.drawRoundedRect(
+                      topStartX + i * (smallW + 2),
+                      bottomY,
+                      smallW,
+                      smallH,
+                      4,
+                    );
+                  }
+                }
+                g.endFill();
+
+                const sideCountLeft = counts.left ?? 7;
+                const sideCountRight = counts.right ?? 7;
+                const sideCount = Math.max(sideCountLeft, sideCountRight);
+                const sideXLeft = tableX + 18;
+                const sideXRight = tableX + tableW - 18 - smallH;
+                const sideStartY = Math.floor(
+                  tableY +
+                    tableH / 2 -
+                    (sideCount * smallW + (sideCount - 1) * 2) / 2,
+                );
+
+                g.beginFill(back);
+                for (let i = 0; i < sideCount; i++) {
+                  if (showLeft) {
+                    if (i >= sideCountLeft) {
+                      // no-op
+                    } else {
+                      g.drawRoundedRect(
+                        sideXLeft,
+                        sideStartY + i * (smallW + 2),
+                        smallH,
+                        smallW,
+                        4,
+                      );
+                    }
+                  }
+                  if (showRight) {
+                    if (i >= sideCountRight) {
+                      // no-op
+                    } else {
+                      g.drawRoundedRect(
+                        sideXRight,
+                        sideStartY + i * (smallW + 2),
+                        smallH,
+                        smallW,
+                        4,
+                      );
+                    }
+                  }
+                }
+                g.endFill();
+
+                g.lineStyle(2, edge, 1);
+                if (showTop) {
+                  for (let i = 0; i < topCount; i++) {
+                    g.drawRoundedRect(
+                      topStartX + i * (smallW + 2),
+                      topY,
+                      smallW,
+                      smallH,
+                      4,
+                    );
+                  }
+                }
+                if (showBottom) {
+                  for (let i = 0; i < topCount; i++) {
+                    g.drawRoundedRect(
+                      topStartX + i * (smallW + 2),
+                      bottomY,
+                      smallW,
+                      smallH,
+                      4,
+                    );
+                  }
+                }
+                for (let i = 0; i < sideCount; i++) {
+                  if (showLeft) {
+                    if (i < sideCountLeft) {
+                      g.drawRoundedRect(
+                        sideXLeft,
+                        sideStartY + i * (smallW + 2),
+                        smallH,
+                        smallW,
+                        4,
+                      );
+                    }
+                  }
+                  if (showRight) {
+                    if (i < sideCountRight) {
+                      g.drawRoundedRect(
+                        sideXRight,
+                        sideStartY + i * (smallW + 2),
+                        smallH,
+                        smallW,
+                        4,
+                      );
+                    }
+                  }
+                }
+              }}
+            />
+
+            {(() => {
+              const orderedMeldGroups = (side: "right" | "top" | "left") => {
+                const raw = opponentMelds?.[side] ?? [];
+                return [
+                  ...raw.filter((m) => m.kind === "chow"),
+                  ...raw.filter((m) => m.kind === "pong"),
+                  ...raw.filter((m) => m.kind === "kong"),
+                ].filter((g) => Array.isArray(g.tiles) && g.tiles.length > 0);
+              };
+
               const showTop = sides.size === 0 || sides.has("top");
               const showLeft = sides.size === 0 || sides.has("left");
               const showRight = sides.size === 0 || sides.has("right");
-              // No small wall blocks for the auth user's side (bottom).
-              const showBottom = false;
 
-              const topCount = counts.top ?? 16;
+              const topGroups = orderedMeldGroups("top");
+              const leftGroups = orderedMeldGroups("left");
+              const rightGroups = orderedMeldGroups("right");
+
               const smallW = 26;
               const smallH = 34;
+              const topY = tableY + 18;
+
+              const topCount = counts.top ?? 7;
               const topStartX = Math.floor(
                 designWidth / 2 - (topCount * smallW + (topCount - 1) * 2) / 2,
               );
-              const topY = tableY + 18;
-              const bottomY = tableY + tableH - 18 - smallH;
 
-              g.beginFill(back);
-              if (showTop) {
-                for (let i = 0; i < topCount; i++) {
-                  g.drawRoundedRect(
-                    topStartX + i * (smallW + 2),
-                    topY,
-                    smallW,
-                    smallH,
-                    4,
-                  );
-                }
-              }
-              if (showBottom) {
-                for (let i = 0; i < topCount; i++) {
-                  g.drawRoundedRect(
-                    topStartX + i * (smallW + 2),
-                    bottomY,
-                    smallW,
-                    smallH,
-                    4,
-                  );
-                }
-              }
-              g.endFill();
-
-              const sideCountLeft = counts.left ?? 14;
-              const sideCountRight = counts.right ?? 14;
+              const sideCountLeft = counts.left ?? 7;
+              const sideCountRight = counts.right ?? 7;
               const sideCount = Math.max(sideCountLeft, sideCountRight);
               const sideXLeft = tableX + 18;
               const sideXRight = tableX + tableW - 18 - smallH;
@@ -916,360 +1047,243 @@ export default function MahjongPixiTable({
                   (sideCount * smallW + (sideCount - 1) * 2) / 2,
               );
 
-              g.beginFill(back);
-              for (let i = 0; i < sideCount; i++) {
-                if (showLeft) {
-                  if (i >= sideCountLeft) {
-                    // no-op
-                  } else {
-                    g.drawRoundedRect(
-                      sideXLeft,
-                      sideStartY + i * (smallW + 2),
-                      smallH,
-                      smallW,
-                      4,
+              const renderMiniTile = (
+                key: string,
+                tile: MahjongTile,
+                x: number,
+                y: number,
+                rotation = 0,
+              ) => {
+                const spritePath = `${tileSpriteBasePath}/${tileSpriteFileName(tile)}`;
+                const tex = textures[spritePath];
+                const w = opponentSmallTileW;
+                const h = opponentSmallTileH;
+
+                return (
+                  <pixiContainer key={key} x={x} y={y} rotation={rotation}>
+                    <pixiGraphics
+                      x={-w / 2}
+                      y={-h / 2}
+                      draw={(g) => {
+                        drawMahjongBlock(g, {
+                          width: w,
+                          height: h,
+                          depthX: 4,
+                          depthY: 4,
+                          faceColor: 0xe7e8eb,
+                          borderColor: 0xb8bcc3,
+                        });
+                      }}
+                    />
+                    {tex ? (
+                      <pixiSprite
+                        texture={tex}
+                        x={-w / 2 + 4}
+                        y={-h / 2 + 5}
+                        width={w - 4 - 8}
+                        height={h - 4 - 10}
+                      />
+                    ) : null}
+                  </pixiContainer>
+                );
+              };
+
+              const out: Array<unknown> = [];
+
+              const groupGap = 3;
+
+              if (showTop && topGroups.length > 0) {
+                const startX =
+                  topStartX + topCount * (smallW + 2) + Math.max(10, gap);
+                const y = topY + smallH / 2;
+
+                let cursor = startX;
+                topGroups.forEach((g, gi) => {
+                  (g.tiles ?? []).forEach((t, ti) => {
+                    const cx =
+                      cursor + ti * (opponentSmallTileW + opponentSmallGap);
+                    out.push(
+                      renderMiniTile(`op-top-inline-${gi}-${ti}`, t, cx, y, 0),
                     );
-                  }
-                }
-                if (showRight) {
-                  if (i >= sideCountRight) {
-                    // no-op
-                  } else {
-                    g.drawRoundedRect(
-                      sideXRight,
-                      sideStartY + i * (smallW + 2),
-                      smallH,
-                      smallW,
-                      4,
+                  });
+                  cursor +=
+                    (g.tiles?.length ?? 0) *
+                    (opponentSmallTileW + opponentSmallGap);
+                  if (gi < topGroups.length - 1) cursor += groupGap;
+                });
+              }
+
+              if (showLeft && leftGroups.length > 0) {
+                const startY =
+                  sideStartY + sideCountLeft * (smallW + 2) + Math.max(10, gap);
+                const x = sideXLeft + smallH / 2;
+
+                let cursor = startY;
+                leftGroups.forEach((g, gi) => {
+                  (g.tiles ?? []).forEach((t, ti) => {
+                    const cy =
+                      cursor + ti * (opponentSmallTileW + opponentSmallGap);
+                    out.push(
+                      renderMiniTile(
+                        `op-left-inline-${gi}-${ti}`,
+                        t,
+                        x,
+                        cy,
+                        Math.PI / 2,
+                      ),
                     );
-                  }
-                }
+                  });
+                  cursor +=
+                    (g.tiles?.length ?? 0) *
+                    (opponentSmallTileW + opponentSmallGap);
+                  if (gi < leftGroups.length - 1) cursor += groupGap;
+                });
               }
-              g.endFill();
 
-              g.lineStyle(2, edge, 1);
-              if (showTop) {
-                for (let i = 0; i < topCount; i++) {
-                  g.drawRoundedRect(
-                    topStartX + i * (smallW + 2),
-                    topY,
-                    smallW,
-                    smallH,
-                    4,
-                  );
-                }
-              }
-              if (showBottom) {
-                for (let i = 0; i < topCount; i++) {
-                  g.drawRoundedRect(
-                    topStartX + i * (smallW + 2),
-                    bottomY,
-                    smallW,
-                    smallH,
-                    4,
-                  );
-                }
-              }
-              for (let i = 0; i < sideCount; i++) {
-                if (showLeft) {
-                  if (i < sideCountLeft) {
-                    g.drawRoundedRect(
-                      sideXLeft,
-                      sideStartY + i * (smallW + 2),
-                      smallH,
-                      smallW,
-                      4,
+              if (showRight && rightGroups.length > 0) {
+                const startY =
+                  sideStartY +
+                  sideCountRight * (smallW + 2) +
+                  Math.max(10, gap);
+                const x = sideXRight + smallH / 2;
+
+                let cursor = startY;
+                rightGroups.forEach((g, gi) => {
+                  (g.tiles ?? []).forEach((t, ti) => {
+                    const cy =
+                      cursor + ti * (opponentSmallTileW + opponentSmallGap);
+                    out.push(
+                      renderMiniTile(
+                        `op-right-inline-${gi}-${ti}`,
+                        t,
+                        x,
+                        cy,
+                        -Math.PI / 2,
+                      ),
                     );
-                  }
-                }
-                if (showRight) {
-                  if (i < sideCountRight) {
-                    g.drawRoundedRect(
-                      sideXRight,
-                      sideStartY + i * (smallW + 2),
-                      smallH,
-                      smallW,
-                      4,
-                    );
-                  }
-                }
+                  });
+                  cursor +=
+                    (g.tiles?.length ?? 0) *
+                    (opponentSmallTileW + opponentSmallGap);
+                  if (gi < rightGroups.length - 1) cursor += groupGap;
+                });
               }
-            }}
-          />
 
-          {(() => {
-            const orderedMeldGroups = (side: "right" | "top" | "left") => {
-              const raw = opponentMelds?.[side] ?? [];
-              return [
-                ...raw.filter((m) => m.kind === "chow"),
-                ...raw.filter((m) => m.kind === "pong"),
-                ...raw.filter((m) => m.kind === "kong"),
-              ].filter((g) => Array.isArray(g.tiles) && g.tiles.length > 0);
-            };
+              return <>{out}</>;
+            })()}
 
-            const showTop = sides.size === 0 || sides.has("top");
-            const showLeft = sides.size === 0 || sides.has("left");
-            const showRight = sides.size === 0 || sides.has("right");
+            {hand.map((t, idx) => {
+              const x = handStartX + idx * (tileW + gap);
+              const baseY = rackY + 16;
+              const isHovered = hoveredHandIdx === idx;
+              const y = baseY + (isHovered ? -10 : 0);
+              const handDepthX = 4;
+              const handDepthY = 4;
 
-            const topGroups = orderedMeldGroups("top");
-            const leftGroups = orderedMeldGroups("left");
-            const rightGroups = orderedMeldGroups("right");
-
-            const smallW = 26;
-            const smallH = 34;
-            const topY = tableY + 18;
-
-            const topCount = counts.top ?? 16;
-            const topStartX = Math.floor(
-              designWidth / 2 - (topCount * smallW + (topCount - 1) * 2) / 2,
-            );
-
-            const sideCountLeft = counts.left ?? 14;
-            const sideCountRight = counts.right ?? 14;
-            const sideCount = Math.max(sideCountLeft, sideCountRight);
-            const sideXLeft = tableX + 18;
-            const sideXRight = tableX + tableW - 18 - smallH;
-            const sideStartY = Math.floor(
-              tableY +
-                tableH / 2 -
-                (sideCount * smallW + (sideCount - 1) * 2) / 2,
-            );
-
-            const renderMiniTile = (
-              key: string,
-              tile: MahjongTile,
-              x: number,
-              y: number,
-              rotation = 0,
-            ) => {
-              const spritePath = `${tileSpriteBasePath}/${tileSpriteFileName(tile)}`;
+              const spritePath = `${tileSpriteBasePath}/${tileSpriteFileName(t)}`;
               const tex = textures[spritePath];
-              const w = opponentSmallTileW;
-              const h = opponentSmallTileH;
 
               return (
-                <pixiContainer key={key} x={x} y={y} rotation={rotation}>
+                <pixiContainer
+                  key={`${t.suit}-${t.rank}-${idx}`}
+                  x={x}
+                  y={y}
+                  scale={isHovered ? 1.06 : 1}
+                  eventMode="static"
+                  cursor="default"
+                  onPointerTap={(e: unknown) => {
+                    const tileId = (t as { id?: number }).id;
+                    if (typeof tileId !== "number") return;
+                    const detail = (e as unknown as { detail?: number }).detail;
+                    tryEmitDoubleTap(tileId, detail);
+                  }}
+                  onPointerOver={() => setHoveredHandIdx(idx)}
+                  onPointerOut={() =>
+                    setHoveredHandIdx((prev) => (prev === idx ? null : prev))
+                  }
+                >
                   <pixiGraphics
-                    x={-w / 2}
-                    y={-h / 2}
                     draw={(g) => {
                       drawMahjongBlock(g, {
-                        width: w,
-                        height: h,
-                        depthX: 4,
-                        depthY: 4,
+                        width: tileW,
+                        height: tileH,
+                        depthX: handDepthX,
+                        depthY: handDepthY,
                         faceColor: 0xe7e8eb,
-                        borderColor: 0xb8bcc3,
+                        borderColor: highlightDiscard ? 0xea2121 : 0xb8bcc3,
                       });
                     }}
                   />
+
                   {tex ? (
                     <pixiSprite
                       texture={tex}
-                      x={-w / 2 + 4}
-                      y={-h / 2 + 5}
-                      width={w - 4 - 8}
-                      height={h - 4 - 10}
+                      x={4}
+                      y={5}
+                      width={tileW - handDepthX - 8}
+                      height={tileH - handDepthY - 10}
                     />
                   ) : null}
                 </pixiContainer>
               );
-            };
+            })}
 
-            const out: Array<unknown> = [];
+            {(() => {
+              if (!melds || melds.length === 0) return null;
+              let cursorX = meldsStartX;
+              const baseY = rackY + 16;
+              const meldDepthX = 4;
+              const meldDepthY = 4;
 
-            const groupGap = 3;
+              return melds
+                .filter((m) => Array.isArray(m.tiles) && m.tiles.length > 0)
+                .map((m, mi) => {
+                  const groupX = cursorX;
+                  const tiles = m.tiles;
+                  const containers = tiles.map((t, ti) => {
+                    const x = groupX + ti * (tileW + gap);
+                    const spritePath = `${tileSpriteBasePath}/${tileSpriteFileName(t)}`;
+                    const tex = textures[spritePath];
 
-            if (showTop && topGroups.length > 0) {
-              const startX =
-                topStartX + topCount * (smallW + 2) + Math.max(10, gap);
-              const y = topY + smallH / 2;
-
-              let cursor = startX;
-              topGroups.forEach((g, gi) => {
-                (g.tiles ?? []).forEach((t, ti) => {
-                  const cx =
-                    cursor + ti * (opponentSmallTileW + opponentSmallGap);
-                  out.push(
-                    renderMiniTile(`op-top-inline-${gi}-${ti}`, t, cx, y, 0),
-                  );
-                });
-                cursor +=
-                  (g.tiles?.length ?? 0) *
-                  (opponentSmallTileW + opponentSmallGap);
-                if (gi < topGroups.length - 1) cursor += groupGap;
-              });
-            }
-
-            if (showLeft && leftGroups.length > 0) {
-              const startY =
-                sideStartY + sideCountLeft * (smallW + 2) + Math.max(10, gap);
-              const x = sideXLeft + smallH / 2;
-
-              let cursor = startY;
-              leftGroups.forEach((g, gi) => {
-                (g.tiles ?? []).forEach((t, ti) => {
-                  const cy =
-                    cursor + ti * (opponentSmallTileW + opponentSmallGap);
-                  out.push(
-                    renderMiniTile(
-                      `op-left-inline-${gi}-${ti}`,
-                      t,
-                      x,
-                      cy,
-                      Math.PI / 2,
-                    ),
-                  );
-                });
-                cursor +=
-                  (g.tiles?.length ?? 0) *
-                  (opponentSmallTileW + opponentSmallGap);
-                if (gi < leftGroups.length - 1) cursor += groupGap;
-              });
-            }
-
-            if (showRight && rightGroups.length > 0) {
-              const startY =
-                sideStartY + sideCountRight * (smallW + 2) + Math.max(10, gap);
-              const x = sideXRight + smallH / 2;
-
-              let cursor = startY;
-              rightGroups.forEach((g, gi) => {
-                (g.tiles ?? []).forEach((t, ti) => {
-                  const cy =
-                    cursor + ti * (opponentSmallTileW + opponentSmallGap);
-                  out.push(
-                    renderMiniTile(
-                      `op-right-inline-${gi}-${ti}`,
-                      t,
-                      x,
-                      cy,
-                      -Math.PI / 2,
-                    ),
-                  );
-                });
-                cursor +=
-                  (g.tiles?.length ?? 0) *
-                  (opponentSmallTileW + opponentSmallGap);
-                if (gi < rightGroups.length - 1) cursor += groupGap;
-              });
-            }
-
-            return <>{out}</>;
-          })()}
-
-          {hand.map((t, idx) => {
-            const x = handStartX + idx * (tileW + gap);
-            const baseY = rackY + 16;
-            const isHovered = hoveredHandIdx === idx;
-            const y = baseY + (isHovered ? -10 : 0);
-            const handDepthX = 4;
-            const handDepthY = 4;
-
-            const spritePath = `${tileSpriteBasePath}/${tileSpriteFileName(t)}`;
-            const tex = textures[spritePath];
-
-            return (
-              <pixiContainer
-                key={`${t.suit}-${t.rank}-${idx}`}
-                x={x}
-                y={y}
-                scale={isHovered ? 1.06 : 1}
-                eventMode="static"
-                cursor="default"
-                onPointerTap={(e: unknown) => {
-                  const tileId = (t as { id?: number }).id;
-                  if (typeof tileId !== "number") return;
-                  const detail = (e as unknown as { detail?: number }).detail;
-                  tryEmitDoubleTap(tileId, detail);
-                }}
-                onPointerOver={() => setHoveredHandIdx(idx)}
-                onPointerOut={() =>
-                  setHoveredHandIdx((prev) => (prev === idx ? null : prev))
-                }
-              >
-                <pixiGraphics
-                  draw={(g) => {
-                    drawMahjongBlock(g, {
-                      width: tileW,
-                      height: tileH,
-                      depthX: handDepthX,
-                      depthY: handDepthY,
-                      faceColor: 0xe7e8eb,
-                      borderColor: highlightDiscard ? 0xea2121 : 0xb8bcc3,
-                    });
-                  }}
-                />
-
-                {tex ? (
-                  <pixiSprite
-                    texture={tex}
-                    x={4}
-                    y={5}
-                    width={tileW - handDepthX - 8}
-                    height={tileH - handDepthY - 10}
-                  />
-                ) : null}
-              </pixiContainer>
-            );
-          })}
-
-          {(() => {
-            if (!melds || melds.length === 0) return null;
-            let cursorX = meldsStartX;
-            const baseY = rackY + 16;
-            const meldDepthX = 4;
-            const meldDepthY = 4;
-
-            return melds
-              .filter((m) => Array.isArray(m.tiles) && m.tiles.length > 0)
-              .map((m, mi) => {
-                const groupX = cursorX;
-                const tiles = m.tiles;
-                const containers = tiles.map((t, ti) => {
-                  const x = groupX + ti * (tileW + gap);
-                  const spritePath = `${tileSpriteBasePath}/${tileSpriteFileName(t)}`;
-                  const tex = textures[spritePath];
-
-                  return (
-                    <pixiContainer
-                      key={`meld-${m.kind}-${m.meldKey}-${mi}-${ti}`}
-                      x={x}
-                      y={baseY}
-                      eventMode="none"
-                    >
-                      <pixiGraphics
-                        draw={(g) => {
-                          drawMahjongBlock(g, {
-                            width: tileW,
-                            height: tileH,
-                            depthX: meldDepthX,
-                            depthY: meldDepthY,
-                            faceColor: 0xe7e8eb,
-                            borderColor: 0xb8bcc3,
-                          });
-                        }}
-                      />
-
-                      {tex ? (
-                        <pixiSprite
-                          texture={tex}
-                          x={4}
-                          y={5}
-                          width={tileW - meldDepthX - 8}
-                          height={tileH - meldDepthY - 10}
+                    return (
+                      <pixiContainer
+                        key={`meld-${m.kind}-${m.meldKey}-${mi}-${ti}`}
+                        x={x}
+                        y={baseY}
+                        eventMode="none"
+                      >
+                        <pixiGraphics
+                          draw={(g) => {
+                            drawMahjongBlock(g, {
+                              width: tileW,
+                              height: tileH,
+                              depthX: meldDepthX,
+                              depthY: meldDepthY,
+                              faceColor: 0xe7e8eb,
+                              borderColor: 0xb8bcc3,
+                            });
+                          }}
                         />
-                      ) : null}
-                    </pixiContainer>
-                  );
-                });
 
-                const groupWidth =
-                  tiles.length * tileW + Math.max(0, tiles.length - 1) * gap;
-                cursorX = groupX + groupWidth + meldGroupGap;
-                return containers;
-              });
-          })()}
+                        {tex ? (
+                          <pixiSprite
+                            texture={tex}
+                            x={4}
+                            y={5}
+                            width={tileW - meldDepthX - 8}
+                            height={tileH - meldDepthY - 10}
+                          />
+                        ) : null}
+                      </pixiContainer>
+                    );
+                  });
+
+                  const groupWidth =
+                    tiles.length * tileW + Math.max(0, tiles.length - 1) * gap;
+                  cursorX = groupX + groupWidth + meldGroupGap;
+                  return containers;
+                });
+            })()}
           </pixiContainer>
         </pixiContainer>
       </Application>
