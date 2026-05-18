@@ -1991,7 +1991,7 @@ export default function MahjongClient() {
                         "absolute flex items-center gap-1.5 rounded-full border border-amber-100/20 bg-black/40 px-2 py-1 text-[10px] text-amber-100 shadow-[0_12px_30px_rgba(0,0,0,0.35)] backdrop-blur-sm";
                       const pos =
                         position === "bottom"
-                          ? `${isMobileUi ? "right-2 bottom-[100px]" : "right-32 bottom-[140px]"}`
+                          ? `${isMobileUi ? "right-5 bottom-[80px]" : "right-32 bottom-[140px]"}`
                           : position === "top"
                             ? `left-1/2 -translate-x-1/2 ${
                                 isMobileUi ? "top-3" : "top-6"
