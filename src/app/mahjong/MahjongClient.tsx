@@ -1736,6 +1736,14 @@ export default function MahjongClient() {
       }
     : null;
 
+  const handleBack = () => {
+    const socket = getSocket();
+    if (socket && roomId != null) {
+      socket.emit("mahjong:leave_room", { roomId: String(roomId) });
+    }
+    router.back();
+  };
+
   return (
     <div className="fixed inset-0 overflow-hidden bg-[#00251b] text-amber-100">
       <div
@@ -1755,7 +1763,7 @@ export default function MahjongClient() {
               <div className="pointer-events-auto absolute left-4 top-4 flex items-center gap-3">
                 <button
                   type="button"
-                  onClick={() => router.back()}
+                  onClick={handleBack}
                   className="rounded-full bg-black/40 p-2 hover:bg-black/60"
                   aria-label="Back"
                 >
@@ -1797,7 +1805,7 @@ export default function MahjongClient() {
             <div className="absolute left-4 top-4 z-20 flex items-center gap-3">
               <button
                 type="button"
-                onClick={() => router.back()}
+                onClick={handleBack}
                 className="rounded-full bg-black/40 p-2 hover:bg-black/60"
                 aria-label="Back"
               >
