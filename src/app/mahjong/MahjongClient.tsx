@@ -1739,6 +1739,7 @@ export default function MahjongClient() {
   const handleBack = () => {
     const socket = getSocket();
     if (socket && roomId != null) {
+      console.log("[ws] emit mahjong:leave_room", { roomId: String(roomId) });
       socket.emit("mahjong:leave_room", { roomId: String(roomId) });
     }
     router.back();
