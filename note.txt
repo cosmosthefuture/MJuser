@@ -16,8 +16,8 @@
 
 #အပူးက သူများဖဲနိုင်လား
 
+leave room 
+cdn image
 
-  transform: isPortraitPhone
-                  ? "translate(-110px, 110px)"
-                  : "none",
-                transformOrigin: "center center",
+
+delete room cache
