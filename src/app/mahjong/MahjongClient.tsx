@@ -1067,12 +1067,12 @@ export default function MahjongClient() {
 
       const handleWaitingForPlayers = () => {
         if (cancelled) return;
-        setCenterMessage("Waiting for players...");
+        setCenterMessage("等待其他玩家...");
       };
 
       const handleCountdownStarted = () => {
         if (cancelled) return;
-        setCenterMessage("Starting...");
+        setCenterMessage("正在开始...");
       };
 
       const handleCountdown = (payload: unknown) => {
@@ -1086,7 +1086,7 @@ export default function MahjongClient() {
           setCenterMessage(null);
           return;
         }
-        setCenterMessage(`Starting in ${remaining}`);
+        setCenterMessage(`将在 ${remaining} 秒后开始`);
       };
 
       const handleRoundStarted = () => {
@@ -1240,7 +1240,7 @@ export default function MahjongClient() {
 
       const handleDrawRound = () => {
         if (cancelled) return;
-        setCenterMessage("THIS ROUND IS DRAW. NO WINNER");
+        setCenterMessage("本局平局。没有赢家");
         console.log("THIS ROUND IS DRAW. NO WINNER");
       };
 
@@ -1777,7 +1777,7 @@ export default function MahjongClient() {
                         isMobileUi ? "text-xs" : "text-lg"
                       }`}
                     >
-                      Mahjong (72 Tiles)
+                      麻将 (72 张)
                     </div>
                     {roomId ? (
                       <div
@@ -1785,18 +1785,18 @@ export default function MahjongClient() {
                           isMobileUi ? "text-[10px]" : "text-xs"
                         }`}
                       >
-                        Room ID: {roomId}{" "}
+                        房间 ID: {roomId}{" "}
                         {joinError
-                          ? "(Join error)"
+                          ? "(加入错误)"
                           : roomState
-                            ? "(Joined)"
-                            : "(Joining...)"}
+                            ? "(已加入)"
+                            : "(加入中...)"}
                       </div>
                     ) : null}
                   </div>
                   {viewport.width >= 900 ? (
                     <div className="text-xs text-amber-50/70">
-                      Win = 4 melds + 1 pair
+                      胡牌 = 4 面子 + 1 对子
                     </div>
                   ) : null}
                 </div>
@@ -1815,22 +1815,22 @@ export default function MahjongClient() {
               <div>
                 <div className="flex items-center gap-3">
                   <div className="text-lg font-semibold text-amber-200">
-                    Mahjong (72 Tiles)
+                    麻将 (72 张)
                   </div>
                   {roomId ? (
                     <div className="text-xs text-amber-50/70">
-                      Room ID: {roomId}{" "}
+                      房间 ID: {roomId}{" "}
                       {joinError
-                        ? "(Join error)"
+                        ? "(加入错误)"
                         : roomState
-                          ? "(Joined)"
-                          : "(Joining...)"}
+                          ? "(已加入)"
+                          : "(加入中...)"}
                     </div>
                   ) : null}
                 </div>
                 {viewport.width >= 900 ? (
                   <div className="text-xs text-amber-50/70">
-                    Win = 4 melds + 1 pair
+                    胡牌 = 4 面子 + 1 对子
                   </div>
                 ) : null}
               </div>
@@ -1884,7 +1884,7 @@ export default function MahjongClient() {
                     onClick={emitSortHand}
                     className="rounded-full border border-amber-100/15 bg-black/45 px-4 py-2 text-xs font-semibold text-amber-100 shadow-[0_20px_60px_rgba(0,0,0,0.45)] backdrop-blur-sm hover:bg-black/60"
                   >
-                    Sort
+                    理牌
                   </button>
                 </div>
               </div>
@@ -1895,7 +1895,7 @@ export default function MahjongClient() {
                   onClick={emitSortHand}
                   className="rounded-full border border-amber-100/15 bg-black/45 px-4 py-2 text-xs font-semibold text-amber-100 shadow-[0_20px_60px_rgba(0,0,0,0.45)] backdrop-blur-sm hover:bg-black/60"
                 >
-                  Sort
+                  理牌
                 </button>
               </div>
             )}
@@ -2392,7 +2392,7 @@ export default function MahjongClient() {
                               }}
                               className="rounded-full bg-amber-100/90 px-4 py-2 text-xs font-semibold text-[#3b0500] hover:bg-amber-100"
                             >
-                              Accept
+                              接受
                             </button>
                             <button
                               type="button"
@@ -2408,7 +2408,7 @@ export default function MahjongClient() {
                               }}
                               className="rounded-full border border-amber-100/15 bg-black/40 px-4 py-2 text-xs font-semibold text-amber-100 hover:bg-black/60"
                             >
-                              Pass
+                              跳过
                             </button>
                           </div>
                         </>
@@ -2475,7 +2475,7 @@ export default function MahjongClient() {
                               }}
                               className="rounded-full bg-amber-100/90 px-4 py-2 text-xs font-semibold text-[#3b0500] hover:bg-amber-100"
                             >
-                              Accept
+                              接受
                             </button>
                             <button
                               type="button"
@@ -2487,7 +2487,7 @@ export default function MahjongClient() {
                               }}
                               className="rounded-full border border-amber-100/15 bg-black/40 px-4 py-2 text-xs font-semibold text-amber-100 hover:bg-black/60"
                             >
-                              Pass
+                              跳过
                             </button>
                           </div>
                         </>
@@ -2550,7 +2550,7 @@ export default function MahjongClient() {
                             }}
                             className="rounded-full bg-amber-100/90 px-4 py-2 text-xs font-semibold text-[#3b0500] hover:bg-amber-100"
                           >
-                            Accept
+                            接受
                           </button>
                         </div>
                       ))}
@@ -2563,7 +2563,7 @@ export default function MahjongClient() {
                       }}
                       className="rounded-full border border-amber-100/15 bg-black/40 px-4 py-2 text-xs font-semibold text-amber-100 hover:bg-black/60"
                     >
-                      Pass
+                      跳过
                     </button>
                   </div>
                 </div>
@@ -2631,7 +2631,9 @@ function WinnerRevealModal({
                   : "text-rose-200"
               }`}
             >
-              {winnerReveal.resultLabel}
+              {winnerReveal.resultLabel === "You Win"
+                ? "您赢了"
+                : winnerReveal.resultLabel}
             </div>
           ) : null}
           <div className="mt-1 text-sm text-amber-100/90">
@@ -2644,7 +2646,7 @@ function WinnerRevealModal({
             onClick={onClose}
             className="rounded-full border border-amber-100/15 bg-black/40 px-3 py-1.5 text-sm text-amber-100 hover:bg-black/60"
           >
-            Close
+            关闭
           </button>
         </div>
       </div>

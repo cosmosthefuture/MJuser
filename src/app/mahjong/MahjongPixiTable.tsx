@@ -504,9 +504,7 @@ export default function MahjongPixiTable({
                 />
                 <pixiText
                   text={
-                    drawPileCount != null
-                      ? `Draw Pile: ${drawPileCount}`
-                      : "Draw Pile"
+                    drawPileCount != null ? `牌堆: ${drawPileCount}` : "牌堆"
                   }
                   x={Math.floor(designWidth / 2) - 60}
                   y={Math.floor(tableY + tableH / 2) - 50}
