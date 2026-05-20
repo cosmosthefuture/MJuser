@@ -68,7 +68,7 @@ export default function SignUpForm() {
             setError(key, { type: "manual", message });
           }
         });
-        toast.error("Registration failed.", {
+        toast.error("注册失败。", {
           description: apiErrors.password
             ? apiErrors.password[0]
             : apiErrors.phone_number
@@ -77,7 +77,7 @@ export default function SignUpForm() {
                 ? apiErrors.username[0]
                   : apiErrors.name
                   ? apiErrors.name[0]
-                  : "Please check your credentials and try again.",
+                  : "请检查您的信息并重试。",
         });
       } else if (response.status === 200 || response.status === 201) {
         const accessToken = response.data.data?.access_token;
@@ -97,8 +97,8 @@ export default function SignUpForm() {
             }),
           );
         }
-        toast.success("Registration successful!", {
-          description: response.data.response?.message || "Account created.",
+        toast.success("注册成功！", {
+          description: response.data.response?.message || "账号已创建。",
         });
         try {
           await fcmService.initializeToken();
@@ -109,8 +109,8 @@ export default function SignUpForm() {
       }
     } catch (err) {
       console.error("Registration error:", err);
-      toast.error("Registration failed.", {
-        description: "Please try again later.",
+      toast.error("注册失败。", {
+        description: "请稍后再试。",
       });
     } finally {
       setLoading(false);
@@ -130,17 +130,17 @@ export default function SignUpForm() {
       <div className="space-y-2.5">
         <div className="flex items-center gap-2.5">
           <p className="w-[5.25rem] shrink-0 text-[11px] font-bold uppercase tracking-[0.16em] text-[#89652e]">
-            Name
+            姓名
           </p>
           <div className="flex-1">
             <Input
               id="name"
               type="text"
-              placeholder="Name"
+              placeholder="姓名"
               autoComplete="off"
               variant="casino"
               {...register("name", {
-                required: "Name is required.",
+                required: "请填写姓名。",
               })}
               error={!!errors.name}
               hint={errors.name?.message}
@@ -151,17 +151,17 @@ export default function SignUpForm() {
 
         <div className="flex items-center gap-2.5">
           <p className="w-[5.25rem] shrink-0 text-[11px] font-bold uppercase tracking-[0.16em] text-[#89652e]">
-            User
+            用户
           </p>
           <div className="flex-1">
             <Input
               id="username"
               type="text"
-              placeholder="Username"
+              placeholder="用户名"
               autoComplete="username"
               variant="casino"
               {...register("username", {
-                required: "Username is required.",
+                required: "请填写用户名。",
               })}
               error={!!errors.username}
               hint={errors.username?.message}
@@ -172,22 +172,22 @@ export default function SignUpForm() {
 
         <div className="flex items-center gap-2.5">
           <p className="w-[5.25rem] shrink-0 text-[11px] font-bold uppercase tracking-[0.16em] text-[#89652e]">
-            Phone
+            电话
           </p>
           <div className="flex-1">
             <Input
               id="phone_number"
               type="tel"
               inputMode="numeric"
-              placeholder="Phone Number"
+              placeholder="电话号码"
               autoComplete="tel"
               variant="casino"
               className="auth-input-light h-[2.6rem] rounded-[13px] border-[#cfc0a0] bg-white px-3.5 py-2 text-[14px] font-medium text-[#4f3517] shadow-none selection:bg-[#d7a64b] selection:text-[#fffaf0] focus:border-[#b98736] focus:bg-white placeholder:text-[#c7b289]"
               {...register("phone_number", {
-                required: "Phone number is required.",
+                required: "请填写电话号码。",
                 minLength: {
                   value: 6,
-                  message: "Please enter a valid phone number.",
+                  message: "请输入有效的电话号码。",
                 },
               })}
               error={!!errors.phone_number}
@@ -198,13 +198,13 @@ export default function SignUpForm() {
 
         <div className="flex items-center gap-2.5">
           <p className="w-[5.25rem] shrink-0 text-[11px] font-bold uppercase tracking-[0.16em] text-[#89652e]">
-            Agent
+            代理
           </p>
           <div className="flex-1">
             <Input
               id="agent_code"
               type="text"
-              placeholder="Agent Code (Optional)"
+              placeholder="代理代码（可选）"
               autoComplete="off"
               variant="casino"
               {...register("agent_code")}
@@ -217,24 +217,24 @@ export default function SignUpForm() {
 
         <div className="flex items-center gap-2.5">
           <p className="w-[5.25rem] shrink-0 text-[11px] font-bold uppercase tracking-[0.16em] text-[#89652e]">
-            Password
+            密码
           </p>
           <div className="flex-1">
             <Input
               id="password"
               type="password"
-              placeholder="Password"
+              placeholder="密码"
               autoComplete="off"
               variant="casino"
               {...register("password", {
-                required: "Password is required.",
+                required: "请填写密码。",
                 minLength: {
                   value: 8,
-                  message: "Password must be at least 8 characters long.",
+                  message: "密码长度必须至少为 8 个字符。",
                 },
                 maxLength: {
                   value: 20,
-                  message: "Password must be at most 20 characters long.",
+                  message: "密码长度不能超过 20 个字符。",
                 },
               })}
               error={!!errors.password}
@@ -246,19 +246,19 @@ export default function SignUpForm() {
 
         <div className="flex items-center gap-2.5">
           <p className="w-[5.25rem] shrink-0 text-[11px] font-bold uppercase tracking-[0.16em] text-[#89652e]">
-            Confirm
+            确认
           </p>
           <div className="flex-1">
             <Input
               id="password_confirmation"
               type="password"
-              placeholder="Confirm Password"
+              placeholder="确认密码"
               autoComplete="off"
               variant="casino"
               {...register("password_confirmation", {
-                required: "Password confirmation is required.",
+                required: "请再次输入密码以确认。",
                 validate: (value: string) =>
-                  value === getValues("password") || "Passwords do not match.",
+                  value === getValues("password") || "两次输入的密码不一致。",
               })}
               error={!!errors.password_confirmation}
               hint={errors.password_confirmation?.message}
@@ -273,7 +273,7 @@ export default function SignUpForm() {
         type="submit"
         className="mt-1 flex h-[2.75rem] w-full items-center justify-center rounded-full border border-[#8c6a2e] bg-[#2a2418] px-5 text-[14px] font-bold uppercase tracking-[0.2em] text-[#f3d58b] shadow-none transition disabled:opacity-70"
       >
-        {loading ? "Registering..." : "Register"}
+        {loading ? "注册中..." : "注册"}
       </Button>
     </form>
   );

@@ -76,12 +76,12 @@ export default function LoginForm() {
             setError(key, { type: "manual", message });
           }
         });
-        toast.error("Login failed.", {
+        toast.error("登录失败。", {
           description: apiErrors.password
             ? apiErrors.password[0]
             : apiErrors.phone_number
               ? apiErrors.phone_number[0]
-              : "Please check your credentials and try again.",
+              : "请检查您的凭据并重试。",
         });
       } else if (response.status === 200) {
         const accessToken = response.data.data.accessToken;
@@ -100,15 +100,15 @@ export default function LoginForm() {
             }),
           );
         }
-        toast.success("Login successful!", {
-          description: "Welcome back!",
+        toast.success("登录成功！", {
+          description: "欢迎回来！",
         });
         isSuccess = true;
       }
     } catch (err) {
       console.error("Login error:", err);
-      toast.error("Login failed.", {
-        description: "Please check your credentials and try again.",
+      toast.error("登录失败。", {
+        description: "请检查您的凭据并重试。",
       });
     } finally {
       setLoading(false);
@@ -133,21 +133,21 @@ export default function LoginForm() {
       <div className="space-y-2.5">
         <div className="flex items-center gap-2.5">
           <p className="w-[5.25rem] shrink-0 text-[11px] font-bold uppercase tracking-[0.16em] text-[#89652e]">
-            ID
+            账号 ID
           </p>
           <div className="flex-1">
             <Input
               id="phone_number"
               type="tel"
               inputMode="numeric"
-              placeholder="Phone Number"
+              placeholder="电话号码"
               autoComplete="tel"
               variant="casino"
               {...register("phone_number", {
-                required: "Phone number is required.",
+                required: "请填写电话号码。",
                 minLength: {
                   value: 6,
-                  message: "Please enter a valid phone number.",
+                  message: "请输入有效的电话号码。",
                 },
               })}
               error={!!errors.phone_number}
@@ -159,24 +159,24 @@ export default function LoginForm() {
 
         <div className="flex items-center gap-2.5">
           <p className="w-[5.25rem] shrink-0 text-[11px] font-bold uppercase tracking-[0.16em] text-[#89652e]">
-            Password
+            密码
           </p>
           <div className="flex-1">
             <Input
               id="password"
               type="password"
-              placeholder="Password"
+              placeholder="密码"
               autoComplete="off"
               variant="casino"
               {...register("password", {
-                required: "Password is required.",
+                required: "请填写密码。",
                 minLength: {
                   value: 8,
-                  message: "Password must be at least 8 characters long.",
+                  message: "密码长度必须至少为 8 个字符。",
                 },
                 maxLength: {
                   value: 20,
-                  message: "Password must be at most 20 characters long.",
+                  message: "密码长度不能超过 20 个字符。",
                 },
               })}
               error={!!errors.password}
@@ -192,7 +192,7 @@ export default function LoginForm() {
         type="submit"
         className="mt-1 flex h-[2.75rem] w-full items-center justify-center rounded-full border border-[#8c6a2e] bg-[#2a2418] px-5 text-[14px] font-bold uppercase tracking-[0.2em] text-[#f3d58b] shadow-none transition disabled:opacity-70"
       >
-        {loading ? "Logging In..." : "Login"}
+        {loading ? "登录中..." : "登录"}
       </Button>
     </form>
   );

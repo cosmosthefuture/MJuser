@@ -7,10 +7,10 @@ export default function SignUpPage() {
     <AuthStage
       eyebrow=""
       linkHref="/login"
-      linkLabel="Login"
-      linkPrompt="Already have an account?"
-      subtitle="Create an account, confirm your phone, and step straight into the lobby."
-      title="Register"
+      linkLabel="登录"
+      linkPrompt="已经有账号了？"
+      subtitle="创建账号，验证您的手机，直接进入大厅。"
+      title="注册"
     >
       <div className="w-full">
         <Suspense fallback={null}>

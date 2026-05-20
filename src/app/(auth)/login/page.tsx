@@ -10,10 +10,10 @@ export default function loginPage() {
       compactMobile
       eyebrow=""
       linkHref="/signup"
-      linkLabel="Register"
-      linkPrompt="New here?"
-      subtitle="Return to the felt, sync your balance, and get back to the live tables."
-      title="Login"
+      linkLabel="注册"
+      linkPrompt="还没有账号？"
+      subtitle="返回牌桌，同步您的余额，重新加入实时牌局。"
+      title="登录"
     >
       <div className="w-full">
         <Suspense fallback={null}>
