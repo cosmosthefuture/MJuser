@@ -181,14 +181,14 @@ export default function GameRulesClient() {
                             isCompactStage ? "text-[0.62rem]" : "text-[0.72rem]"
                           }`}
                         >
-                          {rule.max_player} Players
+                          {rule.max_player} 位玩家
                         </p>
                         <p
                           className={`font-semibold text-[#ffd7ad]/95 ${
                             isCompactStage ? "text-[0.62rem]" : "text-[0.72rem]"
                           }`}
                         >
-                          Bet {rule.bet_amount.toLocaleString()} MMK
+                          底注 {rule.bet_amount.toLocaleString()} MMK
                         </p>
                       </div>
                     </article>
