@@ -116,22 +116,22 @@ export default function GuestLanding() {
               <div className="w-full text-center">
                 <div className="inline-flex items-end gap-[0.15vw] leading-none tracking-[-0.09em]">
                   <span className="text-[clamp(3.6rem,15vw,7.4rem)] font-black text-[#ffd257] [text-shadow:0_0.14em_0_#d1841d,0_0.24em_0_#9d4f13,0_0.34em_0.38em_rgba(85,34,9,0.34)]">
-                    PLAY
+                    开始
                   </span>
                   <span className="ml-[0.4vw] text-[clamp(3.8rem,15.6vw,7.6rem)] font-black text-[#55d43c] [text-shadow:0_0.14em_0_#3b9f20,0_0.24em_0_#276615,0_0.34em_0.38em_rgba(20,54,11,0.34)]">
-                    GO
+                    游戏
                   </span>
                 </div>
 
                 <p className="mt-[2.2vw] text-[clamp(1.05rem,4.2vw,2rem)] font-bold text-[#ffe18a] [text-shadow:0_0.12em_0_#904510,0_0.22em_0.26em_rgba(61,24,4,0.26)]">
-                  Focus on Myanmar Games 8 Years
+                  专注缅甸游戏 8 年
                 </p>
               </div>
 
               <div className="mt-[12vw] flex w-full items-center justify-center gap-[3.2vw]">
                 <Link
                   href="/login"
-                  aria-label="Login"
+                  aria-label="登录"
                   className={`${loginButtonClassName} min-w-[46vw] border-[#99f1ff] bg-[#06324d] px-[0.9vw] py-[0.9vw] shadow-[0_16px_34px_rgba(4,35,61,0.5),0_0_24px_rgba(74,219,255,0.22)] hover:-translate-y-[0.35vw] hover:shadow-[0_22px_42px_rgba(4,35,61,0.58),0_0_32px_rgba(74,219,255,0.34)]`}
                 >
                   <span className={loginButtonSurfaceClassName} />
@@ -139,13 +139,13 @@ export default function GuestLanding() {
                   <span className="absolute inset-x-[8%] bottom-[12%] h-[18%] rounded-full bg-black/18 blur-[8px]" />
                   <span className="relative z-10 flex w-full items-center justify-center gap-[2.4vw] px-[5.2vw] py-[2.7vw] text-[4vw] font-black uppercase tracking-[0.2em] text-[#ddf6ff] [text-shadow:0_0.1em_0_rgba(7,75,112,0.66)]">
                     <UserRound className="h-[4.2vw] w-[4.2vw] text-[#d2f3ff] drop-shadow-[0_2px_4px_rgba(0,0,0,0.28)]" />
-                    Login
+                    登录
                   </span>
                 </Link>
 
                 <Link
                   href="/signup"
-                  aria-label="Sign Up"
+                  aria-label="注册"
                   className={`${signUpButtonClassName} min-w-[46vw] border-[#ffd58e] bg-[#6f2f10] px-[0.9vw] py-[0.9vw] shadow-[0_18px_38px_rgba(82,39,12,0.52),0_0_26px_rgba(255,210,122,0.18)] hover:-translate-y-[0.35vw] hover:shadow-[0_24px_46px_rgba(82,39,12,0.62),0_0_34px_rgba(255,210,122,0.28)]`}
                 >
                   <span className={signUpButtonSurfaceClassName} />
@@ -153,7 +153,7 @@ export default function GuestLanding() {
                   <span className="absolute inset-x-[8%] bottom-[12%] h-[18%] rounded-full bg-black/20 blur-[8px]" />
                   <span className="relative z-10 flex w-full items-center justify-center gap-[2.4vw] px-[5.2vw] py-[2.7vw] text-[4vw] font-black uppercase tracking-[0.18em] text-[#ffe5b3] [text-shadow:0_0.1em_0_rgba(112,53,14,0.62)]">
                     <Lock className="h-[4.2vw] w-[4.2vw] text-[#ffd99a] drop-shadow-[0_2px_4px_rgba(0,0,0,0.28)]" />
-                    Sign Up
+                    注册
                   </span>
                 </Link>
               </div>
@@ -164,22 +164,22 @@ export default function GuestLanding() {
                 <div className="absolute left-1/2 top-[42%] w-full max-w-[58vw] -translate-x-1/2 -translate-y-1/2 text-center">
                   <div className="inline-flex items-end gap-[0.15vw] leading-none tracking-[-0.09em]">
                     <span className="text-[clamp(4rem,9.2vw,8.4rem)] font-black text-[#ffd257] [text-shadow:0_0.14em_0_#d1841d,0_0.24em_0_#9d4f13,0_0.34em_0.38em_rgba(85,34,9,0.34)]">
-                      PLAY
+                      开始
                     </span>
                     <span className="ml-[0.4vw] text-[clamp(4.2rem,9.5vw,8.6rem)] font-black text-[#55d43c] [text-shadow:0_0.14em_0_#3b9f20,0_0.24em_0_#276615,0_0.34em_0.38em_rgba(20,54,11,0.34)]">
-                      GO
+                      游戏
                     </span>
                   </div>
 
                   <p className="mt-[1vw] text-[clamp(1.2rem,2.25vw,1.95rem)] font-bold text-[#ffe18a] [text-shadow:0_0.12em_0_#904510,0_0.22em_0.26em_rgba(61,24,4,0.26)]">
-                    Focus on Myanmar Games 8 Years
+                    专注缅甸游戏 8 年
                   </p>
                 </div>
 
                 <div className="absolute bottom-[13%] left-1/2 flex -translate-x-1/2 items-center gap-[1.5vw]">
                   <Link
                     href="/login"
-                    aria-label="Login"
+                    aria-label="登录"
                     className={`${loginButtonClassName} min-w-[13vw] gap-2 border-[#99f1ff] bg-[#06324d] px-[0.22vw] py-[0.22vw] shadow-[0_14px_30px_rgba(4,35,61,0.52),0_0_22px_rgba(74,219,255,0.22)] hover:-translate-y-[0.18vw] hover:shadow-[0_20px_38px_rgba(4,35,61,0.6),0_0_28px_rgba(74,219,255,0.3)]`}
                   >
                     <span className={loginButtonSurfaceClassName} />
@@ -187,13 +187,13 @@ export default function GuestLanding() {
                     <span className="absolute inset-x-[9%] bottom-[12%] h-[20%] rounded-full bg-black/18 blur-[7px]" />
                     <span className="relative z-10 flex w-full items-center justify-center gap-[0.7vw] px-[2.3vw] py-[1.1vw] text-[1.42vw] font-black uppercase tracking-[0.18em] text-[#ddf6ff] [text-shadow:0_0.1em_0_rgba(7,75,112,0.66)]">
                       <UserRound className="h-[1.45vw] w-[1.45vw] text-[#d2f3ff] drop-shadow-[0_2px_4px_rgba(0,0,0,0.28)]" />
-                      Login
+                      登录
                     </span>
                   </Link>
 
                   <Link
                     href="/signup"
-                    aria-label="Sign Up"
+                    aria-label="注册"
                     className={`${signUpButtonClassName} min-w-[13vw] gap-2 border-[#ffd58e] bg-[#6f2f10] px-[0.22vw] py-[0.22vw] shadow-[0_16px_34px_rgba(82,39,12,0.54),0_0_24px_rgba(255,210,122,0.18)] hover:-translate-y-[0.18vw] hover:shadow-[0_22px_40px_rgba(82,39,12,0.62),0_0_30px_rgba(255,210,122,0.26)]`}
                   >
                     <span className={signUpButtonSurfaceClassName} />
@@ -201,7 +201,7 @@ export default function GuestLanding() {
                     <span className="absolute inset-x-[9%] bottom-[12%] h-[20%] rounded-full bg-black/20 blur-[7px]" />
                     <span className="relative z-10 flex w-full items-center justify-center gap-[0.7vw] px-[2.3vw] py-[1.1vw] text-[1.42vw] font-black uppercase tracking-[0.16em] text-[#ffe5b3] [text-shadow:0_0.1em_0_rgba(112,53,14,0.62)]">
                       <Lock className="h-[1.45vw] w-[1.45vw] text-[#ffd99a] drop-shadow-[0_2px_4px_rgba(0,0,0,0.28)]" />
-                      Sign Up
+                      注册
                     </span>
                   </Link>
                 </div>
