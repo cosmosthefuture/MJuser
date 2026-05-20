@@ -31,12 +31,12 @@ export default function PlayerNavbar({
   async function logoutHandler() {
     try {
       await logout();
-      toast.success("You have been logged out successfully.");
+      toast.success("您已成功退出登录。");
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.data?.message) {
-        toast.error(`Logout failed: ${error.response.data.message}`);
+        toast.error(`退出登录失败: ${error.response.data.message}`);
       } else {
-        toast.error("An unknown error occurred during logout.");
+        toast.error("退出登录时发生未知错误。");
       }
     }
   }
@@ -79,7 +79,7 @@ export default function PlayerNavbar({
             compact ? "h-7 px-3.5 text-[10px]" : "h-10 px-5 text-sm"
           }`}
         >
-          Logout
+          退出
         </Button>
       </div>
     </div>

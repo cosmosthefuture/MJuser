@@ -15,15 +15,15 @@ import { List } from "lucide-react";
 export default function Navbar() {
   const navLinks = [
     {
-      label: "Home",
+      label: "首页",
       path: "/",
     },
     {
-      label: "Resources",
+      label: "资源",
       path: "/resources",
     },
     {
-      label: "About",
+      label: "关于",
       path: "/sfg",
     },
   ];
@@ -38,12 +38,12 @@ export default function Navbar() {
   async function logoutHandler() {
     try {
       await logout();
-      toast.success("You have been logged out successfully.");
+      toast.success("您已成功退出登录。");
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.data?.message) {
-        toast.error(`Logout failed: ${error.response.data.message}`);
+        toast.error(`退出登录失败: ${error.response.data.message}`);
       } else {
-        toast.error("An unknown error occurred during logout.");
+        toast.error("退出登录时发生未知错误。");
       }
     }
   }
@@ -56,7 +56,7 @@ export default function Navbar() {
       <nav className="bg-gray-50 w-100% shadow border-b border-gray-100">
         <div className="hidden md:flex lg:flex xl:flex  justify-between items-center px-10 md:px-10 lg:px-28 py-2">
           <div className="text-xl font-bold">
-            <div className="">Game</div>
+            <div className="">游戏</div>
           </div>
           <div className="flex items-center space-x-8 relative">
             {navLinks.map((link, index) => (
@@ -97,7 +97,7 @@ export default function Navbar() {
                     variant="default"
                     className="text-white px-8 font-medium py-2"
                   >
-                    Login
+                    登录
                   </Button>
                 </Link>
               )
@@ -112,7 +112,7 @@ export default function Navbar() {
       <nav className="bg-gray-50 w-full md:hidden lg:hidden xl:hidden shadow border-b border-gray-100 fixed top-0 z-50">
         <div className="flex justify-between items-center px-4 py-2">
           <p></p>
-          <p>Game</p>
+          <p>游戏</p>
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger>
               <List />
@@ -156,7 +156,7 @@ export default function Navbar() {
                           setOpen(false);
                         }}
                       >
-                        Logout
+                        退出
                         {hovered === 9 && (
                           <motion.div
                             className="absolute bottom-[-8px] left-0 w-full h-[2px] bg-[#6BE2A9]"
@@ -180,7 +180,7 @@ export default function Navbar() {
                       className="relative text-lg font-medium"
                       onClick={() => setOpen(false)}
                     >
-                      Login
+                      登录
                       {hovered === 10 && (
                         <motion.div
                           className="absolute bottom-[-8px] left-0 w-full h-[2px] bg-[#6BE2A9]"
