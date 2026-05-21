@@ -2587,14 +2587,60 @@ function Dice3D({ face, rolling }: { face: number; rolling: boolean }) {
           className="dice3d-cube"
           style={rolling ? undefined : { transform: rotation }}
         >
-          <div className="dice3d-face dice3d-face-front">1</div>
-          <div className="dice3d-face dice3d-face-right">2</div>
-          <div className="dice3d-face dice3d-face-top">3</div>
-          <div className="dice3d-face dice3d-face-bottom">4</div>
-          <div className="dice3d-face dice3d-face-left">5</div>
-          <div className="dice3d-face dice3d-face-back">6</div>
+          <div className="dice3d-face dice3d-face-front">
+            <DicePips value={1} />
+          </div>
+          <div className="dice3d-face dice3d-face-right">
+            <DicePips value={2} />
+          </div>
+          <div className="dice3d-face dice3d-face-top">
+            <DicePips value={3} />
+          </div>
+          <div className="dice3d-face dice3d-face-bottom">
+            <DicePips value={4} />
+          </div>
+          <div className="dice3d-face dice3d-face-left">
+            <DicePips value={5} />
+          </div>
+          <div className="dice3d-face dice3d-face-back">
+            <DicePips value={6} />
+          </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function DicePips({ value }: { value: 1 | 2 | 3 | 4 | 5 | 6 }) {
+  const pips: Array<
+    "tl" | "tr" | "ml" | "mr" | "bl" | "br" | "c"
+  > = (() => {
+    switch (value) {
+      case 1:
+        return ["c"];
+      case 2:
+        return ["tl", "br"];
+      case 3:
+        return ["tl", "c", "br"];
+      case 4:
+        return ["tl", "tr", "bl", "br"];
+      case 5:
+        return ["tl", "tr", "c", "bl", "br"];
+      case 6:
+        return ["tl", "ml", "bl", "tr", "mr", "br"];
+    }
+  })();
+
+  const pipTone = value === 1 || value === 4 ? "dice3d-pip-red" : undefined;
+
+  return (
+    <div className="dice3d-pips" aria-label={`Dice face ${value}`}>
+      {pips.map((pos) => (
+        <span
+          key={pos}
+          className={`dice3d-pip dice3d-pip-${pos} ${pipTone ?? ""}`}
+        />
+      ))}
     </div>
   );
 }
