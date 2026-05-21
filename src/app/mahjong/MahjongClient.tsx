@@ -1923,7 +1923,7 @@ export default function MahjongClient() {
                           isMobileUi ? "px-3 py-2" : "px-4 py-3"
                         }`}
                       >
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-6">
                           <Dice3D
                             face={diceFaces?.[0] ?? 1}
                             rolling={diceRolling}
@@ -2121,7 +2121,7 @@ export default function MahjongClient() {
                       }}
                     >
                       <div className="rounded-[18px] bg-black/35 px-4 py-3 shadow-[0_22px_70px_rgba(0,0,0,0.45)] backdrop-blur-sm ring-1 ring-amber-100/10">
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-6">
                           <Dice3D
                             face={diceFaces?.[0] ?? 1}
                             rolling={diceRolling}
