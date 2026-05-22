@@ -97,6 +97,8 @@ export default function MahjongClient() {
   const [diceRolling, setDiceRolling] = useState(false);
   const [diceFaces, setDiceFaces] = useState<[number, number] | null>(null);
   const [showDrawPile, setShowDrawPile] = useState(false);
+  const [startRoundPromptOpen, setStartRoundPromptOpen] = useState(false);
+  const [showEndRoundButton, setShowEndRoundButton] = useState(false);
   const [turnCountdown, setTurnCountdown] = useState<{
     userId: number;
     remaining: number;
@@ -215,6 +217,32 @@ export default function MahjongClient() {
     socket.emit("mahjong:pass_normal_kong", {
       roomId: String(roomId),
       userId: authUserId,
+    });
+  };
+
+  const emitTemporaryStartRound = () => {
+    const socket = getSocket();
+    if (!socket) return;
+    if (roomId == null || authUserId == null) return;
+    console.log("[ws] emit mahjong:temporary_start_round", {
+      roomId: String(roomId),
+      userId: authUserId,
+    });
+    socket.emit("mahjong:temporary_start_round", {
+      roomId: String(roomId),
+      userId: authUserId,
+    });
+  };
+
+  const emitTemporaryEndRound = () => {
+    const socket = getSocket();
+    if (!socket) return;
+    if (roomId == null) return;
+    console.log("[ws] emit mahjong:temporary_end_round", {
+      roomId: String(roomId),
+    });
+    socket.emit("mahjong:temporary_end_round", {
+      roomId: String(roomId),
     });
   };
 
@@ -1092,6 +1120,8 @@ export default function MahjongClient() {
       const handleRoundStarted = () => {
         if (cancelled) return;
         setCenterMessage(null);
+        setStartRoundPromptOpen(false);
+        setShowEndRoundButton(false);
       };
 
       const normalizeRoundPlayers = (players: unknown): RoundPlayer[] => {
@@ -1137,6 +1167,7 @@ export default function MahjongClient() {
       const handleUpdateRoundPlayers = (payload: unknown) => {
         if (cancelled) return;
         setRoundPlayers(normalizeRoundPlayers(payload));
+        setShowEndRoundButton(true);
       };
 
       const handleStartRollingDice = () => {
@@ -1539,9 +1570,16 @@ export default function MahjongClient() {
       const handleRoundEnd = () => {
         if (cancelled) return;
         setCenterMessage("Round Over!");
+        setShowEndRoundButton(false);
         setTimeout(() => {
           window.location.reload();
         }, 2000);
+      };
+
+      const handleShowStartRound = () => {
+        if (cancelled) return;
+        console.log("Show Start Round");
+        setStartRoundPromptOpen(true);
       };
 
       socket.off("mahjong:waiting_for_players", handleWaitingForPlayers);
@@ -1628,6 +1666,9 @@ export default function MahjongClient() {
       socket.off("mahjong:round_end", handleRoundEnd);
       socket.on("mahjong:round_end", handleRoundEnd);
 
+      socket.off("mahjong:show_start_round", handleShowStartRound);
+      socket.on("mahjong:show_start_round", handleShowStartRound);
+
       if (socket.connected) {
         void doJoin(socket);
       } else {
@@ -1670,6 +1711,7 @@ export default function MahjongClient() {
       socket?.off("mahjong:start_shuffling");
       socket?.off("mahjong:user_to_play");
       socket?.off("mahjong:round_end");
+      socket?.off("mahjong:show_start_round");
     };
   }, [token, roomId, authUserId]);
 
@@ -1780,17 +1822,32 @@ export default function MahjongClient() {
                       麻将 (72 张)
                     </div>
                     {roomId ? (
-                      <div
-                        className={`text-amber-50/70 ${
-                          isMobileUi ? "text-[10px]" : "text-xs"
-                        }`}
-                      >
-                        房间 ID: {roomId}{" "}
-                        {joinError
-                          ? "(加入错误)"
-                          : roomState
-                            ? "(已加入)"
-                            : "(加入中...)"}
+                      <div className="flex items-center gap-2">
+                        <div
+                          className={`text-amber-50/70 ${
+                            isMobileUi ? "text-[10px]" : "text-xs"
+                          }`}
+                        >
+                          房间 ID: {roomId}{" "}
+                          {joinError
+                            ? "(加入错误)"
+                            : roomState
+                              ? "(已加入)"
+                              : "(加入中...)"}
+                        </div>
+                        {showEndRoundButton ? (
+                          <button
+                            type="button"
+                            onClick={emitTemporaryEndRound}
+                            className={`rounded-full border border-rose-200/20 bg-rose-500/15 font-semibold text-rose-100 hover:bg-rose-500/25 ${
+                              isMobileUi
+                                ? "px-2 py-1 text-[10px]"
+                                : "px-3 py-1 text-xs"
+                            }`}
+                          >
+                            End
+                          </button>
+                        ) : null}
                       </div>
                     ) : null}
                   </div>
@@ -1818,13 +1875,24 @@ export default function MahjongClient() {
                     麻将 (72 张)
                   </div>
                   {roomId ? (
-                    <div className="text-xs text-amber-50/70">
-                      房间 ID: {roomId}{" "}
-                      {joinError
-                        ? "(加入错误)"
-                        : roomState
-                          ? "(已加入)"
-                          : "(加入中...)"}
+                    <div className="flex items-center gap-2">
+                      <div className="text-xs text-amber-50/70">
+                        房间 ID: {roomId}{" "}
+                        {joinError
+                          ? "(加入错误)"
+                          : roomState
+                            ? "(已加入)"
+                            : "(加入中...)"}
+                      </div>
+                      {showEndRoundButton ? (
+                        <button
+                          type="button"
+                          onClick={emitTemporaryEndRound}
+                          className="rounded-full border border-rose-200/20 bg-rose-500/15 px-3 py-1 text-xs font-semibold text-rose-100 hover:bg-rose-500/25"
+                        >
+                          End
+                        </button>
+                      ) : null}
                     </div>
                   ) : null}
                 </div>
@@ -2333,6 +2401,37 @@ export default function MahjongClient() {
             </div>
           ) : null}
 
+          {startRoundPromptOpen && !winnerReveal ? (
+            <div className="absolute inset-0 z-30 bg-black/60">
+              {isPortraitPhone ? (
+                <div
+                  className="pointer-events-none absolute left-1/2 top-1/2"
+                  style={portraitUiStyle ?? undefined}
+                >
+                  <div className="pointer-events-none absolute inset-0 flex items-center justify-center p-4">
+                    <StartRoundModal
+                      isMobileUi={isMobileUi}
+                      onStart={() => {
+                        emitTemporaryStartRound();
+                        setStartRoundPromptOpen(false);
+                      }}
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center p-4">
+                  <StartRoundModal
+                    isMobileUi={isMobileUi}
+                    onStart={() => {
+                      emitTemporaryStartRound();
+                      setStartRoundPromptOpen(false);
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+          ) : null}
+
           {kongDecision ? (
             <div className="pointer-events-none absolute inset-0 z-30">
               <div
@@ -2641,6 +2740,43 @@ function DicePips({ value }: { value: 1 | 2 | 3 | 4 | 5 | 6 }) {
           className={`dice3d-pip dice3d-pip-${pos} ${pipTone ?? ""}`}
         />
       ))}
+    </div>
+  );
+}
+
+function StartRoundModal({
+  isMobileUi,
+  onStart,
+}: {
+  isMobileUi: boolean;
+  onStart: () => void;
+}) {
+  return (
+    <div
+      className={`pointer-events-auto w-full rounded-2xl border border-amber-100/15 bg-black/75 shadow-[0_25px_80px_rgba(0,0,0,0.55)] backdrop-blur-sm ${
+        isMobileUi ? "max-w-[420px] p-4" : "max-w-[520px] p-5"
+      }`}
+      role="dialog"
+      aria-modal="true"
+    >
+      <div className="text-center">
+        <div className="text-lg font-extrabold tracking-tight text-amber-100">
+          Ready to start?
+        </div>
+        <div className="mt-1 text-sm text-amber-100/80">
+          Click start to begin the round.
+        </div>
+      </div>
+
+      <div className="mt-4 flex items-center justify-center">
+        <button
+          type="button"
+          onClick={onStart}
+          className="rounded-full bg-amber-100/90 px-5 py-2 text-sm font-extrabold text-[#3b0500] hover:bg-amber-100"
+        >
+          Start
+        </button>
+      </div>
     </div>
   );
 }
