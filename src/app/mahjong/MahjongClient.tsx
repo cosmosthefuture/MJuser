@@ -1845,7 +1845,7 @@ export default function MahjongClient() {
                                 : "px-3 py-1 text-xs"
                             }`}
                           >
-                            End
+                            结束
                           </button>
                         ) : null}
                       </div>
@@ -1890,7 +1890,7 @@ export default function MahjongClient() {
                           onClick={emitTemporaryEndRound}
                           className="rounded-full border border-rose-200/20 bg-rose-500/15 px-3 py-1 text-xs font-semibold text-rose-100 hover:bg-rose-500/25"
                         >
-                          End
+                          结束
                         </button>
                       ) : null}
                     </div>
@@ -2711,9 +2711,7 @@ function Dice3D({ face, rolling }: { face: number; rolling: boolean }) {
 }
 
 function DicePips({ value }: { value: 1 | 2 | 3 | 4 | 5 | 6 }) {
-  const pips: Array<
-    "tl" | "tr" | "ml" | "mr" | "bl" | "br" | "c"
-  > = (() => {
+  const pips: Array<"tl" | "tr" | "ml" | "mr" | "bl" | "br" | "c"> = (() => {
     switch (value) {
       case 1:
         return ["c"];
