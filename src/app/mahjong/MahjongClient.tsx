@@ -99,6 +99,7 @@ export default function MahjongClient() {
   const [showDrawPile, setShowDrawPile] = useState(false);
   const [startRoundPromptOpen, setStartRoundPromptOpen] = useState(false);
   const [showEndRoundButton, setShowEndRoundButton] = useState(false);
+  const [isEndingRound, setIsEndingRound] = useState(false);
   const [turnCountdown, setTurnCountdown] = useState<{
     userId: number;
     remaining: number;
@@ -238,6 +239,7 @@ export default function MahjongClient() {
     const socket = getSocket();
     if (!socket) return;
     if (roomId == null) return;
+    setIsEndingRound(true);
     console.log("[ws] emit mahjong:temporary_end_round", {
       roomId: String(roomId),
     });
@@ -1838,14 +1840,17 @@ export default function MahjongClient() {
                         {showEndRoundButton ? (
                           <button
                             type="button"
-                            onClick={emitTemporaryEndRound}
+                            onClick={() => {
+                              if (isEndingRound) return;
+                              emitTemporaryEndRound();
+                            }}
                             className={`rounded-full border border-rose-200/20 bg-rose-500/15 font-semibold text-rose-100 hover:bg-rose-500/25 ${
                               isMobileUi
                                 ? "px-2 py-1 text-[10px]"
                                 : "px-3 py-1 text-xs"
                             }`}
                           >
-                            结束
+                            {isEndingRound ? "Ending..." : "结束"}
                           </button>
                         ) : null}
                       </div>
@@ -1887,10 +1892,13 @@ export default function MahjongClient() {
                       {showEndRoundButton ? (
                         <button
                           type="button"
-                          onClick={emitTemporaryEndRound}
+                          onClick={() => {
+                            if (isEndingRound) return;
+                            emitTemporaryEndRound();
+                          }}
                           className="rounded-full border border-rose-200/20 bg-rose-500/15 px-3 py-1 text-xs font-semibold text-rose-100 hover:bg-rose-500/25"
                         >
-                          结束
+                          {isEndingRound ? "Ending..." : "结束"}
                         </button>
                       ) : null}
                     </div>
