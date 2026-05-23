@@ -129,6 +129,8 @@ export default function Home() {
 
   const isPortraitPhone =
     viewport.width < 900 && viewport.height > viewport.width;
+  const stageWidth = isPortraitPhone ? viewport.height : viewport.width;
+  const stageHeight = isPortraitPhone ? viewport.width : viewport.height;
   const stageStyle = isPortraitPhone
     ? {
         width: `${viewport.height}px`,
@@ -167,6 +169,18 @@ export default function Home() {
 
   const showcaseGames = getShowcaseGames(gamesData?.data || []);
   const isCompactStage = Math.min(viewport.width, viewport.height) < 520;
+  const lobbyStickerHeight = Math.max(
+    260,
+    Math.min(stageHeight * (isCompactStage ? 0.88 : 0.78), 680),
+  );
+  const lobbyStickerWidth = Math.max(
+    240,
+    Math.min(stageWidth * (isCompactStage ? 0.68 : 0.52), 620),
+  );
+  const lobbyStickerTop = Math.max(
+    40,
+    Math.min(stageHeight * (isCompactStage ? 0.18 : 0.16), 220),
+  );
 
   return (
     <div className="fixed inset-0 overflow-hidden bg-[#1a0f0a]">
@@ -204,11 +218,12 @@ export default function Home() {
               }`}
             >
               <div
-                className={`relative mx-auto w-full ${
-                  isCompactStage
-                    ? "mt-[11rem] h-[31rem] max-w-[31rem]"
-                    : "mt-[7rem] h-[28rem] max-w-[28rem] self-end sm:mt-[8rem] sm:h-[36rem] sm:max-w-[36rem]"
-                }`}
+                className="relative mx-auto w-full self-end"
+                style={{
+                  marginTop: lobbyStickerTop,
+                  height: lobbyStickerHeight,
+                  maxWidth: lobbyStickerWidth,
+                }}
               >
                 <Image
                   src="/images/img/carton.webp"
