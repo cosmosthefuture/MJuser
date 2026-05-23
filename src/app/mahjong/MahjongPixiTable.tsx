@@ -510,7 +510,7 @@ export default function MahjongPixiTable({
                       const tileW = w;
                       const tileH = h;
                       const tileGapX = 4;
-                      const tileGapY = -12;
+                      const tileGapY = -8;
                       const pad = 10;
 
                       const cx = Math.floor(designWidth / 2);
@@ -991,7 +991,7 @@ export default function MahjongPixiTable({
                     if (i < sideCountRight) {
                       g.drawRoundedRect(
                         sideXRight,
-                        sideStartY + i * (smallW + 2),
+                        sideStartY + i * (smallW + 5),
                         smallH,
                         smallW,
                         4,
@@ -1138,7 +1138,7 @@ export default function MahjongPixiTable({
               if (showRight && rightGroups.length > 0) {
                 const startY =
                   sideStartY +
-                  sideCountRight * (smallW + 2) +
+                  sideCountRight * (smallW + 5) +
                   Math.max(10, gap);
                 const x = sideXRight + smallH / 2;
 
