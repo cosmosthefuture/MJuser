@@ -67,8 +67,9 @@ export const config = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
-     * - api (API routes), _next/static (static files), _next/image (image optimization files), favicon.ico (favicon file)
+     * - api (API routes), _next/static (static files), _next/image (image optimization files)
+     * - public assets needed for PWA (manifest, service worker, icons)
      */
-    "/((?!api|_next/static|_next/image|favicon.ico|images|public/images|public/).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|manifest\\.webmanifest|sw\\.js|icons|images|public/images|public/).*)",
   ],
 };

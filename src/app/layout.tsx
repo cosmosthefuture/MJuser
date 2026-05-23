@@ -6,11 +6,17 @@ import LayoutWrapper from "@/components/LayoutWrapper";
 import PwaRegister from "./PwaRegister";
 // import Footer from "@/components/Footer";
 
+export const viewport = {
+  themeColor: "#0b0b0f",
+};
+
 export const metadata: Metadata = {
   title: "Play & Go",
   description: "Play games online",
   manifest: "/manifest.webmanifest",
-  themeColor: "#0b0b0f",
+  other: {
+    google: "notranslate",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
@@ -31,8 +37,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className="antialiased">
+    <html lang="en" suppressHydrationWarning translate="no">
+      <body className="antialiased" suppressHydrationWarning>
         <ReduxProvider>
           <LayoutWrapper>
             <PwaRegister />
