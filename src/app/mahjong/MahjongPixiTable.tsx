@@ -811,11 +811,11 @@ export default function MahjongPixiTable({
                 <pixiGraphics
                   draw={(g) => {
                     g.clear();
-                    g.beginFill(0x000000, 0.55);
-                    g.drawRoundedRect(-220, -34, 440, 68, 18);
+                    // Match the green glassy button style from the reference image
+                    g.beginFill(0x064e3b, 0.8);
+                    g.lineStyle(1.5, 0x1d7b49, 0.6);
+                    g.drawRoundedRect(-220, -34, 440, 68, 34); // pill shape
                     g.endFill();
-                    g.lineStyle(2, 0xf6e3b4, 0.22);
-                    g.drawRoundedRect(-220, -34, 440, 68, 18);
                   }}
                 />
                 <pixiText

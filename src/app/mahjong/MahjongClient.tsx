@@ -1789,6 +1789,11 @@ export default function MahjongClient() {
     router.back();
   };
 
+  const actionButtonClass =
+    "rounded-full border border-[#1d7b49]/60 bg-[#064e3b]/80 px-4 py-2 text-xs font-semibold text-white shadow-[0_8px_32px_rgba(0,0,0,0.3)] backdrop-blur-md hover:bg-[#064e3b] transition-all";
+  const iconButtonClass =
+    "rounded-full border border-[#1d7b49]/60 bg-[#064e3b]/80 p-2 text-white shadow-[0_8px_32px_rgba(0,0,0,0.3)] backdrop-blur-md hover:bg-[#064e3b] transition-all";
+
   return (
     <div className="fixed inset-0 overflow-hidden bg-[#00251b] text-amber-100">
       <div
@@ -1809,7 +1814,7 @@ export default function MahjongClient() {
                 <button
                   type="button"
                   onClick={handleBack}
-                  className="rounded-full bg-black/40 p-2 hover:bg-black/60"
+                  className={iconButtonClass}
                   aria-label="Back"
                 >
                   <ArrowLeft size={18} />
@@ -1869,7 +1874,7 @@ export default function MahjongClient() {
               <button
                 type="button"
                 onClick={handleBack}
-                className="rounded-full bg-black/40 p-2 hover:bg-black/60"
+                className={iconButtonClass}
                 aria-label="Back"
               >
                 <ArrowLeft size={18} />
@@ -1958,7 +1963,7 @@ export default function MahjongClient() {
                   <button
                     type="button"
                     onClick={emitSortHand}
-                    className="rounded-full border border-amber-100/15 bg-black/45 px-4 py-2 text-xs font-semibold text-amber-100 shadow-[0_20px_60px_rgba(0,0,0,0.45)] backdrop-blur-sm hover:bg-black/60"
+                    className={actionButtonClass}
                   >
                     理牌
                   </button>
@@ -1969,7 +1974,7 @@ export default function MahjongClient() {
                 <button
                   type="button"
                   onClick={emitSortHand}
-                  className="rounded-full border border-amber-100/15 bg-black/45 px-4 py-2 text-xs font-semibold text-amber-100 shadow-[0_20px_60px_rgba(0,0,0,0.45)] backdrop-blur-sm hover:bg-black/60"
+                  className={actionButtonClass}
                 >
                   理牌
                 </button>
@@ -1995,7 +2000,7 @@ export default function MahjongClient() {
                       }}
                     >
                       <div
-                        className={`rounded-[18px] bg-black/35 shadow-[0_22px_70px_rgba(0,0,0,0.45)] backdrop-blur-sm ring-1 ring-amber-100/10 ${
+                        className={`rounded-[18px] border border-[#1d7b49]/60 bg-[#064e3b]/85 shadow-[0_22px_70px_rgba(0,0,0,0.45)] backdrop-blur-md ${
                           isMobileUi ? "px-3 py-2" : "px-4 py-3"
                         }`}
                       >
@@ -2087,7 +2092,7 @@ export default function MahjongClient() {
                       position: "bottom" | "right" | "top" | "left";
                     }) => {
                       const base =
-                        "absolute flex items-center gap-1.5 rounded-full border border-amber-100/20 bg-black/40 px-2 py-1 text-[10px] text-amber-100 shadow-[0_12px_30px_rgba(0,0,0,0.35)] backdrop-blur-sm";
+                        "absolute flex items-center gap-1.5 rounded-full border border-[#1d7b49]/60 bg-[#064e3b]/80 px-2 py-1 text-[10px] text-white shadow-[0_8px_32px_rgba(0,0,0,0.3)] backdrop-blur-md";
                       const pos =
                         position === "bottom"
                           ? `${isMobileUi ? "right-5 bottom-[80px]" : "right-32 bottom-[140px]"}`
@@ -2196,7 +2201,7 @@ export default function MahjongClient() {
                         transform: "translate(-50%, -50%) translateY(-70px)",
                       }}
                     >
-                      <div className="rounded-[18px] bg-black/35 px-4 py-3 shadow-[0_22px_70px_rgba(0,0,0,0.45)] backdrop-blur-sm ring-1 ring-amber-100/10">
+                      <div className="rounded-[18px] border border-[#1d7b49]/60 bg-[#064e3b]/85 px-4 py-3 shadow-[0_22px_70px_rgba(0,0,0,0.45)] backdrop-blur-md">
                         <div className="flex items-center gap-6">
                           <Dice3D
                             face={diceFaces?.[0] ?? 1}
@@ -2280,7 +2285,7 @@ export default function MahjongClient() {
                     position: "bottom" | "right" | "top" | "left";
                   }) => {
                     const base =
-                      "absolute flex items-center gap-1.5 rounded-full border border-amber-100/20 bg-black/40 px-2 py-1 text-[10px] text-amber-100 shadow-[0_12px_30px_rgba(0,0,0,0.35)] backdrop-blur-sm";
+                      "absolute flex items-center gap-1.5 rounded-full border border-[#1d7b49]/60 bg-[#064e3b]/80 px-2 py-1 text-[10px] text-white shadow-[0_8px_32px_rgba(0,0,0,0.3)] backdrop-blur-md";
                     const pos =
                       position === "bottom"
                         ? `${isMobileUi ? "right-2 bottom-[100px]" : "right-32 bottom-[140px]"}`
@@ -2460,7 +2465,7 @@ export default function MahjongClient() {
                   }
                 >
                   <div
-                    className={`pointer-events-auto flex items-center gap-3 rounded-2xl border border-amber-100/15 bg-black/55 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-sm ${
+                    className={`pointer-events-auto flex items-center gap-3 rounded-2xl border border-[#1d7b49]/60 bg-[#064e3b]/85 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-md ${
                       isMobileUi ? "px-3 py-2" : "px-4 py-3"
                     }`}
                   >
@@ -2497,7 +2502,7 @@ export default function MahjongClient() {
                                 }
                                 setKongDecision(null);
                               }}
-                              className="rounded-full bg-amber-100/90 px-4 py-2 text-xs font-semibold text-[#3b0500] hover:bg-amber-100"
+                              className={actionButtonClass}
                             >
                               接受
                             </button>
@@ -2513,7 +2518,7 @@ export default function MahjongClient() {
                                 }
                                 setKongDecision(null);
                               }}
-                              className="rounded-full border border-amber-100/15 bg-black/40 px-4 py-2 text-xs font-semibold text-amber-100 hover:bg-black/60"
+                              className={actionButtonClass}
                             >
                               跳过
                             </button>
@@ -2547,7 +2552,7 @@ export default function MahjongClient() {
                   }
                 >
                   <div
-                    className={`pointer-events-auto flex items-center gap-3 rounded-2xl border border-amber-100/15 bg-black/55 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-sm ${
+                    className={`pointer-events-auto flex items-center gap-3 rounded-2xl border border-[#1d7b49]/60 bg-[#064e3b]/85 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-md ${
                       isMobileUi ? "px-3 py-2" : "px-4 py-3"
                     }`}
                   >
@@ -2580,7 +2585,7 @@ export default function MahjongClient() {
                                 }
                                 setPongDecision(null);
                               }}
-                              className="rounded-full bg-amber-100/90 px-4 py-2 text-xs font-semibold text-[#3b0500] hover:bg-amber-100"
+                              className={actionButtonClass}
                             >
                               接受
                             </button>
@@ -2592,7 +2597,7 @@ export default function MahjongClient() {
                                 }
                                 setPongDecision(null);
                               }}
-                              className="rounded-full border border-amber-100/15 bg-black/40 px-4 py-2 text-xs font-semibold text-amber-100 hover:bg-black/60"
+                              className={actionButtonClass}
                             >
                               跳过
                             </button>
@@ -2626,7 +2631,7 @@ export default function MahjongClient() {
                   }
                 >
                   <div
-                    className={`pointer-events-auto flex items-center gap-3 rounded-2xl border border-amber-100/15 bg-black/55 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-sm ${
+                    className={`pointer-events-auto flex items-center gap-3 rounded-2xl border border-[#1d7b49]/60 bg-[#064e3b]/85 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-md ${
                       isMobileUi ? "px-3 py-2" : "px-4 py-3"
                     }`}
                   >
@@ -2655,7 +2660,7 @@ export default function MahjongClient() {
                               emitAcceptNormalChow(g.chowKey);
                               setChowDecision(null);
                             }}
-                            className="rounded-full bg-amber-100/90 px-4 py-2 text-xs font-semibold text-[#3b0500] hover:bg-amber-100"
+                            className={actionButtonClass}
                           >
                             接受
                           </button>
@@ -2668,7 +2673,7 @@ export default function MahjongClient() {
                         emitPassNormalChow();
                         setChowDecision(null);
                       }}
-                      className="rounded-full border border-amber-100/15 bg-black/40 px-4 py-2 text-xs font-semibold text-amber-100 hover:bg-black/60"
+                      className={actionButtonClass}
                     >
                       跳过
                     </button>
