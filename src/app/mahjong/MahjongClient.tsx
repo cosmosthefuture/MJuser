@@ -2450,7 +2450,7 @@ export default function MahjongClient() {
           {kongDecision ? (
             <div className="pointer-events-none absolute inset-0 z-30">
               <div
-                className={`pointer-events-none absolute flex items-center gap-3 ${
+                className={`pointer-events-none absolute flex items-center justify-center gap-3 ${
                   isPortraitPhone
                     ? "left-1/2 top-1/2"
                     : "left-1/2 bottom-[118px] -translate-x-1/2"
@@ -2537,7 +2537,7 @@ export default function MahjongClient() {
           {pongDecision ? (
             <div className="pointer-events-none absolute inset-0 z-30">
               <div
-                className={`pointer-events-none absolute flex items-center gap-3 ${
+                className={`pointer-events-none absolute flex items-center justify-center gap-3 ${
                   isPortraitPhone
                     ? "left-1/2 top-1/2"
                     : "left-1/2 bottom-[118px] -translate-x-1/2"
@@ -2616,7 +2616,7 @@ export default function MahjongClient() {
           {chowDecision ? (
             <div className="pointer-events-none absolute inset-0 z-30">
               <div
-                className={`pointer-events-none absolute flex items-center gap-3 ${
+                className={`pointer-events-none absolute flex items-center justify-center gap-3 ${
                   isPortraitPhone
                     ? "left-1/2 top-1/2"
                     : "left-1/2 bottom-[118px] -translate-x-1/2"
