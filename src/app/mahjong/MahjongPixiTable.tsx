@@ -186,11 +186,11 @@ export default function MahjongPixiTable({
 
   const wallThickness = 44;
 
-  const tileW = 58;
-  const tileH = 80;
-  const gap = 6;
+  const tileW = 80;
+  const tileH = 110;
+  const gap = 0;
 
-  const rackH = 110;
+  const rackH = 140;
   const rackY = designHeight - rackH - 18;
   const rackX = tableX - 18;
   const rackW = tableW + 36;
@@ -300,7 +300,7 @@ export default function MahjongPixiTable({
   // Keep the auth user's hand left-aligned in the rack.
   const handStartX = Math.max(24, rackX + 36);
 
-  const meldGroupGap = 18;
+  const meldGroupGap = 10;
   const meldsWidth = useMemo(() => {
     if (!melds || melds.length === 0) return 0;
     let total = 0;
@@ -320,17 +320,17 @@ export default function MahjongPixiTable({
   );
 
   const discardCols = 10;
-  const discardGap = 6;
-  const discardTileW = 44;
-  const discardTileH = 60;
+  const discardGap = 2;
+  const discardTileW = 56;
+  const discardTileH = 76;
   const discardTotalW =
     discardCols * discardTileW + (discardCols - 1) * discardGap;
   const discardStartX = Math.floor(designWidth / 2 - discardTotalW / 2);
-  const discardStartY = Math.floor(tableY + tableH / 2 - 140);
+  const discardStartY = Math.floor(tableY + tableH / 2 - 170);
 
-  const opponentSmallTileW = 28;
-  const opponentSmallTileH = 40;
-  const opponentSmallGap = 3;
+  const opponentSmallTileW = 36;
+  const opponentSmallTileH = 50;
+  const opponentSmallGap = 1;
 
   return (
     <div ref={containerRef} className="w-full h-full">
@@ -459,10 +459,10 @@ export default function MahjongPixiTable({
                 {rightDiscardTiles.length > 0
                   ? (() => {
                       const rowsPerCol = 5;
-                      const tileW = 28;
-                      const tileH = 40;
-                      const tileGapX = 10;
-                      const tileGapY = -8;
+                      const tileW = 36;
+                      const tileH = 50;
+                      const tileGapX = 4;
+                      const tileGapY = -12;
                       const pad = 10;
 
                       const cx = Math.floor(designWidth / 2);
@@ -499,10 +499,10 @@ export default function MahjongPixiTable({
                                 {tex ? (
                                   <pixiSprite
                                     texture={tex}
-                                    x={-tileW / 2 + 3}
-                                    y={-tileH / 2 + 4}
-                                    width={tileW - 3 - 6}
-                                    height={tileH - 3 - 8}
+                                    x={-tileW / 2 + 5}
+                                    y={-tileH / 2 + 6}
+                                    width={tileW - 10}
+                                    height={tileH - 12}
                                   />
                                 ) : null}
                               </pixiContainer>
@@ -516,9 +516,9 @@ export default function MahjongPixiTable({
                 {topDiscardTiles.length > 0
                   ? (() => {
                       const cols = 5;
-                      const tileW = 28;
-                      const tileH = 40;
-                      const tileGap = 4;
+                      const tileW = 36;
+                      const tileH = 50;
+                      const tileGap = 2;
                       const orderedTopDiscards = [...topDiscardTiles].reverse();
                       const rows = Math.ceil(orderedTopDiscards.length / cols);
                       const contentW =
@@ -560,10 +560,10 @@ export default function MahjongPixiTable({
                                 {tex ? (
                                   <pixiSprite
                                     texture={tex}
-                                    x={3}
-                                    y={4}
-                                    width={tileW - 3 - 6}
-                                    height={tileH - 3 - 8}
+                                    x={5}
+                                    y={6}
+                                    width={tileW - 10}
+                                    height={tileH - 12}
                                   />
                                 ) : null}
                               </pixiContainer>
@@ -577,10 +577,10 @@ export default function MahjongPixiTable({
                 {leftDiscardTiles.length > 0
                   ? (() => {
                       const rowsPerCol = 5;
-                      const tileW = 28;
-                      const tileH = 40;
-                      const tileGapX = 10;
-                      const tileGapY = -8;
+                      const tileW = 36;
+                      const tileH = 50;
+                      const tileGapX = 4;
+                      const tileGapY = -12;
                       const pad = 10;
 
                       const cx = Math.floor(designWidth / 2);
@@ -617,10 +617,10 @@ export default function MahjongPixiTable({
                                 {tex ? (
                                   <pixiSprite
                                     texture={tex}
-                                    x={-tileW / 2 + 3}
-                                    y={-tileH / 2 + 4}
-                                    width={tileW - 3 - 6}
-                                    height={tileH - 3 - 8}
+                                    x={-tileW / 2 + 5}
+                                    y={-tileH / 2 + 6}
+                                    width={tileW - 10}
+                                    height={tileH - 12}
                                   />
                                 ) : null}
                               </pixiContainer>
@@ -634,9 +634,9 @@ export default function MahjongPixiTable({
                 {selfDiscardTiles.length > 0
                   ? (() => {
                       const cols = 5;
-                      const tileW = 28;
-                      const tileH = 40;
-                      const tileGap = 3;
+                      const tileW = 36;
+                      const tileH = 50;
+                      const tileGap = 2;
                       const contentW = cols * tileW + (cols - 1) * tileGap;
 
                       const cx = Math.floor(designWidth / 2);
@@ -672,10 +672,10 @@ export default function MahjongPixiTable({
                                 {tex ? (
                                   <pixiSprite
                                     texture={tex}
-                                    x={3}
-                                    y={4}
-                                    width={tileW - 3 - 6}
-                                    height={tileH - 3 - 8}
+                                    x={5}
+                                    y={6}
+                                    width={tileW - 10}
+                                    height={tileH - 12}
                                   />
                                 ) : null}
                               </pixiContainer>
@@ -696,22 +696,22 @@ export default function MahjongPixiTable({
                       const cx = Math.floor(designWidth / 2);
                       const cy = Math.floor(tableY + tableH / 2);
                       return (
-                        <pixiContainer x={cx - 23} y={cy - 28}>
+                        <pixiContainer x={cx - 26} y={cy - 31}>
                           {tileBgTex && (
                             <pixiSprite
                               texture={tileBgTex}
                               x={0}
                               y={0}
-                              width={46}
-                              height={64}
+                              width={52}
+                              height={72}
                             />
                           )}
                           <pixiSprite
                             texture={tex}
-                            x={4}
-                            y={5}
-                            width={46 - 4 - 8}
-                            height={64 - 4 - 10}
+                            x={8}
+                            y={10}
+                            width={52 - 16}
+                            height={72 - 20}
                           />
                         </pixiContainer>
                       );
@@ -774,10 +774,10 @@ export default function MahjongPixiTable({
                   {tex ? (
                     <pixiSprite
                       texture={tex}
-                      x={3}
-                      y={4}
-                      width={discardTileW - 3 - 6}
-                      height={discardTileH - 3 - 8}
+                      x={8}
+                      y={10}
+                      width={discardTileW - 16}
+                      height={discardTileH - 20}
                     />
                   ) : null}
                 </pixiContainer>
@@ -796,8 +796,8 @@ export default function MahjongPixiTable({
                 const showBottom = false;
 
                 const topCount = counts.top ?? 7;
-                const smallW = 26;
-                const smallH = 34;
+                const smallW = 34;
+                const smallH = 48;
                 const topStartX = Math.floor(
                   designWidth / 2 -
                     (topCount * smallW + (topCount - 1) * 2) / 2,
@@ -940,8 +940,8 @@ export default function MahjongPixiTable({
               const leftGroups = orderedMeldGroups("left");
               const rightGroups = orderedMeldGroups("right");
 
-              const smallW = 26;
-              const smallH = 34;
+              const smallW = 34;
+              const smallH = 48;
               const topY = tableY + 18;
 
               const topCount = counts.top ?? 7;
@@ -986,10 +986,10 @@ export default function MahjongPixiTable({
                     {tex ? (
                       <pixiSprite
                         texture={tex}
-                        x={-w / 2 + 4}
-                        y={-h / 2 + 5}
-                        width={w - 4 - 8}
-                        height={h - 4 - 10}
+                        x={-w / 2 + 6}
+                        y={-h / 2 + 8}
+                        width={w - 12}
+                        height={h - 16}
                       />
                     ) : null}
                   </pixiContainer>
@@ -998,7 +998,7 @@ export default function MahjongPixiTable({
 
               const out: Array<unknown> = [];
 
-              const groupGap = 3;
+              const groupGap = 1;
 
               if (showTop && topGroups.length > 0) {
                 const startX =
@@ -1121,10 +1121,10 @@ export default function MahjongPixiTable({
                   {tex ? (
                     <pixiSprite
                       texture={tex}
-                      x={4}
-                      y={5}
-                      width={tileW - 4 - 8}
-                      height={tileH - 4 - 10}
+                      x={10}
+                      y={12}
+                      width={tileW - 20}
+                      height={tileH - 24}
                     />
                   ) : null}
                 </pixiContainer>
@@ -1166,10 +1166,10 @@ export default function MahjongPixiTable({
                         {tex ? (
                           <pixiSprite
                             texture={tex}
-                            x={4}
-                            y={5}
-                            width={tileW - 4 - 8}
-                            height={tileH - 4 - 10}
+                            x={10}
+                            y={12}
+                            width={tileW - 20}
+                            height={tileH - 24}
                           />
                         ) : null}
                       </pixiContainer>

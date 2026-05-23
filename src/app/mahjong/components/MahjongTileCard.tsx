@@ -18,10 +18,10 @@ export default function MahjongTileCard({
 }) {
   const dims =
     size === "xs"
-      ? { tileW: 40, tileH: 56 }
+      ? { tileW: 52, tileH: 72 }
       : size === "sm"
-        ? { tileW: 46, tileH: 64 }
-        : { tileW: 58, tileH: 80 };
+      ? { tileW: 64, tileH: 88 }
+      : { tileW: 80, tileH: 110 };
 
   const src = tileImageSrc(tile);
 
@@ -40,18 +40,18 @@ export default function MahjongTileCard({
       <div
         className="absolute overflow-hidden"
         style={{
-          left: 4,
-          top: 5,
-          width: dims.tileW - 8,
-          height: dims.tileH - 10,
+          left: 10,
+          top: 12,
+          width: dims.tileW - 20,
+          height: dims.tileH - 24,
           borderRadius: 4,
         }}
       >
         <Image
           src={src}
           alt={`${tile.suit}-${tile.rank}`}
-          width={dims.tileW - 8}
-          height={dims.tileH - 10}
+          width={dims.tileW - 20}
+          height={dims.tileH - 24}
           className="h-full w-full object-contain"
         />
       </div>
