@@ -518,7 +518,7 @@ export default function MahjongPixiTable({
                       } = tileStyle.mini;
                       const tileW = w;
                       const tileH = h;
-                      const tileGapX = 4;
+                      const tileGapX = 10;
                       const tileGapY = -8;
                       const pad = 10;
 
@@ -652,7 +652,7 @@ export default function MahjongPixiTable({
                       } = tileStyle.mini;
                       const tileW = w;
                       const tileH = h;
-                      const tileGapX = 4;
+                      const tileGapX = 10;
                       const tileGapY = -12;
                       const pad = 10;
 
