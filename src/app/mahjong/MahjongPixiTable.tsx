@@ -25,7 +25,6 @@ type Props = {
   rightDiscardTiles?: MahjongTile[];
   topDiscardTiles?: MahjongTile[];
   leftDiscardTiles?: MahjongTile[];
-  highlightDiscard: boolean;
   centerMessage?: string | null;
   showDrawPile?: boolean;
   drawPileCount?: number | null;
@@ -58,62 +57,6 @@ function tileSpriteFileName(t: MahjongTile): string {
   return `bamboo${t.rank}.png`;
 }
 
-function drawMahjongBlock(
-  g: Graphics,
-  opts: {
-    width: number;
-    height: number;
-    depthX: number;
-    depthY: number;
-    faceColor: number;
-    borderColor: number;
-  },
-) {
-  const { width, height, depthX, depthY, faceColor, borderColor } = opts;
-  const faceW = width - depthX;
-  const faceH = height - depthY;
-  const splitX = Math.max(1, depthX / 2);
-  const splitY = Math.max(1, depthY / 2);
-  const radius = 5;
-
-  g.clear();
-
-  // Rounded soft shadow following the outer green layer shape.
-  g.beginFill(0x000000, 0.12);
-  g.drawRoundedRect(depthX + 1, depthY + 2, faceW, faceH, radius + 1);
-  g.endFill();
-  g.beginFill(0x000000, 0.05);
-  g.drawRoundedRect(depthX + 2, depthY + 3, faceW - 2, faceH - 2, radius);
-  g.endFill();
-
-  // 2cm thickness as stacked rounded layers:
-  // first 1cm (near face) = gray, second 1cm (outer) = green.
-  g.beginFill(0xc4ccd8, 0.98);
-  g.drawRoundedRect(splitX, splitY, faceW, faceH, radius);
-  g.endFill();
-
-  g.beginFill(0x29a74e, 0.98);
-  g.drawRoundedRect(depthX, depthY, faceW, faceH, radius);
-  g.endFill();
-
-  // Tile face
-  g.beginFill(faceColor);
-  g.drawRoundedRect(0, 0, faceW, faceH, radius);
-  g.endFill();
-
-  // Face frame
-  g.lineStyle(1, borderColor, 0.92);
-  g.drawRoundedRect(0, 0, faceW, faceH, radius);
-  g.lineStyle(1, 0xffffff, 0.2);
-  g.drawRoundedRect(1.5, 1.5, faceW - 3, faceH - 3, radius - 1);
-
-  // Subtle front image frame.
-  g.lineStyle(1, 0xb8bec8, 0.52);
-  g.drawRoundedRect(4, 6, faceW - 8, faceH - 12, Math.max(2, radius - 3));
-  g.lineStyle(1, 0xffffff, 0.18);
-  g.drawRoundedRect(5, 7, faceW - 10, faceH - 14, Math.max(1, radius - 4));
-}
-
 export default function MahjongPixiTable({
   hand,
   melds = [],
@@ -122,7 +65,6 @@ export default function MahjongPixiTable({
   rightDiscardTiles = [],
   topDiscardTiles = [],
   leftDiscardTiles = [],
-  highlightDiscard,
   centerMessage = null,
   showDrawPile = false,
   drawPileCount = null,
@@ -136,6 +78,7 @@ export default function MahjongPixiTable({
   const designWidth = 1200;
   const designHeight = 720;
   const boardBackgroundPath = "/images/mj-bg.webp";
+  const tileBackgroundPath = "/images/mj-tile-bg.webp";
   const getDevicePixelRatio = () => {
     if (typeof window === "undefined") return 1;
     return Math.min(3, Math.max(1, window.devicePixelRatio || 1));
@@ -310,9 +253,11 @@ export default function MahjongPixiTable({
     if (typeof window === "undefined") return;
 
     let cancelled = false;
-    const missing = [boardBackgroundPath, ...neededSpritePaths].filter(
-      (p) => !textures[p],
-    );
+    const missing = [
+      boardBackgroundPath,
+      tileBackgroundPath,
+      ...neededSpritePaths,
+    ].filter((p) => !textures[p]);
     if (missing.length === 0) return;
 
     (async () => {
@@ -334,9 +279,10 @@ export default function MahjongPixiTable({
     return () => {
       cancelled = true;
     };
-  }, [boardBackgroundPath, neededSpritePaths, textures]);
+  }, [boardBackgroundPath, tileBackgroundPath, neededSpritePaths, textures]);
 
   const boardBackground = textures[boardBackgroundPath];
+  const tileBgTex = textures[tileBackgroundPath];
   const boardBackgroundPlacement = useMemo(() => {
     if (!boardBackground) return null;
     const w = Math.max(1, boardBackground.width);
@@ -377,8 +323,6 @@ export default function MahjongPixiTable({
   const discardGap = 6;
   const discardTileW = 44;
   const discardTileH = 60;
-  const discardDepthX = 3;
-  const discardDepthY = 3;
   const discardTotalW =
     discardCols * discardTileW + (discardCols - 1) * discardGap;
   const discardStartX = Math.floor(designWidth / 2 - discardTotalW / 2);
@@ -519,8 +463,6 @@ export default function MahjongPixiTable({
                       const tileH = 40;
                       const tileGapX = 10;
                       const tileGapY = -8;
-                      const depthX = 3;
-                      const depthY = 3;
                       const pad = 10;
 
                       const cx = Math.floor(designWidth / 2);
@@ -545,27 +487,22 @@ export default function MahjongPixiTable({
                                 y={y + tileH / 2}
                                 rotation={-Math.PI / 2}
                               >
-                                <pixiGraphics
-                                  x={-tileW / 2}
-                                  y={-tileH / 2}
-                                  draw={(g) => {
-                                    drawMahjongBlock(g, {
-                                      width: tileW,
-                                      height: tileH,
-                                      depthX,
-                                      depthY,
-                                      faceColor: 0xe7e8eb,
-                                      borderColor: 0xb8bcc3,
-                                    });
-                                  }}
-                                />
+                                {tileBgTex && (
+                                  <pixiSprite
+                                    texture={tileBgTex}
+                                    x={-tileW / 2}
+                                    y={-tileH / 2}
+                                    width={tileW}
+                                    height={tileH}
+                                  />
+                                )}
                                 {tex ? (
                                   <pixiSprite
                                     texture={tex}
                                     x={-tileW / 2 + 3}
                                     y={-tileH / 2 + 4}
-                                    width={tileW - depthX - 6}
-                                    height={tileH - depthY - 8}
+                                    width={tileW - 3 - 6}
+                                    height={tileH - 3 - 8}
                                   />
                                 ) : null}
                               </pixiContainer>
@@ -582,8 +519,6 @@ export default function MahjongPixiTable({
                       const tileW = 28;
                       const tileH = 40;
                       const tileGap = 4;
-                      const depthX = 3;
-                      const depthY = 3;
                       const orderedTopDiscards = [...topDiscardTiles].reverse();
                       const rows = Math.ceil(orderedTopDiscards.length / cols);
                       const contentW =
@@ -613,25 +548,22 @@ export default function MahjongPixiTable({
                                 x={x}
                                 y={y}
                               >
-                                <pixiGraphics
-                                  draw={(g) => {
-                                    drawMahjongBlock(g, {
-                                      width: tileW,
-                                      height: tileH,
-                                      depthX,
-                                      depthY,
-                                      faceColor: 0xe7e8eb,
-                                      borderColor: 0xb8bcc3,
-                                    });
-                                  }}
-                                />
+                                {tileBgTex && (
+                                  <pixiSprite
+                                    texture={tileBgTex}
+                                    x={0}
+                                    y={0}
+                                    width={tileW}
+                                    height={tileH}
+                                  />
+                                )}
                                 {tex ? (
                                   <pixiSprite
                                     texture={tex}
                                     x={3}
                                     y={4}
-                                    width={tileW - depthX - 6}
-                                    height={tileH - depthY - 8}
+                                    width={tileW - 3 - 6}
+                                    height={tileH - 3 - 8}
                                   />
                                 ) : null}
                               </pixiContainer>
@@ -649,8 +581,6 @@ export default function MahjongPixiTable({
                       const tileH = 40;
                       const tileGapX = 10;
                       const tileGapY = -8;
-                      const depthX = 3;
-                      const depthY = 3;
                       const pad = 10;
 
                       const cx = Math.floor(designWidth / 2);
@@ -675,27 +605,22 @@ export default function MahjongPixiTable({
                                 y={y + tileH / 2}
                                 rotation={Math.PI / 2}
                               >
-                                <pixiGraphics
-                                  x={-tileW / 2}
-                                  y={-tileH / 2}
-                                  draw={(g) => {
-                                    drawMahjongBlock(g, {
-                                      width: tileW,
-                                      height: tileH,
-                                      depthX,
-                                      depthY,
-                                      faceColor: 0xe7e8eb,
-                                      borderColor: 0xb8bcc3,
-                                    });
-                                  }}
-                                />
+                                {tileBgTex && (
+                                  <pixiSprite
+                                    texture={tileBgTex}
+                                    x={-tileW / 2}
+                                    y={-tileH / 2}
+                                    width={tileW}
+                                    height={tileH}
+                                  />
+                                )}
                                 {tex ? (
                                   <pixiSprite
                                     texture={tex}
                                     x={-tileW / 2 + 3}
                                     y={-tileH / 2 + 4}
-                                    width={tileW - depthX - 6}
-                                    height={tileH - depthY - 8}
+                                    width={tileW - 3 - 6}
+                                    height={tileH - 3 - 8}
                                   />
                                 ) : null}
                               </pixiContainer>
@@ -712,8 +637,6 @@ export default function MahjongPixiTable({
                       const tileW = 28;
                       const tileH = 40;
                       const tileGap = 3;
-                      const depthX = 3;
-                      const depthY = 3;
                       const contentW = cols * tileW + (cols - 1) * tileGap;
 
                       const cx = Math.floor(designWidth / 2);
@@ -737,25 +660,22 @@ export default function MahjongPixiTable({
                                 x={x}
                                 y={y}
                               >
-                                <pixiGraphics
-                                  draw={(g) => {
-                                    drawMahjongBlock(g, {
-                                      width: tileW,
-                                      height: tileH,
-                                      depthX,
-                                      depthY,
-                                      faceColor: 0xe7e8eb,
-                                      borderColor: 0xb8bcc3,
-                                    });
-                                  }}
-                                />
+                                {tileBgTex && (
+                                  <pixiSprite
+                                    texture={tileBgTex}
+                                    x={0}
+                                    y={0}
+                                    width={tileW}
+                                    height={tileH}
+                                  />
+                                )}
                                 {tex ? (
                                   <pixiSprite
                                     texture={tex}
                                     x={3}
                                     y={4}
-                                    width={tileW - depthX - 6}
-                                    height={tileH - depthY - 8}
+                                    width={tileW - 3 - 6}
+                                    height={tileH - 3 - 8}
                                   />
                                 ) : null}
                               </pixiContainer>
@@ -777,18 +697,15 @@ export default function MahjongPixiTable({
                       const cy = Math.floor(tableY + tableH / 2);
                       return (
                         <pixiContainer x={cx - 23} y={cy - 28}>
-                          <pixiGraphics
-                            draw={(g) => {
-                              drawMahjongBlock(g, {
-                                width: 46,
-                                height: 64,
-                                depthX: 4,
-                                depthY: 4,
-                                faceColor: 0xe7e8eb,
-                                borderColor: 0xb8bcc3,
-                              });
-                            }}
-                          />
+                          {tileBgTex && (
+                            <pixiSprite
+                              texture={tileBgTex}
+                              x={0}
+                              y={0}
+                              width={46}
+                              height={64}
+                            />
+                          )}
                           <pixiSprite
                             texture={tex}
                             x={4}
@@ -845,25 +762,22 @@ export default function MahjongPixiTable({
 
               return (
                 <pixiContainer key={`d-${t.suit}-${t.rank}-${i}`} x={x} y={y}>
-                  <pixiGraphics
-                    draw={(g) => {
-                      drawMahjongBlock(g, {
-                        width: discardTileW,
-                        height: discardTileH,
-                        depthX: discardDepthX,
-                        depthY: discardDepthY,
-                        faceColor: 0xe7e8eb,
-                        borderColor: 0xb8bcc3,
-                      });
-                    }}
-                  />
+                  {tileBgTex && (
+                    <pixiSprite
+                      texture={tileBgTex}
+                      x={0}
+                      y={0}
+                      width={discardTileW}
+                      height={discardTileH}
+                    />
+                  )}
                   {tex ? (
                     <pixiSprite
                       texture={tex}
                       x={3}
                       y={4}
-                      width={discardTileW - discardDepthX - 6}
-                      height={discardTileH - discardDepthY - 8}
+                      width={discardTileW - 3 - 6}
+                      height={discardTileH - 3 - 8}
                     />
                   ) : null}
                 </pixiContainer>
@@ -1060,20 +974,15 @@ export default function MahjongPixiTable({
 
                 return (
                   <pixiContainer key={key} x={x} y={y} rotation={rotation}>
-                    <pixiGraphics
-                      x={-w / 2}
-                      y={-h / 2}
-                      draw={(g) => {
-                        drawMahjongBlock(g, {
-                          width: w,
-                          height: h,
-                          depthX: 4,
-                          depthY: 4,
-                          faceColor: 0xe7e8eb,
-                          borderColor: 0xb8bcc3,
-                        });
-                      }}
-                    />
+                    {tileBgTex && (
+                      <pixiSprite
+                        texture={tileBgTex}
+                        x={-w / 2}
+                        y={-h / 2}
+                        width={w}
+                        height={h}
+                      />
+                    )}
                     {tex ? (
                       <pixiSprite
                         texture={tex}
@@ -1176,8 +1085,6 @@ export default function MahjongPixiTable({
               const baseY = rackY + 16;
               const isHovered = hoveredHandIdx === idx;
               const y = baseY + (isHovered ? -10 : 0);
-              const handDepthX = 4;
-              const handDepthY = 4;
 
               const spritePath = `${tileSpriteBasePath}/${tileSpriteFileName(t)}`;
               const tex = textures[spritePath];
@@ -1201,26 +1108,23 @@ export default function MahjongPixiTable({
                     setHoveredHandIdx((prev) => (prev === idx ? null : prev))
                   }
                 >
-                  <pixiGraphics
-                    draw={(g) => {
-                      drawMahjongBlock(g, {
-                        width: tileW,
-                        height: tileH,
-                        depthX: handDepthX,
-                        depthY: handDepthY,
-                        faceColor: 0xe7e8eb,
-                        borderColor: highlightDiscard ? 0xea2121 : 0xb8bcc3,
-                      });
-                    }}
-                  />
+                  {tileBgTex && (
+                    <pixiSprite
+                      texture={tileBgTex}
+                      x={0}
+                      y={0}
+                      width={tileW}
+                      height={tileH}
+                    />
+                  )}
 
                   {tex ? (
                     <pixiSprite
                       texture={tex}
                       x={4}
                       y={5}
-                      width={tileW - handDepthX - 8}
-                      height={tileH - handDepthY - 10}
+                      width={tileW - 4 - 8}
+                      height={tileH - 4 - 10}
                     />
                   ) : null}
                 </pixiContainer>
@@ -1231,8 +1135,6 @@ export default function MahjongPixiTable({
               if (!melds || melds.length === 0) return null;
               let cursorX = meldsStartX;
               const baseY = rackY + 16;
-              const meldDepthX = 4;
-              const meldDepthY = 4;
 
               return melds
                 .filter((m) => Array.isArray(m.tiles) && m.tiles.length > 0)
@@ -1251,26 +1153,23 @@ export default function MahjongPixiTable({
                         y={baseY}
                         eventMode="none"
                       >
-                        <pixiGraphics
-                          draw={(g) => {
-                            drawMahjongBlock(g, {
-                              width: tileW,
-                              height: tileH,
-                              depthX: meldDepthX,
-                              depthY: meldDepthY,
-                              faceColor: 0xe7e8eb,
-                              borderColor: 0xb8bcc3,
-                            });
-                          }}
-                        />
+                        {tileBgTex && (
+                          <pixiSprite
+                            texture={tileBgTex}
+                            x={0}
+                            y={0}
+                            width={tileW}
+                            height={tileH}
+                          />
+                        )}
 
                         {tex ? (
                           <pixiSprite
                             texture={tex}
                             x={4}
                             y={5}
-                            width={tileW - meldDepthX - 8}
-                            height={tileH - meldDepthY - 10}
+                            width={tileW - 4 - 8}
+                            height={tileH - 4 - 10}
                           />
                         ) : null}
                       </pixiContainer>
