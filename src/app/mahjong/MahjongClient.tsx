@@ -1803,7 +1803,10 @@ export default function MahjongClient() {
         style={stageStyle}
       >
         <div className="relative h-full w-full overflow-hidden">
-          <div className="absolute inset-0 bg-[#00251b]" />
+          <div 
+            className="absolute inset-0 bg-[#00251b] bg-cover bg-center bg-no-repeat" 
+            style={{ backgroundImage: "url('/images/mj-bg.webp')" }}
+          />
 
           {isPortraitPhone ? (
             <div

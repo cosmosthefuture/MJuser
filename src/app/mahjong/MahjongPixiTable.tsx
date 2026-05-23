@@ -229,8 +229,6 @@ export default function MahjongPixiTable({
   const tableW = designWidth - tableMargin * 2;
   const tableH = designHeight - 170;
 
-  const wallThickness = 44;
-
   const tileW = tileStyle.main.w;
   const tileH = tileStyle.main.h;
   const gap = 0;
@@ -381,6 +379,17 @@ export default function MahjongPixiTable({
   const discardStartX = Math.floor(designWidth / 2 - discardTotalW / 2);
   const discardStartY = Math.floor(tableY + tableH / 2 - 140);
 
+  if (!boardBackground) {
+    return (
+      <div
+        ref={containerRef}
+        className="flex h-full w-full items-center justify-center bg-[#00251b]"
+      >
+        <div className="rounded-2xl  px-6 py-4 text-sm font-semibold text-amber-100 shadow-[0_22px_70px_rgba(0,0,0,0.45)] backdrop-blur-md"></div>
+      </div>
+    );
+  }
+
   return (
     <div ref={containerRef} className="w-full h-full">
       <Application
@@ -412,73 +421,6 @@ export default function MahjongPixiTable({
             <pixiGraphics
               draw={(g) => {
                 g.clear();
-                const felt = 0x1d7b49;
-                const wall = 0x0a6a3a;
-
-                const showTop = sides.size === 0 || sides.has("top");
-                const showLeft = sides.size === 0 || sides.has("left");
-                const showRight = sides.size === 0 || sides.has("right");
-                const showBottom = sides.size === 0 || sides.has("bottom");
-
-                if (!boardBackground) {
-                  if (showTop) {
-                    g.beginFill(wall, 1);
-                    g.drawRoundedRect(
-                      tableX + 24,
-                      tableY + 10,
-                      tableW - 48,
-                      wallThickness,
-                      8,
-                    );
-                    g.endFill();
-                  }
-
-                  if (showLeft) {
-                    g.beginFill(wall, 1);
-                    g.drawRoundedRect(
-                      tableX + 10,
-                      tableY + 24,
-                      wallThickness,
-                      tableH - 48,
-                      8,
-                    );
-                    g.endFill();
-                  }
-
-                  if (showRight) {
-                    g.beginFill(wall, 1);
-                    g.drawRoundedRect(
-                      tableX + tableW - wallThickness - 10,
-                      tableY + 24,
-                      wallThickness,
-                      tableH - 48,
-                      8,
-                    );
-                    g.endFill();
-                  }
-
-                  if (showBottom) {
-                    g.beginFill(wall, 1);
-                    g.drawRoundedRect(
-                      tableX + 24,
-                      tableY + tableH - wallThickness - 10,
-                      tableW - 48,
-                      wallThickness,
-                      8,
-                    );
-                    g.endFill();
-                  }
-
-                  g.beginFill(felt, 1);
-                  g.drawRoundedRect(
-                    tableX + 110,
-                    tableY + 110,
-                    tableW - 220,
-                    tableH - 220,
-                    14,
-                  );
-                  g.endFill();
-                }
               }}
             />
 
