@@ -1789,8 +1789,12 @@ export default function MahjongClient() {
     router.back();
   };
 
+  const acceptButtonClass =
+    "rounded-full border border-emerald-200/40 bg-emerald-500/20 px-4 py-2 text-xs font-semibold text-emerald-50 shadow-[0_8px_32px_rgba(0,0,0,0.3)] backdrop-blur-md hover:bg-emerald-500/30 transition-all";
+  const cancelButtonClass =
+    "rounded-full border border-rose-200/35 bg-rose-500/15 px-4 py-2 text-xs font-semibold text-rose-50 shadow-[0_8px_32px_rgba(0,0,0,0.3)] backdrop-blur-md hover:bg-rose-500/25 transition-all";
   const actionButtonClass =
-    "rounded-full border border-[#1d7b49]/60 bg-[#064e3b]/80 px-4 py-2 text-xs font-semibold text-white shadow-[0_8px_32px_rgba(0,0,0,0.3)] backdrop-blur-md hover:bg-[#064e3b] transition-all";
+    "rounded-full border border-amber-100/20 bg-black/35 px-4 py-2 text-xs font-semibold text-amber-50 shadow-[0_8px_32px_rgba(0,0,0,0.3)] backdrop-blur-md hover:bg-black/50 transition-all";
   const iconButtonClass =
     "rounded-full border border-[#1d7b49]/60 bg-[#064e3b]/80 p-2 text-white shadow-[0_8px_32px_rgba(0,0,0,0.3)] backdrop-blur-md hover:bg-[#064e3b] transition-all";
 
@@ -2504,7 +2508,7 @@ export default function MahjongClient() {
                                 }
                                 setKongDecision(null);
                               }}
-                              className={actionButtonClass}
+                              className={acceptButtonClass}
                             >
                               接受
                             </button>
@@ -2520,7 +2524,7 @@ export default function MahjongClient() {
                                 }
                                 setKongDecision(null);
                               }}
-                              className={actionButtonClass}
+                              className={cancelButtonClass}
                             >
                               跳过
                             </button>
@@ -2587,7 +2591,7 @@ export default function MahjongClient() {
                                 }
                                 setPongDecision(null);
                               }}
-                              className={actionButtonClass}
+                              className={acceptButtonClass}
                             >
                               接受
                             </button>
@@ -2599,7 +2603,7 @@ export default function MahjongClient() {
                                 }
                                 setPongDecision(null);
                               }}
-                              className={actionButtonClass}
+                              className={cancelButtonClass}
                             >
                               跳过
                             </button>
@@ -2662,7 +2666,7 @@ export default function MahjongClient() {
                               emitAcceptNormalChow(g.chowKey);
                               setChowDecision(null);
                             }}
-                            className={actionButtonClass}
+                            className={acceptButtonClass}
                           >
                             接受
                           </button>
@@ -2675,7 +2679,7 @@ export default function MahjongClient() {
                         emitPassNormalChow();
                         setChowDecision(null);
                       }}
-                      className={actionButtonClass}
+                      className={cancelButtonClass}
                     >
                       跳过
                     </button>
@@ -2805,8 +2809,10 @@ function WinnerRevealModal({
 }) {
   return (
     <div
-      className={`pointer-events-auto w-full rounded-2xl border border-amber-100/15 bg-black/75 shadow-[0_25px_80px_rgba(0,0,0,0.55)] backdrop-blur-sm ${
-        isMobileUi ? "max-w-[520px] p-3" : "max-w-[760px] p-5"
+      className={`pointer-events-auto rounded-2xl border border-amber-100/15 bg-black/75 shadow-[0_25px_80px_rgba(0,0,0,0.55)] backdrop-blur-sm ${
+        isMobileUi
+          ? "w-[92vw] max-w-[420px] p-2"
+          : "w-full max-w-[760px] p-5"
       }`}
     >
       <div
@@ -2819,7 +2825,7 @@ function WinnerRevealModal({
           {winnerReveal.resultLabel ? (
             <div
               className={`font-extrabold tracking-tight ${
-                isMobileUi ? "text-2xl" : "text-3xl"
+                isMobileUi ? "text-xl" : "text-3xl"
               } ${
                 winnerReveal.resultLabel === "You Win"
                   ? "text-emerald-200"
@@ -2847,13 +2853,13 @@ function WinnerRevealModal({
       </div>
 
       <div
-        className={`${isMobileUi ? "mt-3" : "mt-4"} flex flex-wrap gap-2 ${
-          isMobileUi ? "scale-[0.60] origin-top-left" : ""
+        className={`${isMobileUi ? "mt-3" : "mt-4"} flex flex-wrap justify-center ${
+          isMobileUi ? "gap-1.5" : "gap-2"
         }`}
       >
         {winnerReveal.tiles.map((t, idx) => (
           <div key={`${t.suit}-${t.rank}-${idx}`}>
-            <MahjongTileCard tile={t} />
+            <MahjongTileCard tile={t} size={isMobileUi ? "xs" : "md"} />
           </div>
         ))}
       </div>
@@ -2888,7 +2894,7 @@ function WinnerRevealModal({
                     <div
                       className={`mt-2 flex flex-wrap ${
                         isMobileUi ? "gap-3" : "gap-6"
-                      } ${isMobileUi ? "scale-[0.60] origin-left" : ""}`}
+                      }`}
                     >
                       {groups.map((g, gi) => (
                         <div key={`${kind}-${gi}`} className="flex gap-2">
@@ -2896,6 +2902,7 @@ function WinnerRevealModal({
                             <MahjongTileCard
                               key={`${kind}-${gi}-${tile.suit}-${tile.rank}-${ti}`}
                               tile={tile}
+                              size={isMobileUi ? "xs" : "md"}
                             />
                           ))}
                         </div>
