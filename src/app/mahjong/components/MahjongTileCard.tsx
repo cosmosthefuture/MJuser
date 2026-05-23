@@ -40,18 +40,18 @@ export default function MahjongTileCard({
       <div
         className="absolute overflow-hidden"
         style={{
-          left: 8,
-          top: 12,
-          width: dims.tileW - 16,
-          height: dims.tileH - 24,
+          left: 10,
+          top: 20,
+          width: dims.tileW - 20,
+          height: dims.tileH - 32,
           borderRadius: 4,
         }}
       >
         <Image
           src={src}
           alt={`${tile.suit}-${tile.rank}`}
-          width={dims.tileW - 16}
-          height={dims.tileH - 24}
+          width={dims.tileW - 20}
+          height={dims.tileH - 32}
           className="h-full w-full object-contain"
         />
       </div>

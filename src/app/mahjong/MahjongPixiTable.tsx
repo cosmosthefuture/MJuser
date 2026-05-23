@@ -499,10 +499,10 @@ export default function MahjongPixiTable({
                                 {tex ? (
                                   <pixiSprite
                                     texture={tex}
-                                    x={-tileW / 2 + 4}
-                                    y={-tileH / 2 + 5}
-                                    width={tileW - 8}
-                                    height={tileH - 10}
+                                    x={-tileW / 2 + 6}
+                                    y={-tileH / 2 + 13}
+                                    width={tileW - 12}
+                                    height={tileH - 20}
                                   />
                                 ) : null}
                               </pixiContainer>
@@ -560,10 +560,10 @@ export default function MahjongPixiTable({
                                 {tex ? (
                                   <pixiSprite
                                     texture={tex}
-                                    x={4}
-                                    y={5}
-                                    width={tileW - 8}
-                                    height={tileH - 10}
+                                    x={6}
+                                    y={13}
+                                    width={tileW - 12}
+                                    height={tileH - 20}
                                   />
                                 ) : null}
                               </pixiContainer>
@@ -617,10 +617,10 @@ export default function MahjongPixiTable({
                                 {tex ? (
                                   <pixiSprite
                                     texture={tex}
-                                    x={-tileW / 2 + 4}
-                                    y={-tileH / 2 + 5}
-                                    width={tileW - 8}
-                                    height={tileH - 10}
+                                    x={-tileW / 2 + 6}
+                                    y={-tileH / 2 + 13}
+                                    width={tileW - 12}
+                                    height={tileH - 20}
                                   />
                                 ) : null}
                               </pixiContainer>
@@ -672,10 +672,10 @@ export default function MahjongPixiTable({
                                 {tex ? (
                                   <pixiSprite
                                     texture={tex}
-                                    x={4}
-                                    y={5}
-                                    width={tileW - 8}
-                                    height={tileH - 10}
+                                    x={6}
+                                    y={13}
+                                    width={tileW - 12}
+                                    height={tileH - 20}
                                   />
                                 ) : null}
                               </pixiContainer>
@@ -708,10 +708,10 @@ export default function MahjongPixiTable({
                           )}
                           <pixiSprite
                             texture={tex}
-                            x={6}
-                            y={8}
-                            width={52 - 12}
-                            height={72 - 16}
+                            x={10}
+                            y={20}
+                            width={52 - 20}
+                            height={72 - 28}
                           />
                         </pixiContainer>
                       );
@@ -774,10 +774,10 @@ export default function MahjongPixiTable({
                   {tex ? (
                     <pixiSprite
                       texture={tex}
-                      x={6}
-                      y={8}
-                      width={discardTileW - 12}
-                      height={discardTileH - 16}
+                      x={8}
+                      y={16}
+                      width={discardTileW - 16}
+                      height={discardTileH - 24}
                     />
                   ) : null}
                 </pixiContainer>
@@ -986,10 +986,10 @@ export default function MahjongPixiTable({
                     {tex ? (
                       <pixiSprite
                         texture={tex}
-                        x={-w / 2 + 5}
-                        y={-h / 2 + 7}
-                        width={w - 10}
-                        height={h - 14}
+                        x={-w / 2 + 6}
+                        y={-h / 2 + 13}
+                        width={w - 12}
+                        height={h - 20}
                       />
                     ) : null}
                   </pixiContainer>
@@ -1121,10 +1121,10 @@ export default function MahjongPixiTable({
                   {tex ? (
                     <pixiSprite
                       texture={tex}
-                      x={8}
-                      y={12}
-                      width={tileW - 16}
-                      height={tileH - 24}
+                      x={10}
+                      y={20}
+                      width={tileW - 20}
+                      height={tileH - 32}
                     />
                   ) : null}
                 </pixiContainer>
@@ -1166,10 +1166,10 @@ export default function MahjongPixiTable({
                         {tex ? (
                           <pixiSprite
                             texture={tex}
-                            x={8}
-                            y={12}
-                            width={tileW - 16}
-                            height={tileH - 24}
+                            x={10}
+                            y={20}
+                            width={tileW - 20}
+                            height={tileH - 32}
                           />
                         ) : null}
                       </pixiContainer>
