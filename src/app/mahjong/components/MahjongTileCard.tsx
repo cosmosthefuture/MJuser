@@ -5,8 +5,8 @@ import type { MahjongTile } from "@/lib/mahjong72";
 
 function tileImageSrc(tile: MahjongTile): string {
   return tile.suit === "bamboo"
-    ? `/images/MahjongRegular/bamboo${tile.rank}.png`
-    : `/images/MahjongRegular/dot${tile.rank}.png`;
+    ? `/images/MahjongRegular/bamboo${tile.rank}.webp`
+    : `/images/MahjongRegular/dot${tile.rank}.webp`;
 }
 
 export default function MahjongTileCard({

@@ -53,8 +53,8 @@ const labelStyle = new TextStyle({
 });
 
 function tileSpriteFileName(t: MahjongTile): string {
-  if (t.suit === "dots") return `dot${t.rank}.png`;
-  return `bamboo${t.rank}.png`;
+  if (t.suit === "dots") return `dot${t.rank}.webp`;
+  return `bamboo${t.rank}.webp`;
 }
 
 export default function MahjongPixiTable({
