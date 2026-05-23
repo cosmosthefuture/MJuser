@@ -135,6 +135,7 @@ export default function MahjongPixiTable({
 }: Props) {
   const designWidth = 1200;
   const designHeight = 720;
+  const boardBackgroundPath = "/images/mj-bg.webp";
   const getDevicePixelRatio = () => {
     if (typeof window === "undefined") return 1;
     return Math.min(3, Math.max(1, window.devicePixelRatio || 1));
@@ -309,7 +310,9 @@ export default function MahjongPixiTable({
     if (typeof window === "undefined") return;
 
     let cancelled = false;
-    const missing = neededSpritePaths.filter((p) => !textures[p]);
+    const missing = [boardBackgroundPath, ...neededSpritePaths].filter(
+      (p) => !textures[p],
+    );
     if (missing.length === 0) return;
 
     (async () => {
@@ -331,7 +334,22 @@ export default function MahjongPixiTable({
     return () => {
       cancelled = true;
     };
-  }, [neededSpritePaths, textures]);
+  }, [boardBackgroundPath, neededSpritePaths, textures]);
+
+  const boardBackground = textures[boardBackgroundPath];
+  const boardBackgroundPlacement = useMemo(() => {
+    if (!boardBackground) return null;
+    const w = Math.max(1, boardBackground.width);
+    const h = Math.max(1, boardBackground.height);
+    const s = Math.max(designWidth / w, designHeight / h);
+    const renderW = w * s;
+    const renderH = h * s;
+    return {
+      x: Math.floor((designWidth - renderW) / 2),
+      y: Math.floor((designHeight - renderH) / 2),
+      scale: s,
+    };
+  }, [boardBackground, designWidth, designHeight]);
 
   // Keep the auth user's hand left-aligned in the rack.
   const handStartX = Math.max(24, rackX + 36);
@@ -389,21 +407,14 @@ export default function MahjongPixiTable({
           rotation={stageRotation}
         >
           <pixiContainer x={-designWidth / 2} y={-designHeight / 2}>
-            <pixiGraphics
-              draw={(g) => {
-                g.clear();
-                g.beginFill(0x3a2a16);
-                g.drawRect(tableX - 18, tableY - 18, tableW + 36, tableH + 36);
-                g.endFill();
-
-                g.beginFill(0x1f6a41);
-                g.drawRect(tableX, tableY, tableW, tableH);
-                g.endFill();
-
-                g.lineStyle(4, 0x0b3a24, 1);
-                g.drawRect(tableX, tableY, tableW, tableH);
-              }}
-            />
+            {boardBackground && boardBackgroundPlacement ? (
+              <pixiSprite
+                texture={boardBackground}
+                x={boardBackgroundPlacement.x}
+                y={boardBackgroundPlacement.y}
+                scale={boardBackgroundPlacement.scale}
+              />
+            ) : null}
 
             <pixiGraphics
               draw={(g) => {
@@ -417,69 +428,71 @@ export default function MahjongPixiTable({
                 const showRight = sides.size === 0 || sides.has("right");
                 const showBottom = sides.size === 0 || sides.has("bottom");
 
-                if (showTop) {
-                  g.beginFill(wall);
+                if (!boardBackground) {
+                  if (showTop) {
+                    g.beginFill(wall, 1);
+                    g.drawRoundedRect(
+                      tableX + 24,
+                      tableY + 10,
+                      tableW - 48,
+                      wallThickness,
+                      8,
+                    );
+                    g.endFill();
+                  }
+
+                  if (showLeft) {
+                    g.beginFill(wall, 1);
+                    g.drawRoundedRect(
+                      tableX + 10,
+                      tableY + 24,
+                      wallThickness,
+                      tableH - 48,
+                      8,
+                    );
+                    g.endFill();
+                  }
+
+                  if (showRight) {
+                    g.beginFill(wall, 1);
+                    g.drawRoundedRect(
+                      tableX + tableW - wallThickness - 10,
+                      tableY + 24,
+                      wallThickness,
+                      tableH - 48,
+                      8,
+                    );
+                    g.endFill();
+                  }
+
+                  if (showBottom) {
+                    g.beginFill(wall, 1);
+                    g.drawRoundedRect(
+                      tableX + 24,
+                      tableY + tableH - wallThickness - 10,
+                      tableW - 48,
+                      wallThickness,
+                      8,
+                    );
+                    g.endFill();
+                  }
+
+                  g.beginFill(felt, 1);
                   g.drawRoundedRect(
-                    tableX + 24,
-                    tableY + 10,
-                    tableW - 48,
-                    wallThickness,
-                    8,
+                    tableX + 110,
+                    tableY + 110,
+                    tableW - 220,
+                    tableH - 220,
+                    14,
                   );
                   g.endFill();
                 }
 
-                if (showLeft) {
-                  g.beginFill(wall);
-                  g.drawRoundedRect(
-                    tableX + 10,
-                    tableY + 24,
-                    wallThickness,
-                    tableH - 48,
-                    8,
-                  );
-                  g.endFill();
-                }
-
-                if (showRight) {
-                  g.beginFill(wall);
-                  g.drawRoundedRect(
-                    tableX + tableW - wallThickness - 10,
-                    tableY + 24,
-                    wallThickness,
-                    tableH - 48,
-                    8,
-                  );
-                  g.endFill();
-                }
-
-                if (showBottom) {
-                  g.beginFill(wall);
-                  g.drawRoundedRect(
-                    tableX + 24,
-                    tableY + tableH - wallThickness - 10,
-                    tableW - 48,
-                    wallThickness,
-                    8,
-                  );
-                  g.endFill();
-                }
-
-                g.beginFill(felt);
-                g.drawRoundedRect(
-                  tableX + 110,
-                  tableY + 110,
-                  tableW - 220,
-                  tableH - 220,
-                  14,
-                );
-                g.endFill();
-
-                g.beginFill(back);
+                g.beginFill(back, 0.5);
                 g.drawRect(rackX, rackY, rackW, rackH);
                 g.endFill();
 
-                g.beginFill(0xd0b07a);
+                g.beginFill(0xd0b07a, 0.85);
                 g.drawRect(rackX + 6, rackY + 6, rackW - 12, rackH - 12);
                 g.endFill();
 
