@@ -79,6 +79,7 @@ export default function MahjongPixiTable({
   const designHeight = 720;
   const boardBackgroundPath = "/images/mj-bg.webp";
   const tileBackgroundPath = "/images/mj-tile-bg.webp";
+  const tileBackPath = "/images/mj-tile-back.webp";
 
   // Centralized Tile Style Configuration
   const tileStyle = useMemo(
@@ -300,6 +301,7 @@ export default function MahjongPixiTable({
     const missing = [
       boardBackgroundPath,
       tileBackgroundPath,
+      tileBackPath,
       ...neededSpritePaths,
     ].filter((p) => !textures[p]);
     if (missing.length === 0) return;
@@ -323,10 +325,17 @@ export default function MahjongPixiTable({
     return () => {
       cancelled = true;
     };
-  }, [boardBackgroundPath, tileBackgroundPath, neededSpritePaths, textures]);
+  }, [
+    boardBackgroundPath,
+    tileBackgroundPath,
+    tileBackPath,
+    neededSpritePaths,
+    textures,
+  ]);
 
   const boardBackground = textures[boardBackgroundPath];
   const tileBgTex = textures[tileBackgroundPath];
+  const tileBackTex = textures[tileBackPath];
   const boardBackgroundPlacement = useMemo(() => {
     if (!boardBackground) return null;
     const w = Math.max(1, boardBackground.width);
@@ -864,144 +873,6 @@ export default function MahjongPixiTable({
               );
             })}
 
-            <pixiGraphics
-              draw={(g) => {
-                g.clear();
-                const back = 0x0e5a35;
-                const edge = 0x06311e;
-                const showTop = sides.size === 0 || sides.has("top");
-                const showLeft = sides.size === 0 || sides.has("left");
-                const showRight = sides.size === 0 || sides.has("right");
-                // No small wall blocks for the auth user's side (bottom).
-                const showBottom = false;
-
-                const topCount = counts.top ?? 7;
-                const smallW = 30;
-                const smallH = 40;
-                const topStartX = Math.floor(
-                  designWidth / 2 -
-                    (topCount * smallW + (topCount - 1) * 2) / 2,
-                );
-                const topY = tableY + 18;
-                const bottomY = tableY + tableH - 18 - smallH;
-
-                g.beginFill(back);
-                if (showTop) {
-                  for (let i = 0; i < topCount; i++) {
-                    g.drawRoundedRect(
-                      topStartX + i * (smallW + 2),
-                      topY,
-                      smallW,
-                      smallH,
-                      4,
-                    );
-                  }
-                }
-                if (showBottom) {
-                  for (let i = 0; i < topCount; i++) {
-                    g.drawRoundedRect(
-                      topStartX + i * (smallW + 2),
-                      bottomY,
-                      smallW,
-                      smallH,
-                      4,
-                    );
-                  }
-                }
-                g.endFill();
-
-                const sideCountLeft = counts.left ?? 7;
-                const sideCountRight = counts.right ?? 7;
-                const sideCount = Math.max(sideCountLeft, sideCountRight);
-                const sideXLeft = tableX + 18;
-                const sideXRight = tableX + tableW - 18 - smallH;
-                const sideStartY = Math.floor(
-                  tableY +
-                    tableH / 2 -
-                    (sideCount * smallW + (sideCount - 1) * 2) / 2,
-                );
-
-                g.beginFill(back);
-                for (let i = 0; i < sideCount; i++) {
-                  if (showLeft) {
-                    if (i >= sideCountLeft) {
-                      // no-op
-                    } else {
-                      g.drawRoundedRect(
-                        sideXLeft,
-                        sideStartY + i * (smallW + 2),
-                        smallH,
-                        smallW,
-                        4,
-                      );
-                    }
-                  }
-                  if (showRight) {
-                    if (i >= sideCountRight) {
-                      // no-op
-                    } else {
-                      g.drawRoundedRect(
-                        sideXRight,
-                        sideStartY + i * (smallW + 2),
-                        smallH,
-                        smallW,
-                        4,
-                      );
-                    }
-                  }
-                }
-                g.endFill();
-
-                g.lineStyle(2, edge, 1);
-                if (showTop) {
-                  for (let i = 0; i < topCount; i++) {
-                    g.drawRoundedRect(
-                      topStartX + i * (smallW + 2),
-                      topY,
-                      smallW,
-                      smallH,
-                      4,
-                    );
-                  }
-                }
-                if (showBottom) {
-                  for (let i = 0; i < topCount; i++) {
-                    g.drawRoundedRect(
-                      topStartX + i * (smallW + 2),
-                      bottomY,
-                      smallW,
-                      smallH,
-                      4,
-                    );
-                  }
-                }
-                for (let i = 0; i < sideCount; i++) {
-                  if (showLeft) {
-                    if (i < sideCountLeft) {
-                      g.drawRoundedRect(
-                        sideXLeft,
-                        sideStartY + i * (smallW + 2),
-                        smallH,
-                        smallW,
-                        4,
-                      );
-                    }
-                  }
-                  if (showRight) {
-                    if (i < sideCountRight) {
-                      g.drawRoundedRect(
-                        sideXRight,
-                        sideStartY + i * (smallW + 5),
-                        smallH,
-                        smallW,
-                        4,
-                      );
-                    }
-                  }
-                }
-              }}
-            />
-
             {(() => {
               const orderedMeldGroups = (side: "right" | "top" | "left") => {
                 const raw = opponentMelds?.[side] ?? [];
@@ -1026,7 +897,7 @@ export default function MahjongPixiTable({
 
               const topCount = counts.top ?? 7;
               const topStartX = Math.floor(
-                designWidth / 2 - (topCount * smallW + (topCount - 1) * 2) / 2,
+                designWidth / 2 - (topCount * smallW + (topCount - 1) * 1) / 2,
               );
 
               const sideCountLeft = counts.left ?? 7;
@@ -1037,7 +908,7 @@ export default function MahjongPixiTable({
               const sideStartY = Math.floor(
                 tableY +
                   tableH / 2 -
-                  (sideCount * smallW + (sideCount - 1) * 2) / 2,
+                  (sideCount * smallW + (sideCount - 1) * 1) / 2,
               );
 
               const renderMiniTile = (
@@ -1082,14 +953,59 @@ export default function MahjongPixiTable({
                 );
               };
 
-              const out: Array<unknown> = [];
+              const out: Array<React.ReactNode> = [];
 
+              // 1. Add Face-down (Back) Tiles
+              if (tileBackTex) {
+                if (showTop) {
+                  for (let i = 0; i < topCount; i++) {
+                    out.push(
+                      <pixiSprite
+                        key={`back-top-${i}`}
+                        texture={tileBackTex}
+                        x={topStartX + i * (smallW + 1)}
+                        y={topY}
+                        width={smallW}
+                        height={smallH}
+                      />,
+                    );
+                  }
+                }
+                for (let i = 0; i < sideCount; i++) {
+                  if (showLeft && i < sideCountLeft) {
+                    out.push(
+                      <pixiSprite
+                        key={`back-left-${i}`}
+                        texture={tileBackTex}
+                        x={sideXLeft}
+                        y={sideStartY + i * (smallW + 1)}
+                        width={smallH} // Landscape
+                        height={smallW} // Landscape
+                      />,
+                    );
+                  }
+                  if (showRight && i < sideCountRight) {
+                    out.push(
+                      <pixiSprite
+                        key={`back-right-${i}`}
+                        texture={tileBackTex}
+                        x={sideXRight}
+                        y={sideStartY + i * (smallW + 1)}
+                        width={smallH} // Landscape
+                        height={smallW} // Landscape
+                      />,
+                    );
+                  }
+                }
+              }
+
+              // 2. Add Inline Melds
               const groupGap = 1;
               const opponentSmallGap = 1;
 
               if (showTop && topGroups.length > 0) {
                 const startX =
-                  topStartX + topCount * (smallW + 2) + Math.max(10, gap);
+                  topStartX + topCount * (smallW + 1) + Math.max(10, gap);
                 const y = topY + smallH / 2;
 
                 let cursor = startX;
@@ -1110,7 +1026,7 @@ export default function MahjongPixiTable({
 
               if (showLeft && leftGroups.length > 0) {
                 const startY =
-                  sideStartY + sideCountLeft * (smallW + 2) + Math.max(10, gap);
+                  sideStartY + sideCountLeft * (smallW + 1) + Math.max(10, gap);
                 const x = sideXLeft + smallH / 2;
 
                 let cursor = startY;
@@ -1138,7 +1054,7 @@ export default function MahjongPixiTable({
               if (showRight && rightGroups.length > 0) {
                 const startY =
                   sideStartY +
-                  sideCountRight * (smallW + 5) +
+                  sideCountRight * (smallW + 1) +
                   Math.max(10, gap);
                 const x = sideXRight + smallH / 2;
 
