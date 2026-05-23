@@ -1935,7 +1935,6 @@ export default function MahjongClient() {
                 rightDiscardTiles={rightDiscardTiles}
                 topDiscardTiles={topDiscardTiles}
                 leftDiscardTiles={leftDiscardTiles}
-                highlightDiscard={false}
                 centerMessage={centerMessage}
                 showDrawPile={showDrawPile}
                 drawPileCount={drawPileCount}
