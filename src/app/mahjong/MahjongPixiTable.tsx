@@ -116,7 +116,7 @@ export default function MahjongPixiTable({
         w: 52,
         h: 72,
         iconOffsetX: 10,
-        iconOffsetY: 24,
+        iconOffsetY: 18,
         iconShrinkW: 20,
         iconShrinkH: 28,
       },
