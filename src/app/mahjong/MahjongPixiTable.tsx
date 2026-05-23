@@ -421,7 +421,6 @@ export default function MahjongPixiTable({
                 g.clear();
                 const felt = 0x1d7b49;
                 const wall = 0x0a6a3a;
-                const back = 0x1a120c;
 
                 const showTop = sides.size === 0 || sides.has("top");
                 const showLeft = sides.size === 0 || sides.has("left");
@@ -487,17 +486,6 @@ export default function MahjongPixiTable({
                   );
                   g.endFill();
                 }
-
-                g.beginFill(back, 0.5);
-                g.drawRect(rackX, rackY, rackW, rackH);
-                g.endFill();
-
-                g.beginFill(0xd0b07a, 0.85);
-                g.drawRect(rackX + 6, rackY + 6, rackW - 12, rackH - 12);
-                g.endFill();
-
-                g.lineStyle(4, 0x7a4b12, 1);
-                g.drawRect(rackX, rackY, rackW, rackH);
               }}
             />
 
