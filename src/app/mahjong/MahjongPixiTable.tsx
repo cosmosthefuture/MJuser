@@ -370,7 +370,7 @@ export default function MahjongPixiTable({
     rackX + rackW - 36 - meldsWidth,
   );
 
-  const discardCols = 20;
+  const discardCols = 15;
   const discardGap = 2;
   const discardTileW = tileStyle.discard.w;
   const discardTileH = tileStyle.discard.h;
@@ -449,7 +449,7 @@ export default function MahjongPixiTable({
 
                 {rightDiscardTiles.length > 0
                   ? (() => {
-                      const rowsPerCol = 5;
+                      const rowsPerCol = 15;
                       const {
                         w,
                         h,
@@ -514,7 +514,7 @@ export default function MahjongPixiTable({
 
                 {topDiscardTiles.length > 0
                   ? (() => {
-                      const cols = 5;
+                      const cols = 15;
                       const {
                         w,
                         h,
@@ -583,7 +583,7 @@ export default function MahjongPixiTable({
 
                 {leftDiscardTiles.length > 0
                   ? (() => {
-                      const rowsPerCol = 5;
+                      const rowsPerCol = 15;
                       const {
                         w,
                         h,
@@ -648,7 +648,7 @@ export default function MahjongPixiTable({
 
                 {selfDiscardTiles.length > 0
                   ? (() => {
-                      const cols = 20;
+                      const cols = 15;
                       const {
                         w,
                         h,
