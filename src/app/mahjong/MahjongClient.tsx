@@ -5,13 +5,14 @@ import { useRouter, useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import { ArrowLeft } from "lucide-react";
 import { useSelector } from "react-redux";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import MahjongTileCard from "./components/MahjongTileCard";
 import { MahjongTile } from "@/lib/mahjong72";
 import { fetchMahjongJoinToken } from "@/lib/mahjongRoomApi";
 import { connectSocket, getSocket } from "@/lib/wsClient";
 import type { RootState } from "@/redux/store";
 import { fetchWsJwtToken } from "@/lib/wsTokenApi";
+import { getUserAvatarSrc } from "@/lib/avatar";
 
 type MahjongRoomState = unknown;
 
@@ -1807,8 +1808,8 @@ export default function MahjongClient() {
         style={stageStyle}
       >
         <div className="relative h-full w-full overflow-hidden">
-          <div 
-            className="absolute inset-0 bg-[#00251b] bg-cover bg-center bg-no-repeat" 
+          <div
+            className="absolute inset-0 bg-[#00251b] bg-cover bg-center bg-no-repeat"
             style={{ backgroundImage: "url('/images/mj-bg.webp')" }}
           />
 
@@ -2098,21 +2099,15 @@ export default function MahjongClient() {
                       position: "bottom" | "right" | "top" | "left";
                     }) => {
                       const base =
-                        "absolute flex items-center gap-1.5 rounded-full border border-[#1d7b49]/60 bg-[#064e3b]/80 px-2 py-1 text-[10px] text-white shadow-[0_8px_32px_rgba(0,0,0,0.3)] backdrop-blur-md";
+                        "absolute flex flex-col items-center gap-2 rounded-[18px] bg-[#064e3b]/70 p-2 text-white shadow-[0_24px_80px_rgba(0,0,0,0.6)] backdrop-blur-md";
                       const pos =
                         position === "bottom"
-                          ? `${isMobileUi ? "right-5 bottom-[80px]" : "right-32 bottom-[140px]"}`
+                          ? "right-40 bottom-[140px]"
                           : position === "top"
-                            ? `left-1/2 -translate-x-1/2 ${
-                                isMobileUi ? "top-3" : "top-6"
-                              }`
+                            ? "left-1/2 -translate-x-1/2 top-6"
                             : position === "left"
-                              ? `${
-                                  isMobileUi ? "left-2" : "left-6"
-                                } top-1/2 -translate-y-1/2`
-                              : `${
-                                  isMobileUi ? "right-2" : "right-6"
-                                } top-1/2 -translate-y-1/2`;
+                              ? "left-6 top-1/2 -translate-y-1/2"
+                              : "right-6 top-1/2 -translate-y-1/2";
 
                       const name = player.name;
                       const initials =
@@ -2122,6 +2117,10 @@ export default function MahjongClient() {
                           .slice(0, 2)
                           .map((s) => s[0]?.toUpperCase())
                           .join("") || "?";
+                      const avatarSrc = getUserAvatarSrc({
+                        userId: player.userId,
+                        name: player.name,
+                      });
 
                       const isHighlighted =
                         player != null && firstPlayerHighlightId != null
@@ -2144,30 +2143,40 @@ export default function MahjongClient() {
                               : ""
                           } ${isMobileUi ? "px-1.5 py-0.5 text-[9px]" : ""}`}
                         >
+                          <div className="pointer-events-none absolute inset-0 rounded-[18px] ring-2 ring-emerald-300/30 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06),inset_0_0_22px_rgba(16,185,129,0.22)]" />
                           {isUserToPlay ? (
                             <div className="pointer-events-none absolute -inset-[2px] rounded-full">
                               <div className="absolute inset-0 rounded-full ring-2 ring-amber-200/70 shadow-[0_0_0_8px_rgba(255,210,125,0.14),0_0_30px_rgba(255,210,125,0.18)] animate-pulse" />
                             </div>
                           ) : null}
                           <Avatar
-                            className={`border border-amber-100/20 bg-black/30 ${
-                              isMobileUi ? "size-4" : "size-5"
+                            className={`relative overflow-hidden rounded-xl bg-emerald-950/35  shadow-[0_16px_40px_rgba(0,0,0,0.55)] ${
+                              isMobileUi ? "size-12" : "size-16"
                             }`}
                           >
-                            <AvatarFallback className="bg-black/30 text-amber-100 font-bold text-[8px]">
+                            <AvatarImage
+                              src={avatarSrc}
+                              alt={name}
+                              className="rounded-xl object-cover"
+                            />
+                            <AvatarFallback className="rounded-lg bg-emerald-950/35 text-[#EFA02C] font-bold">
                               {initials}
                             </AvatarFallback>
                           </Avatar>
                           <div
-                            className={`truncate font-semibold ${
-                              isMobileUi ? "max-w-[70px]" : "max-w-[100px]"
+                            className={`max-w-[160px] truncate text-center font-black tracking-wide text-[#EFA02C] ${
+                              isMobileUi ? "text-[12px]" : "text-[15px]"
                             }`}
+                            style={{
+                              textShadow:
+                                "0 2px 0 rgba(0,0,0,0.65), 0 0 18px rgba(255,200,80,0.35)",
+                            }}
                           >
                             {name}
                           </div>
                           {isActiveTurn ? (
                             <div
-                              className={`ml-1 rounded-full bg-amber-100/90 font-bold tabular-nums text-[#3b0500] ${
+                              className={`mt-1 rounded-full bg-amber-100/90 font-bold tabular-nums text-[#3b0500] ${
                                 isMobileUi
                                   ? "px-1.5 py-0 text-[10px]"
                                   : "px-2 py-0.5 text-[11px]"
@@ -2291,21 +2300,15 @@ export default function MahjongClient() {
                     position: "bottom" | "right" | "top" | "left";
                   }) => {
                     const base =
-                      "absolute flex items-center gap-1.5 rounded-full border border-[#1d7b49]/60 bg-[#064e3b]/80 px-2 py-1 text-[10px] text-white shadow-[0_8px_32px_rgba(0,0,0,0.3)] backdrop-blur-md";
+                      "absolute flex flex-col items-center gap-2 rounded-[18px] bg-[#064e3b]/70 p-2 text-[10px] text-white shadow-[0_24px_80px_rgba(0,0,0,0.6)] backdrop-blur-md";
                     const pos =
                       position === "bottom"
-                        ? `${isMobileUi ? "right-2 bottom-[100px]" : "right-32 bottom-[140px]"}`
+                        ? "right-40 bottom-[140px]"
                         : position === "top"
-                          ? `left-1/2 -translate-x-1/2 ${
-                              isMobileUi ? "top-3" : "top-6"
-                            }`
+                          ? "left-1/2 -translate-x-1/2 top-6"
                           : position === "left"
-                            ? `${
-                                isMobileUi ? "left-2" : "left-6"
-                              } top-1/2 -translate-y-1/2`
-                            : `${
-                                isMobileUi ? "right-2" : "right-6"
-                              } top-1/2 -translate-y-1/2`;
+                            ? "left-6 top-1/2 -translate-y-1/2"
+                            : "right-6 top-1/2 -translate-y-1/2";
 
                     const name = player.name;
                     const initials =
@@ -2315,6 +2318,10 @@ export default function MahjongClient() {
                         .slice(0, 2)
                         .map((s) => s[0]?.toUpperCase())
                         .join("") || "?";
+                    const avatarSrc = getUserAvatarSrc({
+                      userId: player.userId,
+                      name: player.name,
+                    });
 
                     const isHighlighted =
                       player != null && firstPlayerHighlightId != null
@@ -2337,30 +2344,40 @@ export default function MahjongClient() {
                             : ""
                         } ${isMobileUi ? "px-1.5 py-0.5 text-[9px]" : ""}`}
                       >
+                        <div className="pointer-events-none absolute inset-0 rounded-[10px] ring-2 ring-emerald-300/30 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06),inset_0_0_22px_rgba(16,185,129,0.22)]" />
                         {isUserToPlay ? (
                           <div className="pointer-events-none absolute -inset-[2px] rounded-full">
                             <div className="absolute inset-0 rounded-full ring-2 ring-amber-200/70 shadow-[0_0_0_8px_rgba(255,210,125,0.14),0_0_30px_rgba(255,210,125,0.18)] animate-pulse" />
                           </div>
                         ) : null}
                         <Avatar
-                          className={`border border-amber-100/20 bg-black/30 ${
-                            isMobileUi ? "size-4" : "size-5"
+                          className={`relative overflow-hidden rounded-lg bg-emerald-950/35 shadow-[0_16px_40px_rgba(0,0,0,0.55)] ${
+                            isMobileUi ? "size-12" : "size-14"
                           }`}
                         >
-                          <AvatarFallback className="bg-black/30 text-amber-100 font-bold text-[8px]">
+                          <AvatarImage
+                            src={avatarSrc}
+                            alt={name}
+                            className="rounded-lg object-cover"
+                          />
+                          <AvatarFallback className=" bg-emerald-950/35 text-[#EFA02C] font-medium">
                             {initials}
                           </AvatarFallback>
                         </Avatar>
                         <div
-                          className={`truncate font-semibold ${
-                            isMobileUi ? "max-w-[70px]" : "max-w-[100px]"
+                          className={`max-w-[100px] truncate text-center font-black tracking-wide text-[#EFA02C] ${
+                            isMobileUi ? "text-[10px]" : "text-[12px]"
                           }`}
+                          style={{
+                            textShadow:
+                              "0 2px 0 rgba(0,0,0,0.65), 0 0 18px rgba(255,200,80,0.35)",
+                          }}
                         >
                           {name}
                         </div>
                         {isActiveTurn ? (
                           <div
-                            className={`ml-1 rounded-full bg-amber-100/90 font-bold tabular-nums text-[#3b0500] ${
+                            className={`mt-1 rounded-full bg-amber-100/90 font-bold tabular-nums text-[#3b0500] ${
                               isMobileUi
                                 ? "px-1.5 py-0 text-[10px]"
                                 : "px-2 py-0.5 text-[11px]"
@@ -2810,9 +2827,7 @@ function WinnerRevealModal({
   return (
     <div
       className={`pointer-events-auto rounded-2xl border border-amber-100/15 bg-black/75 shadow-[0_25px_80px_rgba(0,0,0,0.55)] backdrop-blur-sm ${
-        isMobileUi
-          ? "w-[92vw] max-w-[420px] p-2"
-          : "w-full max-w-[760px] p-5"
+        isMobileUi ? "w-[92vw] max-w-[420px] p-2" : "w-full max-w-[760px] p-5"
       }`}
     >
       <div

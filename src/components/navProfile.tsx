@@ -14,27 +14,39 @@ import {
 } from "@/components/ui/navigation-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAppSelector } from "@/redux/hook";
+import { getUserAvatarSrc } from "@/lib/avatar";
 type Props = {
   logoutHandler: () => void;
 };
 
 export function NavProfile({ logoutHandler }: Props) {
-  const { name } = useAppSelector((state) => state.auth);
+  const { name, id } = useAppSelector((state) => state.auth);
+  const avatarSrc = getUserAvatarSrc({ userId: id, name });
+  const initials =
+    (name || "")
+      .trim()
+      .split(/\s+/)
+      .slice(0, 2)
+      .map((s) => s[0]?.toUpperCase())
+      .join("") || "?";
   return (
     <NavigationMenu viewport={false}>
       <NavigationMenuList>
         <NavigationMenuItem>
           <NavigationMenuTrigger className="py-4 bg-transparent">
-            <div className="flex flex-row flex-wrap items-center gap-12 space-x-3">
-              <Avatar>
+            <div className="flex items-center gap-2">
+              <Avatar className="size-10 rounded-md border border-emerald-200/20 bg-emerald-950/40 shadow-[0_12px_30px_rgba(0,0,0,0.35)] ring-2 ring-emerald-300/25">
                 <AvatarImage
-                  src="https://github.com/shadcn.png"
-                  alt="@shadcn"
+                  src={avatarSrc}
+                  alt={name ?? "User"}
+                  className="rounded-md"
                 />
-                <AvatarFallback>CN</AvatarFallback>
+                <AvatarFallback className="rounded-md bg-emerald-950/40 text-[#EFA02C] font-bold">
+                  {initials}
+                </AvatarFallback>
               </Avatar>
             </div>
-            <p className="ml-3">{name}</p>
+            <p className="ml-3 text-[#EFA02C] font-bold">{name}</p>
           </NavigationMenuTrigger>
           <NavigationMenuContent>
             <ul className="grid w-[200px] gap-4">
