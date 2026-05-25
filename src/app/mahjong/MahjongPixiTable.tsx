@@ -370,7 +370,7 @@ export default function MahjongPixiTable({
     rackX + rackW - 36 - meldsWidth,
   );
 
-  const discardCols = 10;
+  const discardCols = 20;
   const discardGap = 2;
   const discardTileW = tileStyle.discard.w;
   const discardTileH = tileStyle.discard.h;
@@ -648,7 +648,7 @@ export default function MahjongPixiTable({
 
                 {selfDiscardTiles.length > 0
                   ? (() => {
-                      const cols = 5;
+                      const cols = 20;
                       const {
                         w,
                         h,
@@ -660,11 +660,11 @@ export default function MahjongPixiTable({
                       const tileW = w;
                       const tileH = h;
                       const tileGap = 2;
-                      // const contentW = cols * tileW + (cols - 1) * tileGap;
+                      const totalW = cols * tileW + (cols - 1) * tileGap;
 
                       const cx = Math.floor(designWidth / 2);
                       const cy = Math.floor(tableY + tableH / 2);
-                      const startX = cx - 400;
+                      const startX = Math.floor(cx - totalW / 2);
                       // Move auth user's discarded tiles into the center table area
                       // (blue rectangle target), away from the bottom rack.
                       const startY = cy + 200;
