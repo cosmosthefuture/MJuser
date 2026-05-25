@@ -371,6 +371,7 @@ export default function MahjongPixiTable({
   );
 
   const discardCols = 15;
+  const sideDiscardCols = 10;
   const discardGap = 2;
   const discardTileW = tileStyle.discard.w;
   const discardTileH = tileStyle.discard.h;
@@ -449,7 +450,7 @@ export default function MahjongPixiTable({
 
                 {rightDiscardTiles.length > 0
                   ? (() => {
-                      const rowsPerCol = discardCols;
+                      const rowsPerCol = sideDiscardCols;
                       const {
                         w,
                         h,
@@ -462,20 +463,22 @@ export default function MahjongPixiTable({
                       const tileH = h;
                       const tileGapX = 10;
                       const tileGapY = -8;
-                      const pad = 10;
 
                       const cx = Math.floor(designWidth / 2);
                       const cy = Math.floor(tableY + tableH / 2);
-                      const boxX = cx + 95;
-                      const boxY = cy - 90;
+
+                      const gridHeight =
+                        rowsPerCol * tileH + (rowsPerCol - 1) * tileGapY;
+                      const startX = cx + 300;
+                      const startY = cy - Math.floor(gridHeight / 2);
 
                       return (
-                        <pixiContainer x={boxX} y={boxY}>
+                        <pixiContainer x={startX} y={startY}>
                           {rightDiscardTiles.map((t, i) => {
                             const row = i % rowsPerCol;
                             const col = Math.floor(i / rowsPerCol);
-                            const x = pad + col * (tileW + tileGapX);
-                            const y = pad + row * (tileH + tileGapY);
+                            const x = col * (tileW + tileGapX);
+                            const y = row * (tileH + tileGapY);
                             const spritePath = `${tileSpriteBasePath}/${tileSpriteFileName(t)}`;
                             const tex = textures[spritePath];
 
@@ -527,25 +530,24 @@ export default function MahjongPixiTable({
                       const tileH = h;
                       const tileGap = 2;
                       const orderedTopDiscards = [...topDiscardTiles].reverse();
+
+                      const totalW = cols * tileW + (cols - 1) * tileGap;
                       const rows = Math.ceil(orderedTopDiscards.length / cols);
-                      const contentW =
-                        cols * tileW + Math.max(0, cols - 1) * tileGap;
-                      const pad = 10;
-                      const boxW = contentW + pad * 2;
+                      const gridHeight = rows * tileH + (rows - 1) * tileGap;
 
                       const cx = Math.floor(designWidth / 2);
                       const cy = Math.floor(tableY + tableH / 2);
-                      const boxX = cx - Math.floor(boxW / 2);
-                      const boxY = cy - 155;
+                      const startX = Math.floor(cx - totalW / 2);
+                      const startY = cy - 100 - gridHeight;
 
                       return (
-                        <pixiContainer x={boxX} y={boxY}>
+                        <pixiContainer x={startX} y={startY}>
                           {orderedTopDiscards.map((t, i) => {
                             const col = i % cols;
                             const rowFromTop = Math.floor(i / cols);
                             const row = rows - 1 - rowFromTop;
-                            const x = pad + col * (tileW + tileGap);
-                            const y = pad + row * (tileH + tileGap);
+                            const x = col * (tileW + tileGap);
+                            const y = row * (tileH + tileGap);
                             const spritePath = `${tileSpriteBasePath}/${tileSpriteFileName(t)}`;
                             const tex = textures[spritePath];
 
@@ -583,7 +585,7 @@ export default function MahjongPixiTable({
 
                 {leftDiscardTiles.length > 0
                   ? (() => {
-                      const rowsPerCol = discardCols;
+                      const rowsPerCol = sideDiscardCols;
                       const {
                         w,
                         h,
@@ -596,20 +598,22 @@ export default function MahjongPixiTable({
                       const tileH = h;
                       const tileGapX = 10;
                       const tileGapY = -12;
-                      const pad = 10;
 
                       const cx = Math.floor(designWidth / 2);
                       const cy = Math.floor(tableY + tableH / 2);
-                      const boxX = cx - 95;
-                      const boxY = cy - 90;
+
+                      const gridHeight =
+                        rowsPerCol * tileH + (rowsPerCol - 1) * tileGapY;
+                      const startX = cx - 300;
+                      const startY = cy - Math.floor(gridHeight / 2);
 
                       return (
-                        <pixiContainer x={boxX} y={boxY}>
+                        <pixiContainer x={startX} y={startY}>
                           {leftDiscardTiles.map((t, i) => {
                             const row = i % rowsPerCol;
                             const col = Math.floor(i / rowsPerCol);
-                            const x = pad + col * (tileW + tileGapX);
-                            const y = pad + row * (tileH + tileGapY);
+                            const x = col * (tileW + tileGapX);
+                            const y = row * (tileH + tileGapY);
                             const spritePath = `${tileSpriteBasePath}/${tileSpriteFileName(t)}`;
                             const tex = textures[spritePath];
 
