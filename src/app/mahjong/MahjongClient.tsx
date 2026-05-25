@@ -2098,7 +2098,7 @@ export default function MahjongClient() {
                       player: RoundPlayer;
                       position: "bottom" | "right" | "top" | "left";
                     }) => {
-                      const base = `absolute flex flex-col items-center rounded-[18px] bg-[#064e3b]/70 text-white shadow-[0_24px_80px_rgba(0,0,0,0.6)] backdrop-blur-md ${
+                      const base = `absolute flex flex-col items-center rounded-[18px] bg-[#064e3b]/25 text-white shadow-[0_24px_80px_rgba(0,0,0,0.6)] backdrop-blur-md ${
                         isMobileUi ? "gap-1 p-1.5" : "gap-2 p-2"
                       }`;
                       const pos =
@@ -2152,14 +2152,14 @@ export default function MahjongClient() {
                               : ""
                           } ${isMobileUi ? "px-1.5 py-0.5 text-[9px]" : ""}`}
                         >
-                          <div className="pointer-events-none absolute inset-0 rounded-[18px] ring-2 ring-emerald-300/30 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06),inset_0_0_22px_rgba(16,185,129,0.22)]" />
+                          <div className="pointer-events-none absolute inset-0 rounded-[18px] ring-2 ring-emerald-300/18 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.03),inset_0_0_18px_rgba(16,185,129,0.14)]" />
                           {isUserToPlay ? (
                             <div className="pointer-events-none absolute -inset-[2px] rounded-full">
                               <div className="absolute inset-0 rounded-full ring-2 ring-amber-200/70 shadow-[0_0_0_8px_rgba(255,210,125,0.14),0_0_30px_rgba(255,210,125,0.18)] animate-pulse" />
                             </div>
                           ) : null}
                           <Avatar
-                            className={`relative overflow-hidden rounded-xl bg-emerald-950/35  shadow-[0_16px_40px_rgba(0,0,0,0.55)] ${
+                            className={`relative overflow-hidden rounded-xl bg-emerald-950/22 shadow-[0_16px_40px_rgba(0,0,0,0.55)] ${
                               isMobileUi ? "size-10" : "size-16"
                             }`}
                           >
@@ -2168,7 +2168,7 @@ export default function MahjongClient() {
                               alt={name}
                               className="rounded-xl object-cover"
                             />
-                            <AvatarFallback className="rounded-lg bg-emerald-950/35 text-[#EFA02C] font-bold">
+                            <AvatarFallback className="rounded-lg bg-emerald-950/22 text-[#EFA02C] font-bold">
                               {initials}
                             </AvatarFallback>
                           </Avatar>
@@ -2308,7 +2308,7 @@ export default function MahjongClient() {
                     player: RoundPlayer;
                     position: "bottom" | "right" | "top" | "left";
                   }) => {
-                    const base = `absolute flex flex-col items-center rounded-[18px] bg-[#064e3b]/70 text-[10px] text-white shadow-[0_24px_80px_rgba(0,0,0,0.6)] backdrop-blur-md ${
+                    const base = `absolute flex flex-col items-center rounded-[18px] bg-[#064e3b]/25 text-[10px] text-white shadow-[0_24px_80px_rgba(0,0,0,0.6)] backdrop-blur-md ${
                       isMobileUi ? "gap-1 p-1.5" : "gap-2 p-2"
                     }`;
                     const pos =
@@ -2362,14 +2362,14 @@ export default function MahjongClient() {
                             : ""
                         } ${isMobileUi ? "px-1.5 py-0.5 text-[9px]" : ""}`}
                       >
-                        <div className="pointer-events-none absolute inset-0 rounded-[10px] ring-2 ring-emerald-300/30 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06),inset_0_0_22px_rgba(16,185,129,0.22)]" />
+                        <div className="pointer-events-none absolute inset-0 rounded-[10px] ring-2 ring-emerald-300/18 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.03),inset_0_0_18px_rgba(16,185,129,0.14)]" />
                         {isUserToPlay ? (
                           <div className="pointer-events-none absolute -inset-[2px] rounded-full">
                             <div className="absolute inset-0 rounded-full ring-2 ring-amber-200/70 shadow-[0_0_0_8px_rgba(255,210,125,0.14),0_0_30px_rgba(255,210,125,0.18)] animate-pulse" />
                           </div>
                         ) : null}
                         <Avatar
-                          className={`relative overflow-hidden rounded-lg bg-emerald-950/35 shadow-[0_16px_40px_rgba(0,0,0,0.55)] ${
+                          className={`relative overflow-hidden rounded-lg bg-emerald-950/80 shadow-[0_16px_40px_rgba(0,0,0,0.55)] ${
                             isMobileUi ? "size-10" : "size-14"
                           }`}
                         >
@@ -2378,7 +2378,7 @@ export default function MahjongClient() {
                             alt={name}
                             className="rounded-lg object-cover"
                           />
-                          <AvatarFallback className=" bg-emerald-950/35 text-[#EFA02C] font-medium">
+                          <AvatarFallback className=" bg-emerald-950/80 text-[#EFA02C] font-medium">
                             {initials}
                           </AvatarFallback>
                         </Avatar>
