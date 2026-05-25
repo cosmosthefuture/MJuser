@@ -56,13 +56,6 @@ const drawPileLabelStyle = new TextStyle({
   fontSize: 22,
   fontWeight: "900",
   stroke: { color: 0x053325, width: 4 },
-  dropShadow: {
-    color: 0x000000,
-    alpha: 0.45,
-    blur: 6,
-    distance: 3,
-    angle: Math.PI / 6,
-  },
 });
 
 const centerMessageBaseStyle = {
