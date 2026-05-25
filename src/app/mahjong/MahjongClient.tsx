@@ -2098,8 +2098,9 @@ export default function MahjongClient() {
                       player: RoundPlayer;
                       position: "bottom" | "right" | "top" | "left";
                     }) => {
-                      const base =
-                        "absolute flex flex-col items-center gap-2 rounded-[18px] bg-[#064e3b]/70 p-2 text-white shadow-[0_24px_80px_rgba(0,0,0,0.6)] backdrop-blur-md";
+                      const base = `absolute flex flex-col items-center rounded-[18px] bg-[#064e3b]/70 text-white shadow-[0_24px_80px_rgba(0,0,0,0.6)] backdrop-blur-md ${
+                        isMobileUi ? "gap-1 p-1.5" : "gap-2 p-2"
+                      }`;
                       const pos =
                         position === "bottom"
                           ? isMobileUi
@@ -2159,7 +2160,7 @@ export default function MahjongClient() {
                           ) : null}
                           <Avatar
                             className={`relative overflow-hidden rounded-xl bg-emerald-950/35  shadow-[0_16px_40px_rgba(0,0,0,0.55)] ${
-                              isMobileUi ? "size-12" : "size-16"
+                              isMobileUi ? "size-10" : "size-16"
                             }`}
                           >
                             <AvatarImage
@@ -2172,8 +2173,8 @@ export default function MahjongClient() {
                             </AvatarFallback>
                           </Avatar>
                           <div
-                            className={`max-w-[160px] truncate text-center font-black tracking-wide text-[#EFA02C] ${
-                              isMobileUi ? "text-[12px]" : "text-[15px]"
+                            className={`max-w-[160px] truncate text-center font-medium tracking-wide text-[#EFA02C] ${
+                              isMobileUi ? "text-[10px]" : "text-[15px]"
                             }`}
                             style={{
                               textShadow:
@@ -2307,8 +2308,9 @@ export default function MahjongClient() {
                     player: RoundPlayer;
                     position: "bottom" | "right" | "top" | "left";
                   }) => {
-                    const base =
-                      "absolute flex flex-col items-center gap-2 rounded-[18px] bg-[#064e3b]/70 p-2 text-[10px] text-white shadow-[0_24px_80px_rgba(0,0,0,0.6)] backdrop-blur-md";
+                    const base = `absolute flex flex-col items-center rounded-[18px] bg-[#064e3b]/70 text-[10px] text-white shadow-[0_24px_80px_rgba(0,0,0,0.6)] backdrop-blur-md ${
+                      isMobileUi ? "gap-1 p-1.5" : "gap-2 p-2"
+                    }`;
                     const pos =
                       position === "bottom"
                         ? isMobileUi
@@ -2368,7 +2370,7 @@ export default function MahjongClient() {
                         ) : null}
                         <Avatar
                           className={`relative overflow-hidden rounded-lg bg-emerald-950/35 shadow-[0_16px_40px_rgba(0,0,0,0.55)] ${
-                            isMobileUi ? "size-12" : "size-14"
+                            isMobileUi ? "size-10" : "size-14"
                           }`}
                         >
                           <AvatarImage
@@ -2381,8 +2383,8 @@ export default function MahjongClient() {
                           </AvatarFallback>
                         </Avatar>
                         <div
-                          className={`max-w-[100px] truncate text-center font-black tracking-wide text-[#EFA02C] ${
-                            isMobileUi ? "text-[10px]" : "text-[12px]"
+                          className={`max-w-[100px] truncate text-center font-medium tracking-wide text-[#EFA02C] ${
+                            isMobileUi ? "text-[9px]" : "text-[12px]"
                           }`}
                           style={{
                             textShadow:
