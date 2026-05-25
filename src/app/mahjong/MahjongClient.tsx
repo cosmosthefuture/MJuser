@@ -600,9 +600,6 @@ export default function MahjongClient() {
   }, [authUserId]);
   const [roundPlayers, setRoundPlayers] = useState<RoundPlayer[]>([]);
   const [selfSeatPosition, setSelfSeatPosition] = useState<number | null>(null);
-  const [firstPlayerHighlightId, setFirstPlayerHighlightId] = useState<
-    number | null
-  >(null);
   const [activePlayerUserId, setActivePlayerUserId] = useState<number | null>(
     null,
   );
@@ -647,7 +644,6 @@ export default function MahjongClient() {
 
     let cancelled = false;
     let diceTimer: number | null = null;
-    let firstPlayerHighlightTimer: number | null = null;
 
     const ensureSocket = async () => {
       const existing = getSocket();
@@ -1138,13 +1134,6 @@ export default function MahjongClient() {
       const userId = Number(p.user_id ?? p.userId ?? p.user_id_to_play_first);
       if (!Number.isFinite(userId)) return;
       setActivePlayerUserId(userId);
-      // Small pop animation each time the "user to play" changes.
-      setFirstPlayerHighlightId(userId);
-      if (firstPlayerHighlightTimer)
-        window.clearTimeout(firstPlayerHighlightTimer);
-      firstPlayerHighlightTimer = window.setTimeout(() => {
-        setFirstPlayerHighlightId(null);
-      }, 1200);
     };
 
     const handleJoinSuccess = (data: unknown) => {
@@ -1779,8 +1768,6 @@ export default function MahjongClient() {
     return () => {
       cancelled = true;
       if (diceTimer) window.clearInterval(diceTimer);
-      if (firstPlayerHighlightTimer)
-        window.clearTimeout(firstPlayerHighlightTimer);
       const socket = getSocket();
       socket?.off("mahjong:join_room_success", handleJoinSuccess);
       socket?.off("mahjong:waiting_for_players");
@@ -2289,33 +2276,11 @@ export default function MahjongClient() {
                         name: player.name,
                       });
 
-                      const isHighlighted =
-                        player != null && firstPlayerHighlightId != null
-                          ? player.userId === firstPlayerHighlightId
-                          : false;
-                      const isActiveTurn =
-                        turnCountdown != null
-                          ? player.userId === turnCountdown.userId
-                          : false;
-                      const isUserToPlay =
-                        activePlayerUserId != null
-                          ? player.userId === activePlayerUserId
-                          : false;
-
                       return (
                         <div
-                          className={`${base} ${pos} ${
-                            isHighlighted
-                              ? "animate-[seat-pop_0.55s_ease-in-out_5] ring-4 ring-amber-200/80 shadow-[0_0_0_14px_rgba(255,210,125,0.18),0_34px_90px_rgba(0,0,0,0.55)]"
-                              : ""
-                          } ${isMobileUi ? "px-1.5 py-0.5 text-[9px]" : ""}`}
+                          className={`${base} ${pos} ${isMobileUi ? "px-1.5 py-0.5 text-[9px]" : ""}`}
                         >
                           <div className="pointer-events-none absolute inset-0 rounded-[18px] ring-2 ring-emerald-300/18 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.03),inset_0_0_18px_rgba(16,185,129,0.14)]" />
-                          {isUserToPlay ? (
-                            <div className="pointer-events-none absolute -inset-[2px] rounded-full">
-                              <div className="absolute inset-0 rounded-full ring-2 ring-amber-200/70 shadow-[0_0_0_8px_rgba(255,210,125,0.14),0_0_30px_rgba(255,210,125,0.18)] animate-pulse" />
-                            </div>
-                          ) : null}
                           <Avatar
                             className={`relative overflow-hidden rounded-xl bg-emerald-950/22 shadow-[0_16px_40px_rgba(0,0,0,0.55)] ${
                               isMobileUi ? "size-10" : "size-16"
@@ -2341,21 +2306,6 @@ export default function MahjongClient() {
                           >
                             {name}
                           </div>
-                          {isActiveTurn ? (
-                            <div
-                              className={`mt-1 rounded-full bg-amber-100/90 font-bold tabular-nums text-[#3b0500] ${
-                                isMobileUi
-                                  ? "px-1.5 py-0 text-[10px]"
-                                  : "px-2 py-0.5 text-[11px]"
-                              }`}
-                            >
-                              {Math.max(
-                                0,
-                                Math.floor(turnCountdown?.remaining ?? 0),
-                              )}
-                              s
-                            </div>
-                          ) : null}
                         </div>
                       );
                     };
@@ -2499,33 +2449,11 @@ export default function MahjongClient() {
                       name: player.name,
                     });
 
-                    const isHighlighted =
-                      player != null && firstPlayerHighlightId != null
-                        ? player.userId === firstPlayerHighlightId
-                        : false;
-                    const isActiveTurn =
-                      turnCountdown != null
-                        ? player.userId === turnCountdown.userId
-                        : false;
-                    const isUserToPlay =
-                      activePlayerUserId != null
-                        ? player.userId === activePlayerUserId
-                        : false;
-
                     return (
                       <div
-                        className={`${base} ${pos} ${
-                          isHighlighted
-                            ? "animate-[seat-pop_0.55s_ease-in-out_5] ring-4 ring-amber-200/80 shadow-[0_0_0_14px_rgba(255,210,125,0.18),0_34px_90px_rgba(0,0,0,0.55)]"
-                            : ""
-                        } ${isMobileUi ? "px-1.5 py-0.5 text-[9px]" : ""}`}
+                        className={`${base} ${pos} ${isMobileUi ? "px-1.5 py-0.5 text-[9px]" : ""}`}
                       >
                         <div className="pointer-events-none absolute inset-0 rounded-[10px] ring-2 ring-emerald-300/18 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.03),inset_0_0_18px_rgba(16,185,129,0.14)]" />
-                        {isUserToPlay ? (
-                          <div className="pointer-events-none absolute -inset-[2px] rounded-full">
-                            <div className="absolute inset-0 rounded-full ring-2 ring-amber-200/70 shadow-[0_0_0_8px_rgba(255,210,125,0.14),0_0_30px_rgba(255,210,125,0.18)] animate-pulse" />
-                          </div>
-                        ) : null}
                         <Avatar
                           className={`relative overflow-hidden rounded-lg bg-emerald-950/80 shadow-[0_16px_40px_rgba(0,0,0,0.55)] ${
                             isMobileUi ? "size-10" : "size-14"
@@ -2551,21 +2479,6 @@ export default function MahjongClient() {
                         >
                           {name}
                         </div>
-                        {isActiveTurn ? (
-                          <div
-                            className={`mt-1 rounded-full bg-amber-100/90 font-bold tabular-nums text-[#3b0500] ${
-                              isMobileUi
-                                ? "px-1.5 py-0 text-[10px]"
-                                : "px-2 py-0.5 text-[11px]"
-                            }`}
-                          >
-                            {Math.max(
-                              0,
-                              Math.floor(turnCountdown?.remaining ?? 0),
-                            )}
-                            s
-                          </div>
-                        ) : null}
                       </div>
                     );
                   };
