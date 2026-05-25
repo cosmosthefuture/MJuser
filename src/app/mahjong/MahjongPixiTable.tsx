@@ -163,6 +163,20 @@ export default function MahjongPixiTable({
   const loadingRef = useRef<Set<string>>(new Set());
   const [hoveredHandIdx, setHoveredHandIdx] = useState<number | null>(null);
   const lastTileTapRef = useRef<{ tileId: number; ts: number } | null>(null);
+  const [pulseNow, setPulseNow] = useState(0);
+
+  useEffect(() => {
+    if (!lastDiscardSide) return;
+    let raf = 0;
+    const tick = (ts: number) => {
+      setPulseNow(ts);
+      raf = window.requestAnimationFrame(tick);
+    };
+    raf = window.requestAnimationFrame(tick);
+    return () => window.cancelAnimationFrame(raf);
+  }, [lastDiscardSide]);
+
+  const pulse = lastDiscardSide ? (Math.sin(pulseNow / 180) + 1) / 2 : 0;
 
   const tryEmitDoubleTap = (tileId: number, evtDetail?: number) => {
     // Prefer native click-count when available.
@@ -539,6 +553,7 @@ export default function MahjongPixiTable({
                                 x={x + tileW / 2}
                                 y={y + tileH / 2}
                                 rotation={-Math.PI / 2}
+                                scale={isLast ? 1 + pulse * 0.08 : 1}
                               >
                                 {tileBgTex && (
                                   <pixiSprite
@@ -553,7 +568,21 @@ export default function MahjongPixiTable({
                                   <pixiGraphics
                                     draw={(g) => {
                                       g.clear();
-                                      g.lineStyle(2, 0xffd23b, 1);
+                                      const a = 0.35 + pulse * 0.65;
+                                      const w = 2 + pulse * 2;
+                                      g.beginFill(
+                                        0xffd23b,
+                                        0.06 + pulse * 0.09,
+                                      );
+                                      g.drawRoundedRect(
+                                        -tileW / 2,
+                                        -tileH / 2,
+                                        tileW,
+                                        tileH,
+                                        6,
+                                      );
+                                      g.endFill();
+                                      g.lineStyle(w, 0xffd23b, a);
                                       g.drawRoundedRect(
                                         -tileW / 2,
                                         -tileH / 2,
@@ -637,14 +666,16 @@ export default function MahjongPixiTable({
                                   <pixiGraphics
                                     draw={(g) => {
                                       g.clear();
-                                      g.lineStyle(2, 0xffd23b, 1);
-                                      g.drawRoundedRect(
-                                        0,
-                                        0,
-                                        tileW,
-                                        tileH,
-                                        6,
+                                      const a = 0.35 + pulse * 0.65;
+                                      const w = 2 + pulse * 2;
+                                      g.beginFill(
+                                        0xffd23b,
+                                        0.06 + pulse * 0.09,
                                       );
+                                      g.drawRoundedRect(0, 0, tileW, tileH, 6);
+                                      g.endFill();
+                                      g.lineStyle(w, 0xffd23b, a);
+                                      g.drawRoundedRect(0, 0, tileW, tileH, 6);
                                     }}
                                   />
                                 ) : null}
@@ -708,6 +739,7 @@ export default function MahjongPixiTable({
                                 x={-(x + tileW / 2)}
                                 y={y + tileH / 2}
                                 rotation={Math.PI / 2}
+                                scale={isLast ? 1 + pulse * 0.08 : 1}
                               >
                                 {tileBgTex && (
                                   <pixiSprite
@@ -722,7 +754,21 @@ export default function MahjongPixiTable({
                                   <pixiGraphics
                                     draw={(g) => {
                                       g.clear();
-                                      g.lineStyle(2, 0xffd23b, 1);
+                                      const a = 0.35 + pulse * 0.65;
+                                      const w = 2 + pulse * 2;
+                                      g.beginFill(
+                                        0xffd23b,
+                                        0.06 + pulse * 0.09,
+                                      );
+                                      g.drawRoundedRect(
+                                        -tileW / 2,
+                                        -tileH / 2,
+                                        tileW,
+                                        tileH,
+                                        6,
+                                      );
+                                      g.endFill();
+                                      g.lineStyle(w, 0xffd23b, a);
                                       g.drawRoundedRect(
                                         -tileW / 2,
                                         -tileH / 2,
@@ -805,14 +851,16 @@ export default function MahjongPixiTable({
                                   <pixiGraphics
                                     draw={(g) => {
                                       g.clear();
-                                      g.lineStyle(2, 0xffd23b, 1);
-                                      g.drawRoundedRect(
-                                        0,
-                                        0,
-                                        tileW,
-                                        tileH,
-                                        6,
+                                      const a = 0.35 + pulse * 0.65;
+                                      const w = 2 + pulse * 2;
+                                      g.beginFill(
+                                        0xffd23b,
+                                        0.06 + pulse * 0.09,
                                       );
+                                      g.drawRoundedRect(0, 0, tileW, tileH, 6);
+                                      g.endFill();
+                                      g.lineStyle(w, 0xffd23b, a);
+                                      g.drawRoundedRect(0, 0, tileW, tileH, 6);
                                     }}
                                   />
                                 ) : null}
@@ -832,7 +880,6 @@ export default function MahjongPixiTable({
                       );
                     })()
                   : null}
-
               </>
             ) : null}
 
