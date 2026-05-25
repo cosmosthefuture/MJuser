@@ -67,7 +67,7 @@ const drawPileLabelStyle = new TextStyle({
 
 const centerMessageBaseStyle = {
   fill: 0xffd23b,
-  fontSize: 56,
+  fontSize: 48,
   fontWeight: "900" as const,
 };
 
@@ -462,7 +462,10 @@ export default function MahjongPixiTable({
         ref={containerRef}
         className="flex h-full w-full items-center justify-center bg-[#00251b]"
       >
-        <div className="px-6 py-4 text-center text-5xl font-black tracking-[0.28em] text-[#ffd23b] [text-shadow:0_10px_22px_rgba(0,0,0,0.55),0_0_0_8px_rgba(5,51,37,1)]">
+        <div
+          style={rotateForPortrait ? { transform: "rotate(90deg)" } : undefined}
+          className="px-6 py-4 text-center text-5xl font-black tracking-[0.28em] text-[#ffd23b] [text-shadow:0_10px_22px_rgba(0,0,0,0.55),0_0_0_8px_rgba(5,51,37,1)]"
+        >
           {centerMessage ?? "加载中..."}
         </div>
       </div>
@@ -1335,7 +1338,7 @@ export default function MahjongPixiTable({
                   key={`${t.suit}-${t.rank}-${idx}`}
                   x={x}
                   y={y}
-                  scale={isHovered ? 1.06 : 1}
+                  scale={1}
                   eventMode="static"
                   cursor="default"
                   onPointerTap={(e: unknown) => {
