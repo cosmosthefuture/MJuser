@@ -31,6 +31,12 @@ type WsTile = {
 
 type ClientTile = MahjongTile & { id: number };
 
+type LastDiscardTile = MahjongTile & {
+  tileId?: number;
+  userId?: number;
+  seat?: number;
+};
+
 type WinnerRevealPayload = {
   winner_user_id?: unknown;
   winner_userid?: unknown;
@@ -631,9 +637,9 @@ export default function MahjongClient() {
   const [topDiscardTiles, setTopDiscardTiles] = useState<MahjongTile[]>([]);
   const [leftDiscardTiles, setLeftDiscardTiles] = useState<MahjongTile[]>([]);
   const [drawPileCount, setDrawPileCount] = useState<number | null>(null);
-  const [lastDiscardTile, setLastDiscardTile] = useState<MahjongTile | null>(
-    null,
-  );
+  const [lastDiscardSide, setLastDiscardSide] = useState<
+    "bottom" | "right" | "top" | "left" | null
+  >(null);
 
   useEffect(() => {
     if (!token) return;
@@ -654,7 +660,11 @@ export default function MahjongClient() {
 
     const applyInitialHandState = (payload: unknown) => {
       if (cancelled) return;
-      if (!Array.isArray(payload)) return;
+      const handStateRaw = Array.isArray(payload)
+        ? payload
+        : (payload as { handState?: unknown })?.handState;
+      if (!Array.isArray(handStateRaw)) return;
+      const handState = handStateRaw as unknown[];
 
       const isSortUpdate = sortHandInFlightRef.current;
       sortHandInFlightRef.current = false;
@@ -682,6 +692,7 @@ export default function MahjongClient() {
       const getSeatNumber = (raw: unknown): number | null => {
         if (typeof raw !== "object" || raw === null) return null;
         const seatRaw =
+          (raw as { seat?: unknown }).seat ??
           (raw as { seat_position?: unknown; seatPosition?: unknown })
             .seat_position ??
           (raw as { seat_position?: unknown; seatPosition?: unknown })
@@ -691,7 +702,7 @@ export default function MahjongClient() {
       };
 
       const selfSeat = (() => {
-        const selfPlayer = payload.find(
+        const selfPlayer = handState.find(
           (p) =>
             typeof p === "object" &&
             p !== null &&
@@ -702,7 +713,7 @@ export default function MahjongClient() {
 
       setSelfSeatPosition(selfSeat);
 
-      const opponentCount = payload.filter(
+      const opponentCount = handState.filter(
         (p) =>
           typeof p === "object" &&
           p !== null &&
@@ -728,7 +739,7 @@ export default function MahjongClient() {
         const sidesSet = new Set<"bottom" | "right" | "top" | "left">([
           "bottom",
         ]);
-        for (const p of payload) {
+        for (const p of handState) {
           if (typeof p !== "object" || p === null) continue;
           if ((p as { isSelf?: unknown }).isSelf === true) continue;
           const side = sideFromSeats(selfSeat, getSeatNumber(p));
@@ -742,7 +753,7 @@ export default function MahjongClient() {
         ];
         setActiveSides(ordered.filter((s) => sidesSet.has(s)));
       } else {
-        const count = payload.length;
+        const count = handState.length;
         if (count >= 1) {
           const sides: Array<"bottom" | "right" | "top" | "left"> = ["bottom"];
           if (count >= 2) sides.push("right");
@@ -777,7 +788,7 @@ export default function MahjongClient() {
       const nextRightDiscards: MahjongTile[] = [];
       const nextTopDiscards: MahjongTile[] = [];
       const nextLeftDiscards: MahjongTile[] = [];
-      for (const p of payload) {
+      for (const p of handState) {
         if (typeof p !== "object" || p === null) continue;
         if ((p as { isSelf?: unknown }).isSelf === true) continue;
         const side = sideFromSeats(selfSeat, getSeatNumber(p));
@@ -861,16 +872,13 @@ export default function MahjongClient() {
 
         if (meldsForSide.length > 0) nextOpponentMelds[side] = meldsForSide;
       }
-      setOpponentHandCounts(nextOpponentCounts);
-      setOpponentMelds(nextOpponentMelds);
-      setRightDiscardTiles(nextRightDiscards);
-      setTopDiscardTiles(nextTopDiscards);
-      setLeftDiscardTiles(nextLeftDiscards);
 
       // Track last discarded tile (for the draw pile panel).
       // Payload order can vary, so search for the first valid last_discard_tile.
-      let nextLastDiscard: MahjongTile | null = null;
-      for (const entry of payload) {
+      let nextLastDiscard: LastDiscardTile | null = null;
+      let nextLastDiscardSide: "bottom" | "right" | "top" | "left" | null =
+        null;
+      for (const entry of handState) {
         if (typeof entry !== "object" || entry === null) continue;
         const lastDiscardRaw = (entry as { last_discard_tile?: unknown })
           .last_discard_tile;
@@ -882,13 +890,80 @@ export default function MahjongClient() {
         const suit: MahjongTile["suit"] | null =
           typeRaw === "bamboo" ? "bamboo" : typeRaw === "dot" ? "dots" : null;
         if (suit && Number.isFinite(rank) && rank >= 1 && rank <= 9) {
-          nextLastDiscard = { suit, rank };
+          const tileIdRaw = (lastDiscardRaw as { id?: unknown }).id;
+          const tileId = Number(tileIdRaw);
+          const userIdRaw =
+            (lastDiscardRaw as { userId?: unknown; user_id?: unknown })
+              .userId ??
+            (lastDiscardRaw as { userId?: unknown; user_id?: unknown }).user_id;
+          const userId = Number(userIdRaw);
+          const seatRaw =
+            (lastDiscardRaw as { seat?: unknown; seat_position?: unknown })
+              .seat ??
+            (lastDiscardRaw as { seat?: unknown; seat_position?: unknown })
+              .seat_position;
+          const seat = Number(seatRaw);
+          const seatNo = Number.isFinite(seat) ? seat : null;
+          if (seatNo != null && selfSeat != null && seatNo === selfSeat) {
+            nextLastDiscardSide = "bottom";
+          } else {
+            const side = sideFromSeats(selfSeat, seatNo);
+            if (side) nextLastDiscardSide = side;
+          }
+          if (!nextLastDiscardSide && Number.isFinite(userId)) {
+            if (authUserId != null && userId === authUserId) {
+              nextLastDiscardSide = "bottom";
+            } else if (opponentCount === 1) {
+              nextLastDiscardSide = "right";
+            }
+          }
+          nextLastDiscard = {
+            suit,
+            rank,
+            tileId: Number.isFinite(tileId) ? tileId : undefined,
+            userId: Number.isFinite(userId) ? userId : undefined,
+            seat: seatNo ?? undefined,
+          };
           break;
         }
       }
-      setLastDiscardTile(nextLastDiscard);
+      setLastDiscardSide(nextLastDiscardSide);
 
-      const self = payload.find(
+      if (nextLastDiscard && nextLastDiscardSide) {
+        const same = (a: MahjongTile | undefined) =>
+          a &&
+          a.suit === nextLastDiscard!.suit &&
+          a.rank === nextLastDiscard!.rank;
+        if (nextLastDiscardSide === "right") {
+          if (!same(nextRightDiscards[nextRightDiscards.length - 1]))
+            nextRightDiscards.push({
+              suit: nextLastDiscard.suit,
+              rank: nextLastDiscard.rank,
+            });
+        }
+        if (nextLastDiscardSide === "top") {
+          if (!same(nextTopDiscards[nextTopDiscards.length - 1]))
+            nextTopDiscards.push({
+              suit: nextLastDiscard.suit,
+              rank: nextLastDiscard.rank,
+            });
+        }
+        if (nextLastDiscardSide === "left") {
+          if (!same(nextLeftDiscards[nextLeftDiscards.length - 1]))
+            nextLeftDiscards.push({
+              suit: nextLastDiscard.suit,
+              rank: nextLastDiscard.rank,
+            });
+        }
+      }
+
+      setOpponentHandCounts(nextOpponentCounts);
+      setOpponentMelds(nextOpponentMelds);
+      setRightDiscardTiles(nextRightDiscards);
+      setTopDiscardTiles(nextTopDiscards);
+      setLeftDiscardTiles(nextLeftDiscards);
+
+      const self = handState.find(
         (p) =>
           typeof p === "object" &&
           p !== null &&
@@ -998,9 +1073,29 @@ export default function MahjongClient() {
           if (!suit) continue;
           nextSelfDiscards.push({ suit, rank });
         }
+        if (
+          nextLastDiscard &&
+          nextLastDiscardSide === "bottom" &&
+          (nextSelfDiscards.length === 0 ||
+            nextSelfDiscards[nextSelfDiscards.length - 1]?.suit !==
+              nextLastDiscard.suit ||
+            nextSelfDiscards[nextSelfDiscards.length - 1]?.rank !==
+              nextLastDiscard.rank)
+        ) {
+          nextSelfDiscards.push({
+            suit: nextLastDiscard.suit,
+            rank: nextLastDiscard.rank,
+          });
+        }
         setSelfDiscardTiles(nextSelfDiscards);
       } else {
-        setSelfDiscardTiles([]);
+        if (nextLastDiscard && nextLastDiscardSide === "bottom") {
+          setSelfDiscardTiles([
+            { suit: nextLastDiscard.suit, rank: nextLastDiscard.rank },
+          ]);
+        } else {
+          setSelfDiscardTiles([]);
+        }
       }
 
       const nextHand: ClientTile[] = [];
@@ -1946,7 +2041,7 @@ export default function MahjongClient() {
                 centerMessage={centerMessage}
                 showDrawPile={showDrawPile}
                 drawPileCount={drawPileCount}
-                lastDiscardTile={lastDiscardTile}
+                lastDiscardSide={lastDiscardSide}
                 activeSides={activeSides}
                 opponentHandCounts={opponentHandCounts}
                 opponentMelds={opponentMelds}

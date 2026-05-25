@@ -28,7 +28,7 @@ type Props = {
   centerMessage?: string | null;
   showDrawPile?: boolean;
   drawPileCount?: number | null;
-  lastDiscardTile?: MahjongTile | null;
+  lastDiscardSide?: "bottom" | "right" | "top" | "left" | null;
   onDoubleClickTile?: (tileId: number) => void;
   // Which sides should be visible (matches avatar placement logic).
   activeSides?: Array<"bottom" | "right" | "top" | "left">;
@@ -74,7 +74,7 @@ export default function MahjongPixiTable({
   centerMessage = null,
   showDrawPile = false,
   drawPileCount = null,
-  lastDiscardTile = null,
+  lastDiscardSide = null,
   onDoubleClickTile,
   activeSides,
   opponentHandCounts,
@@ -292,8 +292,6 @@ export default function MahjongPixiTable({
     }
     for (const t of discards)
       paths.add(`${tileSpriteBasePath}/${tileSpriteFileName(t)}`);
-    if (lastDiscardTile)
-      paths.add(`${tileSpriteBasePath}/${tileSpriteFileName(lastDiscardTile)}`);
     for (const t of selfDiscardTiles)
       paths.add(`${tileSpriteBasePath}/${tileSpriteFileName(t)}`);
     for (const t of rightDiscardTiles)
@@ -308,7 +306,6 @@ export default function MahjongPixiTable({
     melds,
     opponentMelds,
     tileSpriteBasePath,
-    lastDiscardTile,
     selfDiscardTiles,
     rightDiscardTiles,
     topDiscardTiles,
@@ -532,6 +529,9 @@ export default function MahjongPixiTable({
                             const y = row * (tileH + tileGapY);
                             const spritePath = `${tileSpriteBasePath}/${tileSpriteFileName(t)}`;
                             const tex = textures[spritePath];
+                            const isLast =
+                              lastDiscardSide === "right" &&
+                              i === rightDiscardTiles.length - 1;
 
                             return (
                               <pixiContainer
@@ -549,6 +549,21 @@ export default function MahjongPixiTable({
                                     height={tileH}
                                   />
                                 )}
+                                {isLast ? (
+                                  <pixiGraphics
+                                    draw={(g) => {
+                                      g.clear();
+                                      g.lineStyle(2, 0xffd23b, 1);
+                                      g.drawRoundedRect(
+                                        -tileW / 2,
+                                        -tileH / 2,
+                                        tileW,
+                                        tileH,
+                                        6,
+                                      );
+                                    }}
+                                  />
+                                ) : null}
                                 {tex ? (
                                   <pixiSprite
                                     texture={tex}
@@ -601,6 +616,7 @@ export default function MahjongPixiTable({
                             const y = row * (tileH + tileGap);
                             const spritePath = `${tileSpriteBasePath}/${tileSpriteFileName(t)}`;
                             const tex = textures[spritePath];
+                            const isLast = lastDiscardSide === "top" && i === 0;
 
                             return (
                               <pixiContainer
@@ -617,6 +633,21 @@ export default function MahjongPixiTable({
                                     height={tileH}
                                   />
                                 )}
+                                {isLast ? (
+                                  <pixiGraphics
+                                    draw={(g) => {
+                                      g.clear();
+                                      g.lineStyle(2, 0xffd23b, 1);
+                                      g.drawRoundedRect(
+                                        0,
+                                        0,
+                                        tileW,
+                                        tileH,
+                                        6,
+                                      );
+                                    }}
+                                  />
+                                ) : null}
                                 {tex ? (
                                   <pixiSprite
                                     texture={tex}
@@ -667,6 +698,9 @@ export default function MahjongPixiTable({
                             const y = row * (tileH + tileGapY);
                             const spritePath = `${tileSpriteBasePath}/${tileSpriteFileName(t)}`;
                             const tex = textures[spritePath];
+                            const isLast =
+                              lastDiscardSide === "left" &&
+                              i === leftDiscardTiles.length - 1;
 
                             return (
                               <pixiContainer
@@ -684,6 +718,21 @@ export default function MahjongPixiTable({
                                     height={tileH}
                                   />
                                 )}
+                                {isLast ? (
+                                  <pixiGraphics
+                                    draw={(g) => {
+                                      g.clear();
+                                      g.lineStyle(2, 0xffd23b, 1);
+                                      g.drawRoundedRect(
+                                        -tileW / 2,
+                                        -tileH / 2,
+                                        tileW,
+                                        tileH,
+                                        6,
+                                      );
+                                    }}
+                                  />
+                                ) : null}
                                 {tex ? (
                                   <pixiSprite
                                     texture={tex}
@@ -733,6 +782,9 @@ export default function MahjongPixiTable({
                             const y = row * (tileH + tileGap);
                             const spritePath = `${tileSpriteBasePath}/${tileSpriteFileName(t)}`;
                             const tex = textures[spritePath];
+                            const isLast =
+                              lastDiscardSide === "bottom" &&
+                              i === selfDiscardTiles.length - 1;
 
                             return (
                               <pixiContainer
@@ -749,6 +801,21 @@ export default function MahjongPixiTable({
                                     height={tileH}
                                   />
                                 )}
+                                {isLast ? (
+                                  <pixiGraphics
+                                    draw={(g) => {
+                                      g.clear();
+                                      g.lineStyle(2, 0xffd23b, 1);
+                                      g.drawRoundedRect(
+                                        0,
+                                        0,
+                                        tileW,
+                                        tileH,
+                                        6,
+                                      );
+                                    }}
+                                  />
+                                ) : null}
                                 {tex ? (
                                   <pixiSprite
                                     texture={tex}
@@ -766,45 +833,6 @@ export default function MahjongPixiTable({
                     })()
                   : null}
 
-                {lastDiscardTile
-                  ? (() => {
-                      const spritePath = `${tileSpriteBasePath}/${tileSpriteFileName(
-                        lastDiscardTile,
-                      )}`;
-                      const tex = textures[spritePath];
-                      if (!tex) return null;
-                      const {
-                        w,
-                        h,
-                        iconOffsetX,
-                        iconOffsetY,
-                        iconShrinkW,
-                        iconShrinkH,
-                      } = tileStyle.lastDiscard;
-                      const cx = Math.floor(designWidth / 2);
-                      const cy = Math.floor(tableY + tableH / 2);
-                      return (
-                        <pixiContainer x={cx - w / 2} y={cy - h / 2}>
-                          {tileBgTex && (
-                            <pixiSprite
-                              texture={tileBgTex}
-                              x={0}
-                              y={0}
-                              width={w}
-                              height={h}
-                            />
-                          )}
-                          <pixiSprite
-                            texture={tex}
-                            x={iconOffsetX}
-                            y={iconOffsetY}
-                            width={w - iconShrinkW}
-                            height={h - iconShrinkH}
-                          />
-                        </pixiContainer>
-                      );
-                    })()
-                  : null}
               </>
             ) : null}
 
