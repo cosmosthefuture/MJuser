@@ -1916,10 +1916,17 @@ export default function MahjongClient() {
       }
     }
 
-    return activePlayerUserId != null
-      ? (sideByUserId.get(activePlayerUserId) ?? null)
+    const effectiveUserId = turnCountdown?.userId ?? activePlayerUserId;
+    return effectiveUserId != null
+      ? (sideByUserId.get(effectiveUserId) ?? null)
       : null;
-  }, [roundPlayers, authUserId, selfSeatPosition, activePlayerUserId]);
+  }, [
+    roundPlayers,
+    authUserId,
+    selfSeatPosition,
+    activePlayerUserId,
+    turnCountdown,
+  ]);
 
   const portraitUiStyle = isPortraitPhone
     ? {
@@ -2097,6 +2104,7 @@ export default function MahjongClient() {
                 drawPileCount={drawPileCount}
                 lastDiscardSide={lastDiscardSide}
                 activeTurnSide={activeTurnSide}
+                turnCountdownRemaining={turnCountdown?.remaining ?? null}
                 activeSides={activeSides}
                 opponentHandCounts={opponentHandCounts}
                 opponentMelds={opponentMelds}

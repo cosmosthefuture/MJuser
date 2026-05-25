@@ -30,6 +30,7 @@ type Props = {
   drawPileCount?: number | null;
   lastDiscardSide?: "bottom" | "right" | "top" | "left" | null;
   activeTurnSide?: "bottom" | "right" | "top" | "left" | null;
+  turnCountdownRemaining?: number | null;
   onDoubleClickTile?: (tileId: number) => void;
   // Which sides should be visible (matches avatar placement logic).
   activeSides?: Array<"bottom" | "right" | "top" | "left">;
@@ -80,6 +81,7 @@ export default function MahjongPixiTable({
   drawPileCount = null,
   lastDiscardSide = null,
   activeTurnSide = null,
+  turnCountdownRemaining = null,
   onDoubleClickTile,
   activeSides,
   seatNumbersBySide,
@@ -607,7 +609,11 @@ export default function MahjongPixiTable({
                   />
                   {/* Digital Timer */}
                   <pixiText
-                    text="15"
+                    text={(() => {
+                      if (turnCountdownRemaining == null) return "00";
+                      const v = Math.max(0, Math.ceil(turnCountdownRemaining));
+                      return String(v);
+                    })()}
                     anchor={0.5}
                     style={
                       new TextStyle({
