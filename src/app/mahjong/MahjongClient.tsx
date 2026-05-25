@@ -1966,7 +1966,7 @@ export default function MahjongClient() {
                 className="pointer-events-none absolute left-1/4 top-1/2"
                 style={portraitUiStyle ?? undefined}
               >
-                <div className="pointer-events-auto absolute right-28 bottom-[200px]">
+                <div className="pointer-events-auto absolute right-40 bottom-[200px]">
                   <button
                     type="button"
                     onClick={emitSortHand}
@@ -1977,7 +1977,7 @@ export default function MahjongClient() {
                 </div>
               </div>
             ) : (
-              <div className="pointer-events-auto absolute right-28 bottom-[200px]">
+              <div className="pointer-events-auto absolute right-40 bottom-[200px]">
                 <button
                   type="button"
                   onClick={emitSortHand}
@@ -2102,12 +2102,20 @@ export default function MahjongClient() {
                         "absolute flex flex-col items-center gap-2 rounded-[18px] bg-[#064e3b]/70 p-2 text-white shadow-[0_24px_80px_rgba(0,0,0,0.6)] backdrop-blur-md";
                       const pos =
                         position === "bottom"
-                          ? "right-40 bottom-[140px]"
+                          ? isMobileUi
+                            ? "left-[18%] -translate-x-1/2 bottom-18"
+                            : "left-[20%] bottom-[40px]"
                           : position === "top"
-                            ? "left-1/2 -translate-x-1/2 top-6"
+                            ? isMobileUi
+                              ? "right-[20%] -translate-x-1/2 top-10"
+                              : "right-[35%] -translate-x-1/2 top-6"
                             : position === "left"
-                              ? "left-6 top-1/2 -translate-y-1/2"
-                              : "right-6 top-1/2 -translate-y-1/2";
+                              ? isMobileUi
+                                ? "left-[12%] top-16"
+                                : "left-[20%] top-[16px] -translate-y-1/2"
+                              : isMobileUi
+                                ? "right-20 bottom-16"
+                                : "right-6 bottom-40 -translate-y-1/2";
 
                       const name = player.name;
                       const initials =
@@ -2303,12 +2311,20 @@ export default function MahjongClient() {
                       "absolute flex flex-col items-center gap-2 rounded-[18px] bg-[#064e3b]/70 p-2 text-[10px] text-white shadow-[0_24px_80px_rgba(0,0,0,0.6)] backdrop-blur-md";
                     const pos =
                       position === "bottom"
-                        ? "right-40 bottom-[140px]"
+                        ? isMobileUi
+                          ? "left-[45%] -translate-x-1/2 bottom-24"
+                          : "right-40 bottom-[140px]"
                         : position === "top"
-                          ? "left-1/2 -translate-x-1/2 top-6"
+                          ? isMobileUi
+                            ? "left-[45%] -translate-x-1/2 top-6"
+                            : "left-1/2 -translate-x-1/2 top-6"
                           : position === "left"
-                            ? "left-6 top-1/2 -translate-y-1/2"
-                            : "right-6 top-1/2 -translate-y-1/2";
+                            ? isMobileUi
+                              ? "left-4 top-24"
+                              : "left-6 top-1/2 -translate-y-1/2"
+                            : isMobileUi
+                              ? "right-24 top-24"
+                              : "right-6 top-1/2 -translate-y-1/2";
 
                     const name = player.name;
                     const initials =
