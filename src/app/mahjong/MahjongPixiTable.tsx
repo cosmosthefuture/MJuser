@@ -449,7 +449,7 @@ export default function MahjongPixiTable({
 
                 {rightDiscardTiles.length > 0
                   ? (() => {
-                      const rowsPerCol = 15;
+                      const rowsPerCol = discardCols;
                       const {
                         w,
                         h,
@@ -514,7 +514,7 @@ export default function MahjongPixiTable({
 
                 {topDiscardTiles.length > 0
                   ? (() => {
-                      const cols = 15;
+                      const cols = discardCols;
                       const {
                         w,
                         h,
@@ -583,7 +583,7 @@ export default function MahjongPixiTable({
 
                 {leftDiscardTiles.length > 0
                   ? (() => {
-                      const rowsPerCol = 15;
+                      const rowsPerCol = discardCols;
                       const {
                         w,
                         h,
@@ -648,7 +648,7 @@ export default function MahjongPixiTable({
 
                 {selfDiscardTiles.length > 0
                   ? (() => {
-                      const cols = 15;
+                      const cols = discardCols;
                       const {
                         w,
                         h,
