@@ -762,16 +762,6 @@ export default function MahjongPixiTable({
                 x={Math.floor(designWidth / 2)}
                 y={Math.floor(tableY + tableH / 2)}
               >
-                <pixiGraphics
-                  draw={(g) => {
-                    g.clear();
-                    // Match the green glassy button style from the reference image
-                    g.beginFill(0x064e3b, 0.8);
-                    g.lineStyle(1.5, 0x1d7b49, 0.6);
-                    g.drawRoundedRect(-220, -34, 440, 68, 34); // pill shape
-                    g.endFill();
-                  }}
-                />
                 <pixiText
                   text={centerMessage}
                   anchor={0.5}
@@ -779,10 +769,17 @@ export default function MahjongPixiTable({
                   y={0}
                   style={
                     new TextStyle({
-                      fill: 0xf6e3b4,
-                      fontSize: 22,
-                      fontWeight: "700",
-                      letterSpacing: 1,
+                      fill: [0xfff3b0, 0xefa02c],
+                      fontSize: 56,
+                      fontWeight: "900",
+                      letterSpacing: 18,
+                      stroke: 0x053325,
+                      strokeThickness: 8,
+                      dropShadow: true,
+                      dropShadowColor: 0x000000,
+                      dropShadowAlpha: 0.55,
+                      dropShadowBlur: 10,
+                      dropShadowDistance: 5,
                     })
                   }
                 />
