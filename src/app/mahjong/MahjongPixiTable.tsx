@@ -52,6 +52,12 @@ const labelStyle = new TextStyle({
   fontWeight: "600",
 });
 
+const centerMessageBaseStyle = {
+  fill: 0xffd23b,
+  fontSize: 56,
+  fontWeight: "900" as const,
+};
+
 function tileSpriteFileName(t: MahjongTile): string {
   if (t.suit === "dots") return `dot${t.rank}.webp`;
   return `bamboo${t.rank}.webp`;
@@ -80,6 +86,23 @@ export default function MahjongPixiTable({
   const boardBackgroundPath = "/images/mj-bg.webp";
   const tileBackgroundPath = "/images/mj-tile-bg.webp";
   const tileBackPath = "/images/mj-tile-back.webp";
+
+  const centerMessageStyle = useMemo(() => {
+    const msg = centerMessage ?? "";
+    const isMixed = /[A-Za-z0-9\s]/.test(msg);
+    return new TextStyle({
+      ...centerMessageBaseStyle,
+      letterSpacing: isMixed ? 6 : 18,
+      stroke: { color: 0x053325, width: isMixed ? 7 : 8 },
+      dropShadow: {
+        color: 0x000000,
+        alpha: 0.55,
+        blur: isMixed ? 9 : 10,
+        distance: isMixed ? 4 : 5,
+        angle: Math.PI / 6,
+      },
+    });
+  }, [centerMessage]);
 
   // Centralized Tile Style Configuration
   const tileStyle = useMemo(
@@ -137,6 +160,7 @@ export default function MahjongPixiTable({
   });
 
   const [textures, setTextures] = useState<Record<string, Texture>>({});
+  const loadingRef = useRef<Set<string>>(new Set());
   const [hoveredHandIdx, setHoveredHandIdx] = useState<number | null>(null);
   const lastTileTapRef = useRef<{ tileId: number; ts: number } | null>(null);
 
@@ -301,25 +325,48 @@ export default function MahjongPixiTable({
       tileBackgroundPath,
       tileBackPath,
       ...neededSpritePaths,
-    ].filter((p) => !textures[p]);
+    ].filter((p) => !textures[p] && !loadingRef.current.has(p));
     if (missing.length === 0) return;
 
     (async () => {
       const loaded: Record<string, Texture> = {};
-      for (const p of missing) {
-        try {
-          const tex = (await Assets.load(p)) as Texture;
-          tex.source.scaleMode = "linear";
-          loaded[p] = tex;
-        } catch {
-          // ignore missing/failed assets; we keep placeholder graphics
-        }
-      }
+      const run = async (paths: string[]) => {
+        const queue = [...paths];
+        const concurrency = 6;
+        const workers = Array.from({
+          length: Math.min(concurrency, queue.length),
+        })
+          .fill(0)
+          .map(async () => {
+            while (queue.length > 0 && !cancelled) {
+              const p = queue.shift();
+              if (!p) return;
+              try {
+                const tex = (await Assets.load(p)) as Texture;
+                tex.source.scaleMode = "linear";
+                loaded[p] = tex;
+              } catch {
+              } finally {
+                loadingRef.current.delete(p);
+              }
+            }
+          });
+        await Promise.all(workers);
+      };
+
+      for (const p of missing) loadingRef.current.add(p);
+      const priority = [
+        boardBackgroundPath,
+        tileBackgroundPath,
+        tileBackPath,
+      ].filter((p) => missing.includes(p));
+      const rest = missing.filter((p) => !priority.includes(p));
+      await run(priority);
+      await run(rest);
       if (cancelled) return;
       if (Object.keys(loaded).length === 0) return;
       setTextures((prev) => ({ ...prev, ...loaded }));
     })();
-
     return () => {
       cancelled = true;
     };
@@ -380,13 +427,17 @@ export default function MahjongPixiTable({
   const discardStartX = Math.floor(designWidth / 2 - discardTotalW / 2);
   const discardStartY = Math.floor(tableY + tableH / 2 - 140);
 
-  if (!boardBackground) {
+  const criticalReady = !!boardBackground && !!tileBgTex && !!tileBackTex;
+
+  if (!criticalReady) {
     return (
       <div
         ref={containerRef}
         className="flex h-full w-full items-center justify-center bg-[#00251b]"
       >
-        <div className="rounded-2xl  px-6 py-4 text-sm font-semibold text-amber-100 shadow-[0_22px_70px_rgba(0,0,0,0.45)] backdrop-blur-md"></div>
+        <div className="px-6 py-4 text-center text-5xl font-black tracking-[0.28em] text-[#ffd23b] [text-shadow:0_10px_22px_rgba(0,0,0,0.55),0_0_0_8px_rgba(5,51,37,1)]">
+          {centerMessage ?? "加载中..."}
+        </div>
       </div>
     );
   }
@@ -767,21 +818,7 @@ export default function MahjongPixiTable({
                   anchor={0.5}
                   x={0}
                   y={0}
-                  style={
-                    new TextStyle({
-                      fill: [0xfff3b0, 0xefa02c],
-                      fontSize: 56,
-                      fontWeight: "900",
-                      letterSpacing: 18,
-                      stroke: 0x053325,
-                      strokeThickness: 8,
-                      dropShadow: true,
-                      dropShadowColor: 0x000000,
-                      dropShadowAlpha: 0.55,
-                      dropShadowBlur: 10,
-                      dropShadowDistance: 5,
-                    })
-                  }
+                  style={centerMessageStyle}
                 />
               </pixiContainer>
             ) : null}

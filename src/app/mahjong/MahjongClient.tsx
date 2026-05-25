@@ -1117,7 +1117,7 @@ export default function MahjongClient() {
           setCenterMessage(null);
           return;
         }
-        setCenterMessage(`将在 ${remaining} 秒后开始`);
+        setCenterMessage(`将在${remaining}秒后开始`);
       };
 
       const handleRoundStarted = () => {
