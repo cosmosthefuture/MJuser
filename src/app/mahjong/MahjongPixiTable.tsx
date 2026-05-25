@@ -51,10 +51,18 @@ type Props = {
 
 extend({ Container, Graphics, Sprite, Text });
 
-const labelStyle = new TextStyle({
-  fill: 0xf6e3b4,
-  fontSize: 14,
-  fontWeight: "600",
+const drawPileLabelStyle = new TextStyle({
+  fill: 0xffd23b,
+  fontSize: 22,
+  fontWeight: "900",
+  stroke: { color: 0x053325, width: 4 },
+  dropShadow: {
+    color: 0x000000,
+    alpha: 0.45,
+    blur: 6,
+    distance: 3,
+    angle: Math.PI / 6,
+  },
 });
 
 const centerMessageBaseStyle = {
@@ -510,23 +518,22 @@ export default function MahjongPixiTable({
                     }
                     anchor={0.5}
                     x={0}
-                    y={-92}
-                    style={labelStyle}
+                    y={-78}
+                    style={drawPileLabelStyle}
                   />
                   <pixiGraphics
                     draw={(g) => {
                       g.clear();
-                      const amberLight = 0xffe07a;
                       const amber = 0xffd23b;
-                      const amberDark = 0xffc61a;
+                      const activeFaceFill = amber;
                       const topFaceFill =
-                        activeTurnSide === "top" ? amberLight : 0xf5f5f5;
+                        activeTurnSide === "top" ? activeFaceFill : 0xf5f5f5;
                       const bottomFaceFill =
-                        activeTurnSide === "bottom" ? amberDark : 0xdcdcdc;
+                        activeTurnSide === "bottom" ? activeFaceFill : 0xdcdcdc;
                       const leftFaceFill =
-                        activeTurnSide === "left" ? amber : 0xe5e5e5;
+                        activeTurnSide === "left" ? activeFaceFill : 0xe5e5e5;
                       const rightFaceFill =
-                        activeTurnSide === "right" ? amber : 0xe5e5e5;
+                        activeTurnSide === "right" ? activeFaceFill : 0xe5e5e5;
 
                       g.beginFill(0x0b6e62);
                       g.drawRoundedRect(-64, -64, 128, 128, 20);
