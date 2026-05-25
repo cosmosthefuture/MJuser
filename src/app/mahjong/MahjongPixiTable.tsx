@@ -660,12 +660,14 @@ export default function MahjongPixiTable({
                       const tileW = w;
                       const tileH = h;
                       const tileGap = 2;
-                      const contentW = cols * tileW + (cols - 1) * tileGap;
+                      // const contentW = cols * tileW + (cols - 1) * tileGap;
 
                       const cx = Math.floor(designWidth / 2);
                       const cy = Math.floor(tableY + tableH / 2);
-                      const startX = cx - Math.floor(contentW / 2);
-                      const startY = cy + 58;
+                      const startX = cx - 400;
+                      // Move auth user's discarded tiles into the center table area
+                      // (blue rectangle target), away from the bottom rack.
+                      const startY = cy + 200;
 
                       return (
                         <pixiContainer x={startX} y={startY}>
