@@ -497,32 +497,22 @@ export default function MahjongPixiTable({
 
             {showDrawPile ? (
               <>
-                <pixiGraphics
-                  draw={(g) => {
-                    g.clear();
-                    const cx = Math.floor(designWidth / 2);
-                    const cy = Math.floor(tableY + tableH / 2);
-                    g.beginFill(0xd8b27a);
-                    g.drawRoundedRect(cx - 80, cy - 55, 160, 110, 10);
-                    g.endFill();
-                    g.lineStyle(3, 0x7a4b12, 1);
-                    g.drawRoundedRect(cx - 80, cy - 55, 160, 110, 10);
-                  }}
-                />
-                <pixiText
-                  text={
-                    drawPileCount != null ? `牌堆: ${drawPileCount}` : "牌堆"
-                  }
-                  x={Math.floor(designWidth / 2) - 60}
-                  y={Math.floor(tableY + tableH / 2) - 50}
-                  style={labelStyle}
-                />
-
                 {/* Center Indicator UI */}
                 <pixiContainer
-                  x={Math.floor(designWidth / 2) + 160}
+                  x={Math.floor(designWidth / 2)}
                   y={Math.floor(tableY + tableH / 2)}
                 >
+                  <pixiText
+                    text={
+                      drawPileCount != null
+                        ? `牌堆: ${drawPileCount}`
+                        : "牌堆: --"
+                    }
+                    anchor={0.5}
+                    x={0}
+                    y={-92}
+                    style={labelStyle}
+                  />
                   <pixiGraphics
                     draw={(g) => {
                       g.clear();
