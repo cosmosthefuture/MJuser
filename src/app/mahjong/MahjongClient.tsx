@@ -1977,7 +1977,7 @@ export default function MahjongClient() {
                 </div>
               </div>
             ) : (
-              <div className="pointer-events-auto absolute right-40 bottom-[200px]">
+              <div className="pointer-events-auto absolute right-50 bottom-[200px]">
                 <button
                   type="button"
                   onClick={emitSortHand}
