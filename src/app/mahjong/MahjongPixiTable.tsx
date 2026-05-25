@@ -29,6 +29,7 @@ type Props = {
   showDrawPile?: boolean;
   drawPileCount?: number | null;
   lastDiscardSide?: "bottom" | "right" | "top" | "left" | null;
+  activeTurnSide?: "bottom" | "right" | "top" | "left" | null;
   onDoubleClickTile?: (tileId: number) => void;
   // Which sides should be visible (matches avatar placement logic).
   activeSides?: Array<"bottom" | "right" | "top" | "left">;
@@ -78,6 +79,7 @@ export default function MahjongPixiTable({
   showDrawPile = false,
   drawPileCount = null,
   lastDiscardSide = null,
+  activeTurnSide = null,
   onDoubleClickTile,
   activeSides,
   seatNumbersBySide,
@@ -522,6 +524,18 @@ export default function MahjongPixiTable({
                   <pixiGraphics
                     draw={(g) => {
                       g.clear();
+                      const amberLight = 0xffe07a;
+                      const amber = 0xffd23b;
+                      const amberDark = 0xffc61a;
+                      const topFaceFill =
+                        activeTurnSide === "top" ? amberLight : 0xf5f5f5;
+                      const bottomFaceFill =
+                        activeTurnSide === "bottom" ? amberDark : 0xdcdcdc;
+                      const leftFaceFill =
+                        activeTurnSide === "left" ? amber : 0xe5e5e5;
+                      const rightFaceFill =
+                        activeTurnSide === "right" ? amber : 0xe5e5e5;
+
                       g.beginFill(0x0b6e62);
                       g.drawRoundedRect(-64, -64, 128, 128, 20);
                       g.endFill();
@@ -548,22 +562,22 @@ export default function MahjongPixiTable({
                       // 3D Sunken Center Face (the beveled trapezoids)
                       // Top face (lighter)
                       g.lineStyle(0);
-                      g.beginFill(0xf5f5f5);
+                      g.beginFill(topFaceFill);
                       g.drawPolygon([-50, -50, 50, -50, 24, -24, -24, -24]);
                       g.endFill();
 
                       // Bottom face (slightly darker)
-                      g.beginFill(0xdcdcdc);
+                      g.beginFill(bottomFaceFill);
                       g.drawPolygon([-50, 50, 50, 50, 24, 24, -24, 24]);
                       g.endFill();
 
                       // Left face (medium)
-                      g.beginFill(0xe5e5e5);
+                      g.beginFill(leftFaceFill);
                       g.drawPolygon([-50, -50, -50, 50, -24, 24, -24, -24]);
                       g.endFill();
 
                       // Right face (medium)
-                      g.beginFill(0xe5e5e5);
+                      g.beginFill(rightFaceFill);
                       g.drawPolygon([50, -50, 50, 50, 24, 24, 24, -24]);
                       g.endFill();
 
@@ -618,7 +632,7 @@ export default function MahjongPixiTable({
                       anchor={0.5}
                       style={
                         new TextStyle({
-                          fill: 0x333333,
+                          fill: activeTurnSide === "top" ? 0xffd23b : 0x333333,
                           fontSize: 18,
                           fontWeight: "bold",
                         })
@@ -633,7 +647,7 @@ export default function MahjongPixiTable({
                       anchor={0.5}
                       style={
                         new TextStyle({
-                          fill: 0x333333,
+                          fill: activeTurnSide === "left" ? 0xffd23b : 0x333333,
                           fontSize: 18,
                           fontWeight: "bold",
                         })
@@ -648,7 +662,8 @@ export default function MahjongPixiTable({
                       anchor={0.5}
                       style={
                         new TextStyle({
-                          fill: 0x333333,
+                          fill:
+                            activeTurnSide === "right" ? 0xffd23b : 0x333333,
                           fontSize: 18,
                           fontWeight: "bold",
                         })
@@ -663,7 +678,8 @@ export default function MahjongPixiTable({
                       anchor={0.5}
                       style={
                         new TextStyle({
-                          fill: 0x333333,
+                          fill:
+                            activeTurnSide === "bottom" ? 0xffd23b : 0x333333,
                           fontSize: 18,
                           fontWeight: "bold",
                         })

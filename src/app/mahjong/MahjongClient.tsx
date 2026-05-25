@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import { ArrowLeft } from "lucide-react";
@@ -1867,6 +1867,60 @@ export default function MahjongClient() {
     transform: "translate(-50%, -50%)",
   };
 
+  const activeTurnSide = useMemo(() => {
+    if (roundPlayers.length === 0) return null;
+
+    const authPlayer =
+      authUserId != null
+        ? (roundPlayers.find((p) => p.userId === authUserId) ?? null)
+        : null;
+    const self =
+      authPlayer ??
+      (selfSeatPosition != null
+        ? (roundPlayers.find((p) => p.seatPosition === selfSeatPosition) ??
+          null)
+        : null) ??
+      roundPlayers[0] ??
+      null;
+
+    if (!self) return null;
+    const otherPlayers = roundPlayers.filter((p) => p !== self);
+
+    const sideByUserId = new Map<number, "bottom" | "right" | "top" | "left">();
+    sideByUserId.set(self.userId, "bottom");
+
+    const selfSeatNo = Number.isFinite(self.seatPosition)
+      ? self.seatPosition
+      : null;
+
+    if (otherPlayers.length === 1) {
+      const only = otherPlayers[0];
+      if (only) sideByUserId.set(only.userId, "right");
+    } else if (selfSeatNo != null) {
+      for (const p of otherPlayers) {
+        const otherSeatNo = Number.isFinite(p.seatPosition)
+          ? p.seatPosition
+          : 0;
+        const delta = (((otherSeatNo - selfSeatNo) % 4) + 4) % 4;
+        if (delta === 1) sideByUserId.set(p.userId, "right");
+        if (delta === 2) sideByUserId.set(p.userId, "top");
+        if (delta === 3) sideByUserId.set(p.userId, "left");
+      }
+    } else {
+      const ordered: Array<"right" | "top" | "left"> = ["right", "top", "left"];
+      for (let i = 0; i < otherPlayers.length; i++) {
+        const p = otherPlayers[i];
+        const side = ordered[i];
+        if (!p || !side) continue;
+        sideByUserId.set(p.userId, side);
+      }
+    }
+
+    return activePlayerUserId != null
+      ? (sideByUserId.get(activePlayerUserId) ?? null)
+      : null;
+  }, [roundPlayers, authUserId, selfSeatPosition, activePlayerUserId]);
+
   const portraitUiStyle = isPortraitPhone
     ? {
         width: `${viewport.height}px`,
@@ -2042,6 +2096,7 @@ export default function MahjongClient() {
                 showDrawPile={showDrawPile}
                 drawPileCount={drawPileCount}
                 lastDiscardSide={lastDiscardSide}
+                activeTurnSide={activeTurnSide}
                 activeSides={activeSides}
                 opponentHandCounts={opponentHandCounts}
                 opponentMelds={opponentMelds}
