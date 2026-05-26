@@ -141,9 +141,17 @@ export default function MahjongClient() {
     }>;
   } | null>(null);
 
+  const [winDecision, setWinDecision] = useState<{
+    userId: number;
+    message: string;
+  } | null>(null);
+
   const sortHandInFlightRef = useRef(false);
   const isDecisionModalOpen =
-    kongDecision != null || pongDecision != null || chowDecision != null;
+    kongDecision != null ||
+    pongDecision != null ||
+    chowDecision != null ||
+    winDecision != null;
 
   useEffect(() => {
     const updateViewport = () => {
@@ -376,6 +384,36 @@ export default function MahjongClient() {
     socket.emit("mahjong:pass_normal_chow", {
       roomId: String(roomId),
       userId: authUserId,
+    });
+  };
+
+  const emitAcceptWin = (userId: number) => {
+    const socket = getSocket();
+    if (!socket) return;
+    if (roomId == null) return;
+    if (!Number.isFinite(userId)) return;
+    console.log("[ws] emit mahjong:accept_win", {
+      roomId: String(roomId),
+      userId,
+    });
+    socket.emit("mahjong:accept_win", {
+      roomId: String(roomId),
+      userId,
+    });
+  };
+
+  const emitPassWin = (userId: number) => {
+    const socket = getSocket();
+    if (!socket) return;
+    if (roomId == null) return;
+    if (!Number.isFinite(userId)) return;
+    console.log("[ws] emit mahjong:pass_win", {
+      roomId: String(roomId),
+      userId,
+    });
+    socket.emit("mahjong:pass_win", {
+      roomId: String(roomId),
+      userId,
     });
   };
 
@@ -1592,6 +1630,27 @@ export default function MahjongClient() {
         setChowDecision(null);
       };
 
+      const handleAskWinDecision = (payload: unknown) => {
+        if (cancelled) return;
+        if (typeof payload !== "object" || payload === null) return;
+        const userIdRaw =
+          (payload as { user_id?: unknown; userId?: unknown }).user_id ??
+          (payload as { user_id?: unknown; userId?: unknown }).userId;
+        const messageRaw = (payload as { message?: unknown }).message;
+        const userId = Number(userIdRaw ?? authUserId);
+        const message =
+          typeof messageRaw === "string" && messageRaw.trim().length > 0
+            ? messageRaw
+            : "胡牌？";
+        if (!Number.isFinite(userId)) return;
+        setWinDecision({ userId, message });
+      };
+
+      const handleRemoveWinDecision = () => {
+        if (cancelled) return;
+        setWinDecision(null);
+      };
+
       const applyCanChow = (payload: unknown) => {
         if (cancelled) return;
         if (typeof payload !== "object" || payload === null) return;
@@ -1741,6 +1800,12 @@ export default function MahjongClient() {
       socket.off("mahjong:remove_chow_decision", handleRemoveChowDecision);
       socket.on("mahjong:remove_chow_decision", handleRemoveChowDecision);
 
+      socket.off("mahjong:ask_win_decision", handleAskWinDecision);
+      socket.on("mahjong:ask_win_decision", handleAskWinDecision);
+
+      socket.off("mahjong:remove_win_decision", handleRemoveWinDecision);
+      socket.on("mahjong:remove_win_decision", handleRemoveWinDecision);
+
       socket.off("mahjong:initial_hand_state", handleInitialHandState);
       socket.on("mahjong:initial_hand_state", handleInitialHandState);
 
@@ -1792,6 +1857,8 @@ export default function MahjongClient() {
       socket?.off("mahjong:remove_kong_decision");
       socket?.off("mahjong:remove_pong_decision");
       socket?.off("mahjong:remove_chow_decision");
+      socket?.off("mahjong:ask_win_decision");
+      socket?.off("mahjong:remove_win_decision");
       socket?.off("mahjong:initial_hand_state");
       socket?.off("mahjong:start_shuffling");
       socket?.off("mahjong:user_to_play");
@@ -2789,6 +2856,67 @@ export default function MahjongClient() {
                     >
                       跳过
                     </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : null}
+
+          {winDecision ? (
+            <div className="pointer-events-none absolute inset-0 z-30">
+              <div
+                className={`pointer-events-none absolute flex items-center justify-center gap-3 ${
+                  isPortraitPhone
+                    ? "left-1/2 top-1/2"
+                    : "left-1/2 bottom-[118px] -translate-x-1/2"
+                }`}
+                style={
+                  isPortraitPhone ? (portraitUiStyle ?? undefined) : undefined
+                }
+              >
+                <div
+                  className={
+                    isPortraitPhone && isMobileUi
+                      ? "-translate-x-0 translate-y-10"
+                      : undefined
+                  }
+                >
+                  <div
+                    className={`pointer-events-auto flex items-center gap-3 rounded-2xl border border-[#1d7b49]/60 bg-[#064e3b]/85 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-md ${
+                      isMobileUi ? "px-3 py-2" : "px-4 py-3"
+                    }`}
+                    role="dialog"
+                    aria-modal="true"
+                  >
+                    <div
+                      className={`max-w-[240px] text-center font-extrabold tracking-wide text-amber-100 ${
+                        isMobileUi ? "text-xs" : "text-sm"
+                      }`}
+                    >
+                      {winDecision.message}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          emitAcceptWin(winDecision.userId);
+                          setWinDecision(null);
+                        }}
+                        className={acceptButtonClass}
+                      >
+                        接受
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          emitPassWin(winDecision.userId);
+                          setWinDecision(null);
+                        }}
+                        className={cancelButtonClass}
+                      >
+                        跳过
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
