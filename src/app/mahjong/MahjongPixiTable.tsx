@@ -175,7 +175,7 @@ export default function MahjongPixiTable({
   const [pulseNow, setPulseNow] = useState(0);
 
   useEffect(() => {
-    if (!lastDiscardSide) return;
+    if (!lastDiscardSide && !activeTurnSide) return;
     let raf = 0;
     const tick = (ts: number) => {
       setPulseNow(ts);
@@ -183,9 +183,10 @@ export default function MahjongPixiTable({
     };
     raf = window.requestAnimationFrame(tick);
     return () => window.cancelAnimationFrame(raf);
-  }, [lastDiscardSide]);
+  }, [lastDiscardSide, activeTurnSide]);
 
-  const pulse = lastDiscardSide ? (Math.sin(pulseNow / 180) + 1) / 2 : 0;
+  const pulse =
+    lastDiscardSide || activeTurnSide ? (Math.sin(pulseNow / 180) + 1) / 2 : 0;
 
   const tryEmitDoubleTap = (tileId: number, evtDetail?: number) => {
     // Prefer native click-count when available.
@@ -520,17 +521,7 @@ export default function MahjongPixiTable({
                   <pixiGraphics
                     draw={(g) => {
                       g.clear();
-                      const amber = 0xffd23b;
-                      const activeFaceFill = amber;
-                      const topFaceFill =
-                        activeTurnSide === "top" ? activeFaceFill : 0xf5f5f5;
-                      const bottomFaceFill =
-                        activeTurnSide === "bottom" ? activeFaceFill : 0xdcdcdc;
-                      const leftFaceFill =
-                        activeTurnSide === "left" ? activeFaceFill : 0xe5e5e5;
-                      const rightFaceFill =
-                        activeTurnSide === "right" ? activeFaceFill : 0xe5e5e5;
-
+                      // Center UI Container
                       g.beginFill(0x0b6e62);
                       g.drawRoundedRect(-64, -64, 128, 128, 20);
                       g.endFill();
@@ -555,26 +546,49 @@ export default function MahjongPixiTable({
                       g.endFill();
 
                       // 3D Sunken Center Face (the beveled trapezoids)
+                      const amber = 0xffd23b;
+                      const activeAlpha = 0.4 + pulse * 0.6;
+
                       // Top face (lighter)
                       g.lineStyle(0);
-                      g.beginFill(topFaceFill);
+                      g.beginFill(0xf5f5f5);
                       g.drawPolygon([-50, -50, 50, -50, 24, -24, -24, -24]);
                       g.endFill();
+                      if (activeTurnSide === "top") {
+                        g.beginFill(amber, activeAlpha);
+                        g.drawPolygon([-50, -50, 50, -50, 24, -24, -24, -24]);
+                        g.endFill();
+                      }
 
                       // Bottom face (slightly darker)
-                      g.beginFill(bottomFaceFill);
+                      g.beginFill(0xdcdcdc);
                       g.drawPolygon([-50, 50, 50, 50, 24, 24, -24, 24]);
                       g.endFill();
+                      if (activeTurnSide === "bottom") {
+                        g.beginFill(amber, activeAlpha);
+                        g.drawPolygon([-50, 50, 50, 50, 24, 24, -24, 24]);
+                        g.endFill();
+                      }
 
                       // Left face (medium)
-                      g.beginFill(leftFaceFill);
+                      g.beginFill(0xe5e5e5);
                       g.drawPolygon([-50, -50, -50, 50, -24, 24, -24, -24]);
                       g.endFill();
+                      if (activeTurnSide === "left") {
+                        g.beginFill(amber, activeAlpha);
+                        g.drawPolygon([-50, -50, -50, 50, -24, 24, -24, -24]);
+                        g.endFill();
+                      }
 
                       // Right face (medium)
-                      g.beginFill(rightFaceFill);
+                      g.beginFill(0xe5e5e5);
                       g.drawPolygon([50, -50, 50, 50, 24, 24, 24, -24]);
                       g.endFill();
+                      if (activeTurnSide === "right") {
+                        g.beginFill(amber, activeAlpha);
+                        g.drawPolygon([50, -50, 50, 50, 24, 24, 24, -24]);
+                        g.endFill();
+                      }
 
                       // Diagonal lines for depth
                       g.lineStyle(1, 0x999999, 0.5);
@@ -629,6 +643,7 @@ export default function MahjongPixiTable({
                       x={0}
                       y={-38}
                       anchor={0.5}
+                      alpha={activeTurnSide === "top" ? 0.6 + pulse * 0.4 : 1}
                       style={
                         new TextStyle({
                           fill: activeTurnSide === "top" ? 0xffd23b : 0x333333,
@@ -644,6 +659,7 @@ export default function MahjongPixiTable({
                       x={-38}
                       y={0}
                       anchor={0.5}
+                      alpha={activeTurnSide === "left" ? 0.6 + pulse * 0.4 : 1}
                       style={
                         new TextStyle({
                           fill: activeTurnSide === "left" ? 0xffd23b : 0x333333,
@@ -659,6 +675,7 @@ export default function MahjongPixiTable({
                       x={38}
                       y={0}
                       anchor={0.5}
+                      alpha={activeTurnSide === "right" ? 0.6 + pulse * 0.4 : 1}
                       style={
                         new TextStyle({
                           fill:
@@ -675,6 +692,9 @@ export default function MahjongPixiTable({
                       x={0}
                       y={38}
                       anchor={0.5}
+                      alpha={
+                        activeTurnSide === "bottom" ? 0.6 + pulse * 0.4 : 1
+                      }
                       style={
                         new TextStyle({
                           fill:
