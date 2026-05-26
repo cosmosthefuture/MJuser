@@ -622,6 +622,16 @@ export default function MahjongClient() {
       });
     };
 
+    // Dev-only helper for testing the win decision modal from the browser console:
+    // `globalThis.__mj_triggerWinDecision()`
+    (
+      globalThis as unknown as { __mj_triggerWinDecision?: () => void }
+    ).__mj_triggerWinDecision = () => {
+      const message = "胡牌？";
+      console.log("[dev] trigger mahjong:ask_win_decision", { message });
+      setWinDecision({ userId: authUserId ?? 0, message });
+    };
+
     return () => {
       delete (
         globalThis as unknown as { __mj_triggerWinnerReveal?: () => void }
@@ -634,6 +644,9 @@ export default function MahjongClient() {
       delete (
         globalThis as unknown as { __mj_triggerCanNormalChow?: () => void }
       ).__mj_triggerCanNormalChow;
+      delete (
+        globalThis as unknown as { __mj_triggerWinDecision?: () => void }
+      ).__mj_triggerWinDecision;
     };
   }, [authUserId]);
   const [roundPlayers, setRoundPlayers] = useState<RoundPlayer[]>([]);
