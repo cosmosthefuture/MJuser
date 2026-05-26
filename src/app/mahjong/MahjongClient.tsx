@@ -644,9 +644,8 @@ export default function MahjongClient() {
       delete (
         globalThis as unknown as { __mj_triggerCanNormalChow?: () => void }
       ).__mj_triggerCanNormalChow;
-      delete (
-        globalThis as unknown as { __mj_triggerWinDecision?: () => void }
-      ).__mj_triggerWinDecision;
+      delete (globalThis as unknown as { __mj_triggerWinDecision?: () => void })
+        .__mj_triggerWinDecision;
     };
   }, [authUserId]);
   const [roundPlayers, setRoundPlayers] = useState<RoundPlayer[]>([]);
@@ -1731,7 +1730,7 @@ export default function MahjongClient() {
         setCenterMessage("Round Over!");
         setShowEndRoundButton(false);
         setTimeout(() => {
-          window.location.reload();
+          router.push("/game-rooms?rule_id=1");
         }, 2000);
       };
 
