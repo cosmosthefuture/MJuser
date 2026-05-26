@@ -52,14 +52,14 @@ type Props = {
 extend({ Container, Graphics, Sprite, Text });
 
 const drawPileLabelStyle = new TextStyle({
-  fill: 0xffd23b,
+  fill: 0xd9a600,
   fontSize: 22,
   fontWeight: "900",
   stroke: { color: 0x053325, width: 4 },
 });
 
 const centerMessageBaseStyle = {
-  fill: 0xffd23b,
+  fill: 0xd9a600,
   fontSize: 48,
   fontWeight: "900" as const,
 };
@@ -458,7 +458,7 @@ export default function MahjongPixiTable({
       >
         <div
           style={rotateForPortrait ? { transform: "rotate(90deg)" } : undefined}
-          className="px-6 py-4 text-center text-5xl font-black tracking-[0.28em] text-[#ffd23b] [text-shadow:0_10px_22px_rgba(0,0,0,0.55),0_0_0_8px_rgba(5,51,37,1)]"
+          className="px-6 py-4 text-center text-5xl font-black tracking-[0.28em] text-[#d9a600] [text-shadow:0_10px_22px_rgba(0,0,0,0.55),0_0_0_8px_rgba(5,51,37,1)]"
         >
           {centerMessage ?? "加载中..."}
         </div>
@@ -546,7 +546,7 @@ export default function MahjongPixiTable({
                       g.endFill();
 
                       // 3D Sunken Center Face (the beveled trapezoids)
-                      const amber = 0xffd23b;
+                      const amber = 0xd9a600;
                       const activeAlpha = 0.4 + pulse * 0.6;
 
                       // Top face (lighter)
@@ -646,7 +646,7 @@ export default function MahjongPixiTable({
                       alpha={activeTurnSide === "top" ? 0.6 + pulse * 0.4 : 1}
                       style={
                         new TextStyle({
-                          fill: activeTurnSide === "top" ? 0xffd23b : 0x333333,
+                          fill: activeTurnSide === "top" ? 0xd9a600 : 0x333333,
                           fontSize: 18,
                           fontWeight: "bold",
                         })
@@ -662,7 +662,7 @@ export default function MahjongPixiTable({
                       alpha={activeTurnSide === "left" ? 0.6 + pulse * 0.4 : 1}
                       style={
                         new TextStyle({
-                          fill: activeTurnSide === "left" ? 0xffd23b : 0x333333,
+                          fill: activeTurnSide === "left" ? 0xd9a600 : 0x333333,
                           fontSize: 18,
                           fontWeight: "bold",
                         })
@@ -679,7 +679,7 @@ export default function MahjongPixiTable({
                       style={
                         new TextStyle({
                           fill:
-                            activeTurnSide === "right" ? 0xffd23b : 0x333333,
+                            activeTurnSide === "right" ? 0xd9a600 : 0x333333,
                           fontSize: 18,
                           fontWeight: "bold",
                         })
@@ -698,7 +698,7 @@ export default function MahjongPixiTable({
                       style={
                         new TextStyle({
                           fill:
-                            activeTurnSide === "bottom" ? 0xffd23b : 0x333333,
+                            activeTurnSide === "bottom" ? 0xd9a600 : 0x333333,
                           fontSize: 18,
                           fontWeight: "bold",
                         })
@@ -768,7 +768,7 @@ export default function MahjongPixiTable({
                                       const a = 0.35 + pulse * 0.65;
                                       const w = 2 + pulse * 2;
                                       g.beginFill(
-                                        0xffd23b,
+                                        0xd9a600,
                                         0.06 + pulse * 0.09,
                                       );
                                       g.drawRoundedRect(
@@ -779,7 +779,7 @@ export default function MahjongPixiTable({
                                         6,
                                       );
                                       g.endFill();
-                                      g.lineStyle(w, 0xffd23b, a);
+                                      g.lineStyle(w, 0xd9a600, a);
                                       g.drawRoundedRect(
                                         -tileW / 2,
                                         -tileH / 2,
@@ -866,12 +866,12 @@ export default function MahjongPixiTable({
                                       const a = 0.35 + pulse * 0.65;
                                       const w = 2 + pulse * 2;
                                       g.beginFill(
-                                        0xffd23b,
+                                        0xd9a600,
                                         0.06 + pulse * 0.09,
                                       );
                                       g.drawRoundedRect(0, 0, tileW, tileH, 6);
                                       g.endFill();
-                                      g.lineStyle(w, 0xffd23b, a);
+                                      g.lineStyle(w, 0xd9a600, a);
                                       g.drawRoundedRect(0, 0, tileW, tileH, 6);
                                     }}
                                   />
@@ -954,7 +954,7 @@ export default function MahjongPixiTable({
                                       const a = 0.35 + pulse * 0.65;
                                       const w = 2 + pulse * 2;
                                       g.beginFill(
-                                        0xffd23b,
+                                        0xd9a600,
                                         0.06 + pulse * 0.09,
                                       );
                                       g.drawRoundedRect(
@@ -965,7 +965,7 @@ export default function MahjongPixiTable({
                                         6,
                                       );
                                       g.endFill();
-                                      g.lineStyle(w, 0xffd23b, a);
+                                      g.lineStyle(w, 0xd9a600, a);
                                       g.drawRoundedRect(
                                         -tileW / 2,
                                         -tileH / 2,
@@ -1051,12 +1051,12 @@ export default function MahjongPixiTable({
                                       const a = 0.35 + pulse * 0.65;
                                       const w = 2 + pulse * 2;
                                       g.beginFill(
-                                        0xffd23b,
+                                        0xd9a600,
                                         0.06 + pulse * 0.09,
                                       );
                                       g.drawRoundedRect(0, 0, tileW, tileH, 6);
                                       g.endFill();
-                                      g.lineStyle(w, 0xffd23b, a);
+                                      g.lineStyle(w, 0xd9a600, a);
                                       g.drawRoundedRect(0, 0, tileW, tileH, 6);
                                     }}
                                   />
