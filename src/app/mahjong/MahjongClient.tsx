@@ -1927,11 +1927,18 @@ export default function MahjongClient() {
   const isPortraitPhone =
     viewport.width < 900 && viewport.height > viewport.width;
   const isMobileUi = viewport.width < 520;
-  const stageStyle = {
-    width: "100vw",
-    height: "100dvh",
-    transform: "translate(-50%, -50%)",
-  };
+  const stageStyle = isPortraitPhone
+    ? {
+        width: `${viewport.height}px`,
+        height: `${viewport.width}px`,
+        transform: "translate(-50%, -50%) rotate(90deg)",
+        transformOrigin: "center center",
+      }
+    : {
+        width: "100vw",
+        height: "100dvh",
+        transform: "translate(-50%, -50%)",
+      };
 
   const activeTurnSide = useMemo(() => {
     if (roundPlayers.length === 0) return null;
