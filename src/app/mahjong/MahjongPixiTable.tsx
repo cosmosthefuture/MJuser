@@ -114,18 +114,28 @@ export default function MahjongPixiTable({
   }, [centerMessage]);
 
   // Centralized Tile Style Configuration
-  const tileStyle = useMemo(
-    () => ({
-      // Main hand and meld tiles
-      main: {
-        w: 68,
-        h: 94,
-        iconOffsetX: 8,
-        iconOffsetY: 20,
-        iconShrinkW: 16,
-        iconShrinkH: 24,
-      },
-      // Discarded tiles on the table
+  const tileStyle = useMemo(() => {
+    const baseMain = {
+      w: 68,
+      h: 94,
+      iconOffsetX: 8,
+      iconOffsetY: 20,
+      iconShrinkW: 16,
+      iconShrinkH: 24,
+    };
+
+    const scaleMain = (scale: number) => ({
+      w: Math.max(1, Math.round(baseMain.w * scale)),
+      h: Math.max(1, Math.round(baseMain.h * scale)),
+      iconOffsetX: Math.max(0, Math.round(baseMain.iconOffsetX * scale)),
+      iconOffsetY: Math.max(0, Math.round(baseMain.iconOffsetY * scale)),
+      iconShrinkW: Math.max(0, Math.round(baseMain.iconShrinkW * scale)),
+      iconShrinkH: Math.max(0, Math.round(baseMain.iconShrinkH * scale)),
+    });
+
+    return {
+      main: scaleMain(1.06),
+      meld: scaleMain(0.94),
       discard: {
         w: 48,
         h: 66,
@@ -134,7 +144,6 @@ export default function MahjongPixiTable({
         iconShrinkW: 12,
         iconShrinkH: 16,
       },
-      // Small tiles for opponents and side views
       mini: {
         w: 32,
         h: 44,
@@ -143,7 +152,6 @@ export default function MahjongPixiTable({
         iconShrinkW: 10,
         iconShrinkH: 14,
       },
-      // Last discarded tile (highlighted)
       lastDiscard: {
         w: 52,
         h: 72,
@@ -152,9 +160,8 @@ export default function MahjongPixiTable({
         iconShrinkW: 20,
         iconShrinkH: 28,
       },
-    }),
-    [],
-  );
+    };
+  }, []);
 
   const getDevicePixelRatio = () => {
     if (typeof window === "undefined") return 1;
@@ -277,8 +284,10 @@ export default function MahjongPixiTable({
   const tableW = designWidth - tableMargin * 2;
   const tableH = designHeight - 170;
 
-  const tileW = tileStyle.main.w;
-  const tileH = tileStyle.main.h;
+  const handTileW = tileStyle.main.w;
+  const handTileH = tileStyle.main.h;
+  const meldTileW = tileStyle.meld.w;
+  const meldTileH = tileStyle.meld.h;
   const gap = 0;
 
   const rackH = 120;
@@ -416,8 +425,11 @@ export default function MahjongPixiTable({
     };
   }, [boardBackground, designWidth, designHeight]);
 
-  // Keep the auth user's hand left-aligned in the rack.
-  const handStartX = Math.max(24, rackX + 36);
+  const rackInnerLeft = Math.max(24, rackX + 36);
+  const rackInnerRight = rackX + rackW - 36;
+  const rackInnerWidth = Math.max(0, rackInnerRight - rackInnerLeft);
+  const handWidth =
+    hand.length * handTileW + Math.max(0, hand.length - 1) * gap;
 
   const meldGroupGap = 10;
   const meldsWidth = useMemo(() => {
@@ -427,16 +439,20 @@ export default function MahjongPixiTable({
       const m = melds[i];
       const count = Math.max(0, m?.tiles?.length ?? 0);
       if (count === 0) continue;
-      total += count * tileW + (count - 1) * gap;
+      total += count * meldTileW + (count - 1) * gap;
       if (i < melds.length - 1) total += meldGroupGap;
     }
     return total;
-  }, [melds, tileW, gap]);
+  }, [melds, meldTileW, gap]);
 
-  const meldsStartX = Math.max(
-    handStartX + 24,
-    rackX + rackW - 36 - meldsWidth,
-  );
+  const canPlaceMeldsOnLeft =
+    meldsWidth > 0 && meldsWidth + 24 + handWidth <= rackInnerWidth;
+  const handStartX = canPlaceMeldsOnLeft
+    ? rackInnerLeft + meldsWidth + 24
+    : rackInnerLeft;
+  const meldsStartX = canPlaceMeldsOnLeft
+    ? rackInnerLeft
+    : Math.max(handStartX + 24, rackInnerRight - meldsWidth);
 
   const discardCols = 15;
   const sideDiscardCols = 10;
@@ -1338,10 +1354,10 @@ export default function MahjongPixiTable({
             })()}
 
             {hand.map((t, idx) => {
-              const x = handStartX + idx * (tileW + gap);
+              const x = handStartX + idx * (handTileW + gap);
               const baseY = rackY + 16;
               const isHovered = hoveredHandIdx === idx;
-              const y = baseY + (isHovered ? -10 : 0);
+              const y = baseY + (isHovered ? -12 : 0);
 
               const spritePath = `${tileSpriteBasePath}/${tileSpriteFileName(t)}`;
               const tex = textures[spritePath];
@@ -1370,8 +1386,8 @@ export default function MahjongPixiTable({
                       texture={tileBgTex}
                       x={0}
                       y={0}
-                      width={tileW}
-                      height={tileH}
+                      width={handTileW}
+                      height={handTileH}
                     />
                   )}
 
@@ -1380,8 +1396,8 @@ export default function MahjongPixiTable({
                       texture={tex}
                       x={tileStyle.main.iconOffsetX}
                       y={tileStyle.main.iconOffsetY}
-                      width={tileW - tileStyle.main.iconShrinkW}
-                      height={tileH - tileStyle.main.iconShrinkH}
+                      width={handTileW - tileStyle.main.iconShrinkW}
+                      height={handTileH - tileStyle.main.iconShrinkH}
                     />
                   ) : null}
                 </pixiContainer>
@@ -1399,7 +1415,7 @@ export default function MahjongPixiTable({
                   const groupX = cursorX;
                   const tiles = m.tiles;
                   const containers = tiles.map((t, ti) => {
-                    const x = groupX + ti * (tileW + gap);
+                    const x = groupX + ti * (meldTileW + gap);
                     const spritePath = `${tileSpriteBasePath}/${tileSpriteFileName(t)}`;
                     const tex = textures[spritePath];
 
@@ -1415,18 +1431,18 @@ export default function MahjongPixiTable({
                             texture={tileBgTex}
                             x={0}
                             y={0}
-                            width={tileW}
-                            height={tileH}
+                            width={meldTileW}
+                            height={meldTileH}
                           />
                         )}
 
                         {tex ? (
                           <pixiSprite
                             texture={tex}
-                            x={tileStyle.main.iconOffsetX}
-                            y={tileStyle.main.iconOffsetY}
-                            width={tileW - tileStyle.main.iconShrinkW}
-                            height={tileH - tileStyle.main.iconShrinkH}
+                            x={tileStyle.meld.iconOffsetX}
+                            y={tileStyle.meld.iconOffsetY}
+                            width={meldTileW - tileStyle.meld.iconShrinkW}
+                            height={meldTileH - tileStyle.meld.iconShrinkH}
                           />
                         ) : null}
                       </pixiContainer>
@@ -1434,7 +1450,8 @@ export default function MahjongPixiTable({
                   });
 
                   const groupWidth =
-                    tiles.length * tileW + Math.max(0, tiles.length - 1) * gap;
+                    tiles.length * meldTileW +
+                    Math.max(0, tiles.length - 1) * gap;
                   cursorX = groupX + groupWidth + meldGroupGap;
                   return containers;
                 });
