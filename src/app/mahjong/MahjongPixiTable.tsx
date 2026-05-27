@@ -1275,7 +1275,7 @@ export default function MahjongPixiTable({
 
               if (showTop && topGroups.length > 0) {
                 const startX =
-                  topStartX + topCount * (smallW + 1) + Math.max(10, gap);
+                  topStartX + topCount * (smallW + 1) + Math.max(22, gap);
                 const y = topY + smallH / 2;
 
                 let cursor = startX;
@@ -1296,7 +1296,7 @@ export default function MahjongPixiTable({
 
               if (showLeft && leftGroups.length > 0) {
                 const startY =
-                  sideStartY + sideCountLeft * (smallW + 1) + Math.max(10, gap);
+                  sideStartY + sideCountLeft * (smallW + 1) + Math.max(22, gap);
                 const x = sideXLeft + smallH / 2;
 
                 let cursor = startY;
@@ -1325,7 +1325,7 @@ export default function MahjongPixiTable({
                 const startY =
                   sideStartY +
                   sideCountRight * (smallW + 1) +
-                  Math.max(10, gap);
+                  Math.max(22, gap);
                 const x = sideXRight + smallH / 2;
 
                 let cursor = startY;
