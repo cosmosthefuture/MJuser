@@ -118,7 +118,7 @@ export default function Navbar() {
               <List />
             </SheetTrigger>
             {isMounted && (
-              <SheetContent side="top" className="h-[100vh]">
+              <SheetContent side="top" className="h-dvh">
                 <div className="flex flex-col items-center mt-10 space-y-4">
                   {navLinks.map((link, idx) => (
                     <Link

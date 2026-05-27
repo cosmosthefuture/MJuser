@@ -214,7 +214,7 @@ export const GameTable: React.FC = () => {
   }, [game.players, playWinSound]);
 
   return (
-    <div className="w-full h-screen bg-gradient-to-b from-[#021219] via-[#03252f] to-[#02080d] flex flex-col items-center justify-center overflow-hidden select-none">
+    <div className="w-full h-dvh bg-gradient-to-b from-[#021219] via-[#03252f] to-[#02080d] flex flex-col items-center justify-center overflow-hidden select-none">
       <div className="w-full max-w-6xl px-4 py-2 flex items-center justify-between bg-black/40 backdrop-blur-sm border-b border-[hsl(var(--gold-dark))]/60 shadow-[0_0_20px_rgba(0,0,0,0.8)]">
         <div className="flex items-center gap-4">
           <button className="w-7 h-7 rounded-full border border-[hsl(var(--gold))]/70 flex items-center justify-center text-[hsl(var(--gold))] text-xs bg-black/60">
@@ -278,7 +278,7 @@ export const GameTable: React.FC = () => {
       </div>
 
       <div className="flex-1 w-full max-w-6xl flex items-center justify-center p-4">
-        <div className="relative w-full aspect-[2/1] max-h-[78vh] rounded-[50%] border-[6px] border-[hsl(var(--gold-dark))] shadow-[0_0_40px_rgba(0,0,0,0.9)] overflow-hidden bg-[#024142]">
+        <div className="relative w-full aspect-[2/1] max-h-[78dvh] rounded-[50%] border-[6px] border-[hsl(var(--gold-dark))] shadow-[0_0_40px_rgba(0,0,0,0.9)] overflow-hidden bg-[#024142]">
           <div className="absolute inset-[10px] rounded-[50%] border border-[hsl(var(--gold))]/30 shadow-inner" />
 
           <div className="absolute inset-0 flex items-center justify-center z-0">

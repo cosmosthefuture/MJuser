@@ -347,6 +347,10 @@
 }
 
 @layer base {
+  :root {
+    --vh: 1vh;
+  }
+
   * {
     @apply border-border outline-ring/50;
   }
@@ -359,6 +363,29 @@
       system-ui,
       sans-serif
     );
+    /* Fix for Safari mobile height issues */
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+  }
+
+  html {
+    height: -webkit-fill-available;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* Safari specific flexbox fix */
+  .flex-col {
+    min-height: 0;
+  }
+
+  /* Improve scrolling on Safari mobile */
+  .overflow-y-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Prevent double-tap zoom on buttons */
+  button {
+    touch-action: manipulation;
   }
 
   input:-webkit-autofill,
@@ -430,7 +457,11 @@
   }
 
   .felt-panel {
-    background:
-      radial-gradient(circle at 50% 16%, #2a9a4c 0%, #15673a 40%, #092115 100%);
+    background: radial-gradient(
+      circle at 50% 16%,
+      #2a9a4c 0%,
+      #15673a 40%,
+      #092115 100%
+    );
   }
 }

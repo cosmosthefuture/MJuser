@@ -38,7 +38,7 @@ const LayoutWrapper: React.FC<LayoutWrapperProps> = ({ children }) => {
     isGameRoomsRoute
   ) {
     return (
-      <div className="flex h-screen w-screen items-center justify-center overflow-hidden bg-[#00251b]">
+      <div className="flex h-dvh w-screen items-center justify-center overflow-hidden bg-[#00251b]">
         {children}
       </div>
     );
@@ -46,16 +46,16 @@ const LayoutWrapper: React.FC<LayoutWrapperProps> = ({ children }) => {
 
   if (isHomeRoute) {
     return (
-      <div className="casino-lobby-bg min-h-screen w-full overflow-hidden">
+      <div className="casino-lobby-bg min-h-dvh w-full overflow-hidden">
         {children}
       </div>
     );
   }
 
   return (
-    <div className="casino-lobby-bg min-h-screen">
-      <div className="mx-auto flex min-h-screen w-full items-stretch justify-center">
-        <div className="casino-stage-frame relative flex min-h-screen w-full max-w-sm flex-col overflow-hidden rounded-none shadow-[0_0_60px_rgba(88,47,13,0.24)] sm:my-4 sm:min-h-[calc(100vh-2rem)] sm:rounded-[34px]">
+    <div className="casino-lobby-bg min-h-dvh">
+      <div className="mx-auto flex min-h-dvh w-full items-stretch justify-center">
+        <div className="casino-stage-frame relative flex min-h-dvh w-full max-w-sm flex-col overflow-hidden rounded-none shadow-[0_0_60px_rgba(88,47,13,0.24)] sm:my-4 sm:min-h-[calc(100dvh-2rem)] sm:rounded-[34px]">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.45),transparent_34%),linear-gradient(180deg,rgba(255,247,225,0.45),transparent_40%)]" />
           <div className="pointer-events-none absolute left-1/2 top-[-7rem] h-56 w-56 -translate-x-1/2 rounded-full bg-white/60 blur-3xl" />
 
