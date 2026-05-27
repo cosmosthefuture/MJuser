@@ -2328,18 +2328,18 @@ export default function MahjongClient() {
                       const pos =
                         position === "bottom"
                           ? isMobileUi
-                            ? "left-[18%] -translate-x-1/2 bottom-18"
-                            : "left-[20%] bottom-[40px]"
+                            ? "left-[5%] -translate-x-1/2 bottom-18"
+                            : "left-[2%] bottom-[40px]"
                           : position === "top"
                             ? isMobileUi
                               ? "right-[20%] -translate-x-1/2 top-10"
                               : "right-[35%] -translate-x-1/2 top-6"
                             : position === "left"
                               ? isMobileUi
-                                ? "left-[12%] top-16"
-                                : "left-[20%] top-[16px] -translate-y-1/2"
+                                ? "left-[0%] top-16"
+                                : "left-[2%] top-[16px] -translate-y-1/2"
                               : isMobileUi
-                                ? "right-20 bottom-16"
+                                ? "right-2 bottom-16"
                                 : "right-6 bottom-40 -translate-y-1/2";
 
                       const name = player.name;
@@ -2509,8 +2509,8 @@ export default function MahjongClient() {
                             : "left-1/2 -translate-x-1/2 top-6"
                           : position === "left"
                             ? isMobileUi
-                              ? "left-4 top-24"
-                              : "left-6 top-1/2 -translate-y-1/2"
+                              ? "left-6 top-24"
+                              : "left-8 top-1/2 -translate-y-1/2"
                             : isMobileUi
                               ? "right-24 top-24"
                               : "right-6 top-1/2 -translate-y-1/2";
