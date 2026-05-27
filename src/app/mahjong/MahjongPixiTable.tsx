@@ -1407,7 +1407,7 @@ export default function MahjongPixiTable({
             {(() => {
               if (!melds || melds.length === 0) return null;
               let cursorX = meldsStartX;
-              const baseY = rackY + 16;
+              const baseY = rackY + 16 + Math.max(0, handTileH - meldTileH);
 
               return melds
                 .filter((m) => Array.isArray(m.tiles) && m.tiles.length > 0)
