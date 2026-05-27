@@ -1113,21 +1113,22 @@ export default function MahjongPixiTable({
                             return (
                               <pixiContainer
                                 key={`sd-${t.suit}-${t.rank}-${i}`}
-                                x={x}
-                                y={y}
+                                x={x + tileW / 2}
+                                y={y + tileH / 2}
+                                rotation={Math.PI}
                               >
                                 {renderTileShadow(
                                   tileW,
                                   tileH,
-                                  0,
-                                  0,
+                                  -tileW / 2,
+                                  -tileH / 2,
                                   tileShadow.radiusMini,
                                 )}
                                 {tileBgTex && (
                                   <pixiSprite
                                     texture={tileBgTex}
-                                    x={0}
-                                    y={0}
+                                    x={-tileW / 2}
+                                    y={-tileH / 2}
                                     width={tileW}
                                     height={tileH}
                                   />
@@ -1142,18 +1143,30 @@ export default function MahjongPixiTable({
                                         0xd9a600,
                                         0.06 + pulse * 0.09,
                                       );
-                                      g.drawRoundedRect(0, 0, tileW, tileH, 6);
+                                      g.drawRoundedRect(
+                                        -tileW / 2,
+                                        -tileH / 2,
+                                        tileW,
+                                        tileH,
+                                        6,
+                                      );
                                       g.endFill();
                                       g.lineStyle(w, 0xd9a600, a);
-                                      g.drawRoundedRect(0, 0, tileW, tileH, 6);
+                                      g.drawRoundedRect(
+                                        -tileW / 2,
+                                        -tileH / 2,
+                                        tileW,
+                                        tileH,
+                                        6,
+                                      );
                                     }}
                                   />
                                 ) : null}
                                 {tex ? (
                                   <pixiSprite
                                     texture={tex}
-                                    x={iconOffsetX}
-                                    y={iconOffsetY}
+                                    x={-tileW / 2 + iconOffsetX}
+                                    y={-tileH / 2 + iconOffsetY}
                                     width={tileW - iconShrinkW}
                                     height={tileH - iconShrinkH}
                                   />
@@ -1192,19 +1205,24 @@ export default function MahjongPixiTable({
               const tex = textures[spritePath];
 
               return (
-                <pixiContainer key={`d-${t.suit}-${t.rank}-${i}`} x={x} y={y}>
+                <pixiContainer
+                  key={`d-${t.suit}-${t.rank}-${i}`}
+                  x={x + discardTileW / 2}
+                  y={y + discardTileH / 2}
+                  rotation={Math.PI}
+                >
                   {renderTileShadow(
                     discardTileW,
                     discardTileH,
-                    0,
-                    0,
+                    -discardTileW / 2,
+                    -discardTileH / 2,
                     tileShadow.radiusSmall,
                   )}
                   {tileBgTex && (
                     <pixiSprite
                       texture={tileBgTex}
-                      x={0}
-                      y={0}
+                      x={-discardTileW / 2}
+                      y={-discardTileH / 2}
                       width={discardTileW}
                       height={discardTileH}
                     />
@@ -1212,8 +1230,8 @@ export default function MahjongPixiTable({
                   {tex ? (
                     <pixiSprite
                       texture={tex}
-                      x={tileStyle.discard.iconOffsetX}
-                      y={tileStyle.discard.iconOffsetY}
+                      x={-discardTileW / 2 + tileStyle.discard.iconOffsetX}
+                      y={-discardTileH / 2 + tileStyle.discard.iconOffsetY}
                       width={discardTileW - tileStyle.discard.iconShrinkW}
                       height={discardTileH - tileStyle.discard.iconShrinkH}
                     />
@@ -1578,22 +1596,23 @@ export default function MahjongPixiTable({
                     return (
                       <pixiContainer
                         key={`meld-${m.kind}-${m.meldKey}-${mi}-${ti}`}
-                        x={x}
-                        y={baseY}
+                        x={x + meldTileW / 2}
+                        y={baseY + meldTileH / 2}
+                        rotation={Math.PI}
                         eventMode="none"
                       >
                         {renderTileShadow(
                           meldTileW,
                           meldTileH,
-                          0,
-                          0,
+                          -meldTileW / 2,
+                          -meldTileH / 2,
                           tileShadow.radius,
                         )}
                         {tileBgTex && (
                           <pixiSprite
                             texture={tileBgTex}
-                            x={0}
-                            y={0}
+                            x={-meldTileW / 2}
+                            y={-meldTileH / 2}
                             width={meldTileW}
                             height={meldTileH}
                           />
@@ -1602,8 +1621,8 @@ export default function MahjongPixiTable({
                         {tex ? (
                           <pixiSprite
                             texture={tex}
-                            x={tileStyle.meld.iconOffsetX}
-                            y={tileStyle.meld.iconOffsetY}
+                            x={-meldTileW / 2 + tileStyle.meld.iconOffsetX}
+                            y={-meldTileH / 2 + tileStyle.meld.iconOffsetY}
                             width={meldTileW - tileStyle.meld.iconShrinkW}
                             height={meldTileH - tileStyle.meld.iconShrinkH}
                           />
