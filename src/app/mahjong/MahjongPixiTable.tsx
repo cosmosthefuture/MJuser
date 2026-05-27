@@ -455,7 +455,7 @@ export default function MahjongPixiTable({
     : Math.max(handStartX + 24, rackInnerRight - meldsWidth);
 
   const discardCols = 15;
-  const sideDiscardCols = 10;
+  const sideDiscardCols = 5;
   const discardGap = 2;
   const discardTileW = tileStyle.discard.w;
   const discardTileH = tileStyle.discard.h;
@@ -1187,8 +1187,8 @@ export default function MahjongPixiTable({
               const sideCountLeft = counts.left ?? 7;
               const sideCountRight = counts.right ?? 7;
               const sideCount = Math.max(sideCountLeft, sideCountRight);
-              const sideXLeft = tableX + 70;
-              const sideXRight = tableX + tableW - 18 - smallH - 60;
+              const sideXLeft = tableX + 116;
+              const sideXRight = tableX + tableW - 18 - smallH - 116;
               const sideStartY = Math.floor(
                 tableY +
                   tableH / 2 -
