@@ -728,7 +728,7 @@ export default function MahjongPixiTable({
 
                       const gridHeight =
                         rowsPerCol * tileH + (rowsPerCol - 1) * tileGapY;
-                      const startX = cx + 200;
+                      const startX = cx + 300;
                       const startY = cy - Math.floor(gridHeight / 2);
 
                       return (
