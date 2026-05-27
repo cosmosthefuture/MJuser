@@ -728,7 +728,7 @@ export default function MahjongPixiTable({
 
                       const gridHeight =
                         rowsPerCol * tileH + (rowsPerCol - 1) * tileGapY;
-                      const startX = cx + 300;
+                      const startX = cx + 200;
                       const startY = cy - Math.floor(gridHeight / 2);
 
                       return (
@@ -1158,7 +1158,7 @@ export default function MahjongPixiTable({
               const sideCountRight = counts.right ?? 7;
               const sideCount = Math.max(sideCountLeft, sideCountRight);
               const sideXLeft = tableX + 18;
-              const sideXRight = tableX + tableW - 18 - smallH;
+              const sideXRight = tableX + tableW - 18 - smallH - 10;
               const sideStartY = Math.floor(
                 tableY +
                   tableH / 2 -
