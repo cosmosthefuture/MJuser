@@ -1,4 +1,4 @@
-const AVATAR_COUNT = 6;
+const AVATAR_COUNT = 4;
 
 function hashString(input: string) {
   let hash = 0;
@@ -18,6 +18,6 @@ export function getUserAvatarSrc(params: {
       : (params.name ?? "").trim().toLowerCase();
 
   const index = key ? (hashString(key) % AVATAR_COUNT) + 1 : 1;
-  return `/avatars/avatar-${index}.svg`;
+  return `/images/avator/avator${index}.jpg`;
 }
 
