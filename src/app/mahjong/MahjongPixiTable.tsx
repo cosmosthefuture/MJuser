@@ -758,7 +758,7 @@ export default function MahjongPixiTable({
 
                       const gridHeight =
                         rowsPerCol * tileH + (rowsPerCol - 1) * tileGapY;
-                      const startX = cx + 300;
+                      const startX = cx + 310;
                       const startY = cy - Math.floor(gridHeight / 2);
 
                       return (
@@ -945,8 +945,8 @@ export default function MahjongPixiTable({
 
                       const gridHeight =
                         rowsPerCol * tileH + (rowsPerCol - 1) * tileGapY;
-                      const startX = cx - 300;
-                      const startY = cy - Math.floor(gridHeight / 2);
+                      const startX = cx - 340;
+                      const startY = cy - Math.floor(gridHeight / 2) + 15;
 
                       return (
                         <pixiContainer x={startX} y={startY}>
