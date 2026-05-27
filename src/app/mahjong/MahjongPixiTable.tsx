@@ -455,7 +455,7 @@ export default function MahjongPixiTable({
     : Math.max(handStartX + 24, rackInnerRight - meldsWidth);
 
   const discardCols = 15;
-  const sideDiscardCols = 5;
+  const sideDiscardCols = 10;
   const discardGap = 2;
   const discardTileW = tileStyle.discard.w;
   const discardTileH = tileStyle.discard.h;
@@ -764,9 +764,9 @@ export default function MahjongPixiTable({
                       return (
                         <pixiContainer x={startX} y={startY}>
                           {rightDiscardTiles.map((t, i) => {
-                            const row = i % rowsPerCol;
+                            const row = rowsPerCol - 1 - (i % rowsPerCol);
                             const col = Math.floor(i / rowsPerCol);
-                            const x = col * (tileW + tileGapX);
+                            const x = -col * (tileW + tileGapX);
                             const y = row * (tileH + tileGapY);
                             const spritePath = `${tileSpriteBasePath}/${tileSpriteFileName(t)}`;
                             const tex = textures[spritePath];
@@ -851,7 +851,7 @@ export default function MahjongPixiTable({
                       const tileW = w;
                       const tileH = h;
                       const tileGap = 2;
-                      const orderedTopDiscards = [...topDiscardTiles].reverse();
+                      const orderedTopDiscards = [...topDiscardTiles];
 
                       const totalW = cols * tileW + (cols - 1) * tileGap;
                       const rows = Math.ceil(orderedTopDiscards.length / cols);
@@ -866,13 +866,14 @@ export default function MahjongPixiTable({
                         <pixiContainer x={startX} y={startY}>
                           {orderedTopDiscards.map((t, i) => {
                             const col = i % cols;
-                            const rowFromTop = Math.floor(i / cols);
-                            const row = rows - 1 - rowFromTop;
+                            const row = Math.floor(i / cols);
                             const x = col * (tileW + tileGap);
                             const y = row * (tileH + tileGap);
                             const spritePath = `${tileSpriteBasePath}/${tileSpriteFileName(t)}`;
                             const tex = textures[spritePath];
-                            const isLast = lastDiscardSide === "top" && i === 0;
+                            const isLast =
+                              lastDiscardSide === "top" &&
+                              i === orderedTopDiscards.length - 1;
 
                             return (
                               <pixiContainer
@@ -950,7 +951,7 @@ export default function MahjongPixiTable({
                       return (
                         <pixiContainer x={startX} y={startY}>
                           {leftDiscardTiles.map((t, i) => {
-                            const row = i % rowsPerCol;
+                            const row = rowsPerCol - 1 - (i % rowsPerCol);
                             const col = Math.floor(i / rowsPerCol);
                             const x = col * (tileW + tileGapX);
                             const y = row * (tileH + tileGapY);
@@ -963,7 +964,7 @@ export default function MahjongPixiTable({
                             return (
                               <pixiContainer
                                 key={`ld-${t.suit}-${t.rank}-${i}`}
-                                x={-(x + tileW / 2)}
+                                x={x + tileW / 2}
                                 y={y + tileH / 2}
                                 rotation={Math.PI / 2}
                                 scale={isLast ? 1 + pulse * 0.08 : 1}
@@ -1052,7 +1053,7 @@ export default function MahjongPixiTable({
                             const col = i % cols;
                             const row = Math.floor(i / cols);
                             const x = col * (tileW + tileGap);
-                            const y = row * (tileH + tileGap);
+                            const y = -row * (tileH + tileGap);
                             const spritePath = `${tileSpriteBasePath}/${tileSpriteFileName(t)}`;
                             const tex = textures[spritePath];
                             const isLast =
