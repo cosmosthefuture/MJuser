@@ -1188,7 +1188,7 @@ export default function MahjongPixiTable({
               const sideCountLeft = counts.left ?? 7;
               const sideCountRight = counts.right ?? 7;
               const sideCount = Math.max(sideCountLeft, sideCountRight);
-              const sideXLeft = tableX + 116;
+              const sideXLeft = tableX + 130;
               const sideXRight = tableX + tableW - 18 - smallH - 116;
               const sideStartY = Math.floor(
                 tableY +
