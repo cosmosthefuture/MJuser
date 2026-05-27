@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import { ArrowLeft } from "lucide-react";
 import { useSelector } from "react-redux";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import MahjongTileCard from "./components/MahjongTileCard";
 import { MahjongTile } from "@/lib/mahjong72";
 import { fetchMahjongJoinToken } from "@/lib/mahjongRoomApi";
@@ -2329,11 +2328,11 @@ export default function MahjongClient() {
                             : "left-[2%] bottom-[40px]"
                           : position === "top"
                             ? isMobileUi
-                              ? "right-[20%] -translate-x-1/2 top-10"
+                              ? "right-[20%] -translate-x-1/2 top-6"
                               : "right-[35%] -translate-x-1/2 top-6"
                             : position === "left"
                               ? isMobileUi
-                                ? "left-[0%] top-16"
+                                ? "left-[5%] -translate-x-1/2 top-16"
                                 : "left-[2%] top-[16px] -translate-y-1/2"
                               : isMobileUi
                                 ? "right-2 bottom-16"
