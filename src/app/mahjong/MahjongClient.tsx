@@ -773,9 +773,9 @@ export default function MahjongClient() {
         if (opponentCount === 1) return "right";
         if (selfSeatNo == null || otherSeatNo == null) return null;
         const delta = (((otherSeatNo - selfSeatNo) % 4) + 4) % 4;
-        if (delta === 1) return "right";
+        if (delta === 1) return "left";
         if (delta === 2) return "top";
-        if (delta === 3) return "left";
+        if (delta === 3) return "right";
         return null;
       };
 
@@ -1910,9 +1910,9 @@ export default function MahjongClient() {
     for (const p of others) {
       const otherSeatNo = p.seatPosition;
       const delta = (((otherSeatNo - selfSeatNo) % 4) + 4) % 4;
-      if (delta === 1) sidesSet.add("right");
+      if (delta === 1) sidesSet.add("left");
       if (delta === 2) sidesSet.add("top");
-      if (delta === 3) sidesSet.add("left");
+      if (delta === 3) sidesSet.add("right");
     }
 
     const ordered: Array<"bottom" | "right" | "top" | "left"> = [
@@ -1968,9 +1968,9 @@ export default function MahjongClient() {
           ? p.seatPosition
           : 0;
         const delta = (((otherSeatNo - selfSeatNo) % 4) + 4) % 4;
-        if (delta === 1) sideByUserId.set(p.userId, "right");
+        if (delta === 1) sideByUserId.set(p.userId, "left");
         if (delta === 2) sideByUserId.set(p.userId, "top");
-        if (delta === 3) sideByUserId.set(p.userId, "left");
+        if (delta === 3) sideByUserId.set(p.userId, "right");
       }
     } else {
       const ordered: Array<"right" | "top" | "left"> = ["right", "top", "left"];
@@ -2302,14 +2302,14 @@ export default function MahjongClient() {
                         const delta = item.delta;
                         if (delta === 1)
                           seats.push({
-                            position: "right",
+                            position: "left",
                             player: item.player,
                           });
                         if (delta === 2)
                           seats.push({ position: "top", player: item.player });
                         if (delta === 3)
                           seats.push({
-                            position: "left",
+                            position: "right",
                             player: item.player,
                           });
                       }
@@ -2480,11 +2480,11 @@ export default function MahjongClient() {
                     for (const item of byDelta) {
                       const delta = item.delta;
                       if (delta === 1)
-                        seats.push({ position: "right", player: item.player });
+                        seats.push({ position: "left", player: item.player });
                       if (delta === 2)
                         seats.push({ position: "top", player: item.player });
                       if (delta === 3)
-                        seats.push({ position: "left", player: item.player });
+                        seats.push({ position: "right", player: item.player });
                     }
                   }
 
