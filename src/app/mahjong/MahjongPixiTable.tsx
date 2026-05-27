@@ -863,8 +863,21 @@ export default function MahjongPixiTable({
                                     y={-tileH / 2 + iconOffsetY}
                                     width={tileW - iconShrinkW}
                                     height={tileH - iconShrinkH}
+                                    alpha={0.85}
                                   />
                                 ) : null}
+
+                                {/* 3D lighting overlay */}
+                                <pixiGraphics
+                                  draw={(g) => {
+                                    g.clear();
+                                    g.beginFill(0xffffff, 0.1);
+                                    g.moveTo(-tileW / 2, -tileH / 2);
+                                    g.lineTo(tileW / 2, -tileH / 2);
+                                    g.lineTo(-tileW / 2, tileH / 2);
+                                    g.endFill();
+                                  }}
+                                />
                               </pixiContainer>
                             );
                           })}
@@ -957,8 +970,21 @@ export default function MahjongPixiTable({
                                     y={iconOffsetY}
                                     width={tileW - iconShrinkW}
                                     height={tileH - iconShrinkH}
+                                    alpha={0.85}
                                   />
                                 ) : null}
+
+                                {/* 3D lighting overlay */}
+                                <pixiGraphics
+                                  draw={(g) => {
+                                    g.clear();
+                                    g.beginFill(0xffffff, 0.1);
+                                    g.moveTo(0, 0);
+                                    g.lineTo(tileW, 0);
+                                    g.lineTo(0, tileH);
+                                    g.endFill();
+                                  }}
+                                />
                               </pixiContainer>
                             );
                           })}
@@ -1064,8 +1090,21 @@ export default function MahjongPixiTable({
                                     y={-tileH / 2 + iconOffsetY}
                                     width={tileW - iconShrinkW}
                                     height={tileH - iconShrinkH}
+                                    alpha={0.85}
                                   />
                                 ) : null}
+
+                                {/* 3D lighting overlay */}
+                                <pixiGraphics
+                                  draw={(g) => {
+                                    g.clear();
+                                    g.beginFill(0xffffff, 0.1);
+                                    g.moveTo(-tileW / 2, -tileH / 2);
+                                    g.lineTo(tileW / 2, -tileH / 2);
+                                    g.lineTo(-tileW / 2, tileH / 2);
+                                    g.endFill();
+                                  }}
+                                />
                               </pixiContainer>
                             );
                           })}
@@ -1169,8 +1208,21 @@ export default function MahjongPixiTable({
                                     y={-tileH / 2 + iconOffsetY}
                                     width={tileW - iconShrinkW}
                                     height={tileH - iconShrinkH}
+                                    alpha={0.85}
                                   />
                                 ) : null}
+
+                                {/* 3D lighting overlay */}
+                                <pixiGraphics
+                                  draw={(g) => {
+                                    g.clear();
+                                    g.beginFill(0xffffff, 0.1);
+                                    g.moveTo(-tileW / 2, -tileH / 2);
+                                    g.lineTo(tileW / 2, -tileH / 2);
+                                    g.lineTo(-tileW / 2, tileH / 2);
+                                    g.endFill();
+                                  }}
+                                />
                               </pixiContainer>
                             );
                           })}
@@ -1234,8 +1286,21 @@ export default function MahjongPixiTable({
                       y={-discardTileH / 2 + tileStyle.discard.iconOffsetY}
                       width={discardTileW - tileStyle.discard.iconShrinkW}
                       height={discardTileH - tileStyle.discard.iconShrinkH}
+                      alpha={0.85}
                     />
                   ) : null}
+
+                  {/* 3D lighting overlay */}
+                  <pixiGraphics
+                    draw={(g) => {
+                      g.clear();
+                      g.beginFill(0xffffff, 0.1);
+                      g.moveTo(-discardTileW / 2, -discardTileH / 2);
+                      g.lineTo(discardTileW / 2, -discardTileH / 2);
+                      g.lineTo(-discardTileW / 2, discardTileH / 2);
+                      g.endFill();
+                    }}
+                  />
                 </pixiContainer>
               );
             })}
@@ -1321,8 +1386,21 @@ export default function MahjongPixiTable({
                         y={-h / 2 + iconOffsetY}
                         width={w - iconShrinkW}
                         height={h - iconShrinkH}
+                        alpha={0.85}
                       />
                     ) : null}
+
+                    {/* 3D lighting overlay */}
+                    <pixiGraphics
+                      draw={(g) => {
+                        g.clear();
+                        g.beginFill(0xffffff, 0.1);
+                        g.moveTo(-w / 2, -h / 2);
+                        g.lineTo(w / 2, -h / 2);
+                        g.lineTo(-w / 2, h / 2);
+                        g.endFill();
+                      }}
+                    />
                   </pixiContainer>
                 );
               };
@@ -1572,8 +1650,22 @@ export default function MahjongPixiTable({
                       y={tileStyle.main.iconOffsetY}
                       width={handTileW - tileStyle.main.iconShrinkW}
                       height={handTileH - tileStyle.main.iconShrinkH}
+                      alpha={0.85}
+                      filters={[]}
                     />
                   ) : null}
+
+                  {/* 3D lighting overlay */}
+                  <pixiGraphics
+                    draw={(g) => {
+                      g.clear();
+                      g.beginFill(0xffffff, 0.1);
+                      g.moveTo(0, 0);
+                      g.lineTo(handTileW, 0);
+                      g.lineTo(0, handTileH);
+                      g.endFill();
+                    }}
+                  />
                 </pixiContainer>
               );
             })}
@@ -1625,8 +1717,21 @@ export default function MahjongPixiTable({
                             y={-meldTileH / 2 + tileStyle.meld.iconOffsetY}
                             width={meldTileW - tileStyle.meld.iconShrinkW}
                             height={meldTileH - tileStyle.meld.iconShrinkH}
+                            alpha={0.85}
                           />
                         ) : null}
+
+                        {/* 3D lighting overlay */}
+                        <pixiGraphics
+                          draw={(g) => {
+                            g.clear();
+                            g.beginFill(0xffffff, 0.1);
+                            g.moveTo(-meldTileW / 2, -meldTileH / 2);
+                            g.lineTo(meldTileW / 2, -meldTileH / 2);
+                            g.lineTo(-meldTileW / 2, meldTileH / 2);
+                            g.endFill();
+                          }}
+                        />
                       </pixiContainer>
                     );
                   });
