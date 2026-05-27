@@ -2322,9 +2322,6 @@ export default function MahjongClient() {
                       player: RoundPlayer;
                       position: "bottom" | "right" | "top" | "left";
                     }) => {
-                      const base = `absolute flex flex-col items-center rounded-[18px] bg-[#064e3b]/25 text-white shadow-[0_24px_80px_rgba(0,0,0,0.6)] backdrop-blur-md ${
-                        isMobileUi ? "gap-1 p-1.5" : "gap-2 p-2"
-                      }`;
                       const pos =
                         position === "bottom"
                           ? isMobileUi
@@ -2355,28 +2352,30 @@ export default function MahjongClient() {
                         name: player.name,
                       });
 
+                      const imgSize = isMobileUi ? 56 : 80;
+
                       return (
                         <div
-                          className={`${base} ${pos} ${isMobileUi ? "px-1.5 py-0.5 text-[9px]" : ""}`}
+                          className={`absolute flex flex-col items-center ${pos}`}
                         >
-                          <div className="pointer-events-none absolute inset-0 rounded-[18px] ring-2 ring-emerald-300/18 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.03),inset_0_0_18px_rgba(16,185,129,0.14)]" />
-                          <Avatar
-                            className={`relative overflow-hidden rounded-xl bg-emerald-950/22 shadow-[0_16px_40px_rgba(0,0,0,0.55)] ${
-                              isMobileUi ? "size-10" : "size-16"
-                            }`}
+                          <div
+                            className="relative overflow-hidden rounded-[14px] bg-[#064e3b]/60 shadow-[0_24px_80px_rgba(0,0,0,0.6)] backdrop-blur-md"
+                            style={{ width: imgSize, height: imgSize }}
                           >
-                            <AvatarImage
+                            <img
                               src={avatarSrc}
                               alt={name}
-                              className="rounded-xl object-cover"
+                              className="h-full w-full object-cover"
                             />
-                            <AvatarFallback className="rounded-lg bg-emerald-950/22 text-[#EFA02C] font-bold">
-                              {initials}
-                            </AvatarFallback>
-                          </Avatar>
+                            {!avatarSrc && (
+                              <div className="absolute inset-0 flex items-center justify-center bg-emerald-950/60 text-[#EFA02C] font-bold text-lg">
+                                {initials}
+                              </div>
+                            )}
+                          </div>
                           <div
-                            className={`max-w-[160px] truncate text-center font-medium tracking-wide text-[#EFA02C] ${
-                              isMobileUi ? "text-[10px]" : "text-[15px]"
+                            className={`mt-1 max-w-[100px] truncate text-center font-semibold tracking-wide text-[#EFA02C] ${
+                              isMobileUi ? "text-[10px]" : "text-[13px]"
                             }`}
                             style={{
                               textShadow:
@@ -2495,9 +2494,6 @@ export default function MahjongClient() {
                     player: RoundPlayer;
                     position: "bottom" | "right" | "top" | "left";
                   }) => {
-                    const base = `absolute flex flex-col items-center rounded-[18px] bg-[#064e3b]/25 text-[10px] text-white shadow-[0_24px_80px_rgba(0,0,0,0.6)] backdrop-blur-md ${
-                      isMobileUi ? "gap-1 p-1.5" : "gap-2 p-2"
-                    }`;
                     const pos =
                       position === "bottom"
                         ? isMobileUi
@@ -2528,28 +2524,30 @@ export default function MahjongClient() {
                       name: player.name,
                     });
 
+                    const imgSize = isMobileUi ? 56 : 80;
+
                     return (
                       <div
-                        className={`${base} ${pos} ${isMobileUi ? "px-1.5 py-0.5 text-[9px]" : ""}`}
+                        className={`absolute flex flex-col items-center ${pos}`}
                       >
-                        <div className="pointer-events-none absolute inset-0 rounded-[10px] ring-2 ring-emerald-300/18 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.03),inset_0_0_18px_rgba(16,185,129,0.14)]" />
-                        <Avatar
-                          className={`relative overflow-hidden rounded-lg bg-emerald-950/80 shadow-[0_16px_40px_rgba(0,0,0,0.55)] ${
-                            isMobileUi ? "size-10" : "size-14"
-                          }`}
+                        <div
+                          className="relative overflow-hidden rounded-[14px] bg-[#064e3b]/60 shadow-[0_24px_80px_rgba(0,0,0,0.6)] backdrop-blur-md"
+                          style={{ width: imgSize, height: imgSize }}
                         >
-                          <AvatarImage
+                          <img
                             src={avatarSrc}
                             alt={name}
-                            className="rounded-lg object-cover"
+                            className="h-full w-full object-cover"
                           />
-                          <AvatarFallback className=" bg-emerald-950/80 text-[#EFA02C] font-medium">
-                            {initials}
-                          </AvatarFallback>
-                        </Avatar>
+                          {!avatarSrc && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-emerald-950/60 text-[#EFA02C] font-bold text-lg">
+                              {initials}
+                            </div>
+                          )}
+                        </div>
                         <div
-                          className={`max-w-[100px] truncate text-center font-medium tracking-wide text-[#EFA02C] ${
-                            isMobileUi ? "text-[9px]" : "text-[12px]"
+                          className={`mt-1 max-w-[100px] truncate text-center font-semibold tracking-wide text-[#EFA02C] ${
+                            isMobileUi ? "text-[10px]" : "text-[13px]"
                           }`}
                           style={{
                             textShadow:
