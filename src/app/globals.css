@@ -464,4 +464,11 @@
       #092115 100%
     );
   }
+
+  .tile-shadow {
+    box-shadow:
+      0 10px 22px rgba(0, 0, 0, 0.45),
+      0 2px 6px rgba(0, 0, 0, 0.35),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  }
 }

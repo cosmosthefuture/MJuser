@@ -27,7 +27,10 @@ export default function MahjongTileCard({
 
   // CSS tile frame using mj-tile-bg.webp
   return (
-    <div className="relative" style={{ width: dims.tileW, height: dims.tileH }}>
+    <div
+      className="relative tile-shadow"
+      style={{ width: dims.tileW, height: dims.tileH }}
+    >
       <div className="absolute inset-0">
         <Image
           src="/images/mj-tile-bg.webp"

@@ -163,6 +163,35 @@ export default function MahjongPixiTable({
     };
   }, []);
 
+  const tileShadow = {
+    dx: 3,
+    dy: 4,
+    color: 0x000000,
+    alpha: 0.22,
+    radius: 10,
+    radiusSmall: 7,
+    radiusMini: 6,
+  };
+
+  const renderTileShadow = (
+    w: number,
+    h: number,
+    baseX: number,
+    baseY: number,
+    radius: number,
+  ) => (
+    <pixiGraphics
+      x={baseX + tileShadow.dx}
+      y={baseY + tileShadow.dy}
+      draw={(g) => {
+        g.clear();
+        g.beginFill(tileShadow.color, tileShadow.alpha);
+        g.drawRoundedRect(0, 0, w, h, radius);
+        g.endFill();
+      }}
+    />
+  );
+
   const getDevicePixelRatio = () => {
     if (typeof window === "undefined") return 1;
     return Math.min(3, Math.max(1, window.devicePixelRatio || 1));
@@ -782,6 +811,13 @@ export default function MahjongPixiTable({
                                 rotation={-Math.PI / 2}
                                 scale={isLast ? 1 + pulse * 0.08 : 1}
                               >
+                                {renderTileShadow(
+                                  tileW,
+                                  tileH,
+                                  -tileW / 2,
+                                  -tileH / 2,
+                                  tileShadow.radiusMini,
+                                )}
                                 {tileBgTex && (
                                   <pixiSprite
                                     texture={tileBgTex}
@@ -881,6 +917,13 @@ export default function MahjongPixiTable({
                                 x={x}
                                 y={y}
                               >
+                                {renderTileShadow(
+                                  tileW,
+                                  tileH,
+                                  0,
+                                  0,
+                                  tileShadow.radiusMini,
+                                )}
                                 {tileBgTex && (
                                   <pixiSprite
                                     texture={tileBgTex}
@@ -969,6 +1012,13 @@ export default function MahjongPixiTable({
                                 rotation={Math.PI / 2}
                                 scale={isLast ? 1 + pulse * 0.08 : 1}
                               >
+                                {renderTileShadow(
+                                  tileW,
+                                  tileH,
+                                  -tileW / 2,
+                                  -tileH / 2,
+                                  tileShadow.radiusMini,
+                                )}
                                 {tileBgTex && (
                                   <pixiSprite
                                     texture={tileBgTex}
@@ -1066,6 +1116,13 @@ export default function MahjongPixiTable({
                                 x={x}
                                 y={y}
                               >
+                                {renderTileShadow(
+                                  tileW,
+                                  tileH,
+                                  0,
+                                  0,
+                                  tileShadow.radiusMini,
+                                )}
                                 {tileBgTex && (
                                   <pixiSprite
                                     texture={tileBgTex}
@@ -1136,6 +1193,13 @@ export default function MahjongPixiTable({
 
               return (
                 <pixiContainer key={`d-${t.suit}-${t.rank}-${i}`} x={x} y={y}>
+                  {renderTileShadow(
+                    discardTileW,
+                    discardTileH,
+                    0,
+                    0,
+                    tileShadow.radiusSmall,
+                  )}
                   {tileBgTex && (
                     <pixiSprite
                       texture={tileBgTex}
@@ -1216,6 +1280,13 @@ export default function MahjongPixiTable({
 
                 return (
                   <pixiContainer key={key} x={x} y={y} rotation={rotation}>
+                    {renderTileShadow(
+                      w,
+                      h,
+                      -w / 2,
+                      -h / 2,
+                      tileShadow.radiusMini,
+                    )}
                     {tileBgTex && (
                       <pixiSprite
                         texture={tileBgTex}
@@ -1245,40 +1316,103 @@ export default function MahjongPixiTable({
                 if (showTop) {
                   for (let i = 0; i < topCount; i++) {
                     out.push(
-                      <pixiSprite
+                      <pixiContainer
                         key={`back-top-${i}`}
-                        texture={tileBackTex}
                         x={topStartX + i * (smallW + 1)}
                         y={topY}
-                        width={smallW}
-                        height={smallH}
-                      />,
+                      >
+                        {renderTileShadow(
+                          smallW,
+                          smallH,
+                          0,
+                          0,
+                          tileShadow.radiusMini,
+                        )}
+                        {tileBgTex && (
+                          <pixiSprite
+                            texture={tileBgTex}
+                            x={0}
+                            y={0}
+                            width={smallW}
+                            height={smallH}
+                          />
+                        )}
+                        <pixiSprite
+                          texture={tileBackTex}
+                          x={0}
+                          y={0}
+                          width={smallW}
+                          height={smallH}
+                        />
+                      </pixiContainer>,
                     );
                   }
                 }
                 for (let i = 0; i < sideCount; i++) {
                   if (showLeft && i < sideCountLeft) {
                     out.push(
-                      <pixiSprite
+                      <pixiContainer
                         key={`back-left-${i}`}
-                        texture={tileBackTex}
                         x={sideXLeft}
                         y={sideStartY + i * (smallW + 1)}
-                        width={smallH} // Landscape
-                        height={smallW} // Landscape
-                      />,
+                      >
+                        {renderTileShadow(
+                          smallH,
+                          smallW,
+                          0,
+                          0,
+                          tileShadow.radiusMini,
+                        )}
+                        {tileBgTex && (
+                          <pixiSprite
+                            texture={tileBgTex}
+                            x={0}
+                            y={0}
+                            width={smallH}
+                            height={smallW}
+                          />
+                        )}
+                        <pixiSprite
+                          texture={tileBackTex}
+                          x={0}
+                          y={0}
+                          width={smallH}
+                          height={smallW}
+                        />
+                      </pixiContainer>,
                     );
                   }
                   if (showRight && i < sideCountRight) {
                     out.push(
-                      <pixiSprite
+                      <pixiContainer
                         key={`back-right-${i}`}
-                        texture={tileBackTex}
                         x={sideXRight}
                         y={sideStartY + i * (smallW + 1)}
-                        width={smallH} // Landscape
-                        height={smallW} // Landscape
-                      />,
+                      >
+                        {renderTileShadow(
+                          smallH,
+                          smallW,
+                          0,
+                          0,
+                          tileShadow.radiusMini,
+                        )}
+                        {tileBgTex && (
+                          <pixiSprite
+                            texture={tileBgTex}
+                            x={0}
+                            y={0}
+                            width={smallH}
+                            height={smallW}
+                          />
+                        )}
+                        <pixiSprite
+                          texture={tileBackTex}
+                          x={0}
+                          y={0}
+                          width={smallH}
+                          height={smallW}
+                        />
+                      </pixiContainer>,
                     );
                   }
                 }
@@ -1396,6 +1530,13 @@ export default function MahjongPixiTable({
                     setHoveredHandIdx((prev) => (prev === idx ? null : prev))
                   }
                 >
+                  {renderTileShadow(
+                    handTileW,
+                    handTileH,
+                    0,
+                    0,
+                    tileShadow.radius,
+                  )}
                   {tileBgTex && (
                     <pixiSprite
                       texture={tileBgTex}
@@ -1441,6 +1582,13 @@ export default function MahjongPixiTable({
                         y={baseY}
                         eventMode="none"
                       >
+                        {renderTileShadow(
+                          meldTileW,
+                          meldTileH,
+                          0,
+                          0,
+                          tileShadow.radius,
+                        )}
                         {tileBgTex && (
                           <pixiSprite
                             texture={tileBgTex}
