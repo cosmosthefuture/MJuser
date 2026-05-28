@@ -6,6 +6,7 @@ import dynamic from "next/dynamic";
 import { ArrowLeft } from "lucide-react";
 import { useSelector } from "react-redux";
 import MahjongTileCard from "./components/MahjongTileCard";
+import FlowerTilesPanel from "./components/FlowerTilesPanel";
 import { MahjongTile } from "@/lib/mahjong72";
 import { fetchMahjongJoinToken } from "@/lib/mahjongRoomApi";
 import { connectSocket, getSocket } from "@/lib/wsClient";
@@ -2214,6 +2215,13 @@ export default function MahjongClient() {
 
           {/* Overlays (HTML) */}
           <div className="pointer-events-none absolute inset-0 z-20">
+            <div
+              className={`pointer-events-auto absolute left-4 top-24 ${
+                isMobileUi ? "scale-[0.8] origin-top-left" : ""
+              }`}
+            >
+              <FlowerTilesPanel isMobile={isMobileUi} />
+            </div>
             {isPortraitPhone ? (
               <div
                 className="pointer-events-none absolute left-1/2 top-1/2"
