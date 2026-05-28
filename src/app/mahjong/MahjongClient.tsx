@@ -2017,7 +2017,7 @@ export default function MahjongClient() {
   const cancelButtonClass =
     "rounded-full border border-rose-200/35 bg-rose-500/15 px-4 py-2 text-xs font-semibold text-rose-50 shadow-[0_8px_32px_rgba(0,0,0,0.3)] backdrop-blur-md hover:bg-rose-500/25 transition-all";
   const actionButtonClass =
-    "rounded-full border border-amber-100/20 bg-black/35 px-4 py-2 text-xs font-semibold text-amber-50 shadow-[0_8px_32px_rgba(0,0,0,0.3)] backdrop-blur-md hover:bg-black/50 transition-all";
+    "rounded-[8px] border border-[#0d9276] bg-[#022c22]/95 px-4 py-2 text-xs font-bold text-white shadow-[0_12px_40px_rgba(0,0,0,0.6)] backdrop-blur-md hover:bg-[#022c22] hover:border-[#0d9276] transition-all";
   const iconButtonClass =
     "rounded-full border border-[#1d7b49]/60 bg-[#064e3b]/80 p-2 text-white shadow-[0_8px_32px_rgba(0,0,0,0.3)] backdrop-blur-md hover:bg-[#064e3b] transition-all";
 
