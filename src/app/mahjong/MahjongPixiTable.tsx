@@ -494,7 +494,7 @@ export default function MahjongPixiTable({
   const discardStartY = Math.floor(tableY + tableH / 2 - 140);
 
   const centerIndicatorScale = 1.18;
-  const centerIndicatorLabelY = -Math.round(64 * centerIndicatorScale + 14);
+  const centerIndicatorLabelY = -Math.round(64 * centerIndicatorScale + 34);
 
   const criticalReady = !!boardBackground && !!tileBgTex && !!tileBackTex;
 
