@@ -464,65 +464,94 @@ export default function MahjongClient() {
       globalThis as unknown as { __mj_triggerWinnerReveal?: () => void }
     ).__mj_triggerWinnerReveal = () => {
       const payload = {
-        winner_user_id: authUserId ?? 2,
-        winner_user_name: "Player 2",
+        winner_user_id: 1,
+        winner_user_name: "User One",
         pair: [
-          { id: 70, type: "dot", number: 9, copy_no: 1 },
-          { id: 71, type: "dot", number: 9, copy_no: 2 },
+          { id: 25, type: "dot", number: 7, copy_no: 1 },
+          { id: 28, type: "dot", number: 7, copy_no: 4 },
         ],
         chow: [
           {
-            chow_key: "dot_1_2_3",
+            chow_key: "dot_3_4_5",
             tiles: [
-              { id: 1, type: "dot", number: 1, copy_no: 1 },
-              { id: 2, type: "dot", number: 2, copy_no: 1 },
-              { id: 3, type: "dot", number: 3, copy_no: 1 },
+              { id: 12, type: "dot", number: 3, copy_no: 4 },
+              { id: 13, type: "dot", number: 4, copy_no: 1 },
+              { id: 20, type: "dot", number: 5, copy_no: 4 },
+            ],
+          },
+          {
+            chow_key: "dot_7_8_9",
+            tiles: [
+              { id: 27, type: "dot", number: 7, copy_no: 3 },
+              { id: 31, type: "dot", number: 8, copy_no: 3 },
+              { id: 35, type: "dot", number: 9, copy_no: 3 },
             ],
           },
         ],
         pong: [
           {
-            pong_key: "dot_5",
+            pong_key: "bamboo_7",
             tiles: [
-              { id: 20, type: "dot", number: 5, copy_no: 1 },
-              { id: 21, type: "dot", number: 5, copy_no: 2 },
-              { id: 22, type: "dot", number: 5, copy_no: 3 },
+              { id: 63, type: "bamboo", number: 7, copy_no: 3 },
+              { id: 64, type: "bamboo", number: 7, copy_no: 4 },
+              { id: 62, type: "bamboo", number: 7, copy_no: 2 },
+            ],
+          },
+          {
+            pong_key: "bamboo_8",
+            tiles: [
+              { id: 65, type: "bamboo", number: 8, copy_no: 1 },
+              { id: 67, type: "bamboo", number: 8, copy_no: 3 },
+              { id: 68, type: "bamboo", number: 8, copy_no: 4 },
             ],
           },
         ],
         kong: [],
         winType: "self-draw",
-        isPure: true,
-        payouts: [
-          { payerId: "1", amount: 10 },
-          { payerId: "3", amount: 10 },
-        ],
+        isPure: false,
+        payouts: [{ payerId: "2", amount: 1 }],
       };
       console.log("[dev] trigger mahjong:winner_reveal", payload);
       setWinnerReveal({
-        winnerUserId: authUserId ?? 2,
-        winnerName: "Player 2",
+        winnerUserId: 1,
+        winnerName: "User One",
         resultLabel:
-          authUserId != null ? (authUserId === 2 ? "You Win" : "You Lose") : "",
+          authUserId != null ? (authUserId === 1 ? "You Win" : "You Lose") : "",
         tiles: [
-          { suit: "dots", rank: 9 },
-          { suit: "dots", rank: 9 },
+          { suit: "dots", rank: 7 },
+          { suit: "dots", rank: 7 },
         ],
         melds: [
           {
             kind: "chow",
             tiles: [
-              { suit: "dots", rank: 1 },
-              { suit: "dots", rank: 2 },
               { suit: "dots", rank: 3 },
+              { suit: "dots", rank: 4 },
+              { suit: "dots", rank: 5 },
+            ],
+          },
+          {
+            kind: "chow",
+            tiles: [
+              { suit: "dots", rank: 7 },
+              { suit: "dots", rank: 8 },
+              { suit: "dots", rank: 9 },
             ],
           },
           {
             kind: "pong",
             tiles: [
-              { suit: "dots", rank: 5 },
-              { suit: "dots", rank: 5 },
-              { suit: "dots", rank: 5 },
+              { suit: "bamboo", rank: 7 },
+              { suit: "bamboo", rank: 7 },
+              { suit: "bamboo", rank: 7 },
+            ],
+          },
+          {
+            kind: "pong",
+            tiles: [
+              { suit: "bamboo", rank: 8 },
+              { suit: "bamboo", rank: 8 },
+              { suit: "bamboo", rank: 8 },
             ],
           },
         ],
@@ -3336,25 +3365,27 @@ function WinnerRevealModal({
 }) {
   return (
     <div
-      className={`pointer-events-auto rounded-2xl border border-amber-100/15 bg-black/75 shadow-[0_25px_80px_rgba(0,0,0,0.55)] backdrop-blur-sm ${
-        isMobileUi ? "w-[92vw] max-w-[420px] p-2" : "w-full max-w-[760px] p-5"
+      className={`pointer-events-auto rounded-2xl border border-amber-100/15 bg-black/85 shadow-[0_25px_80px_rgba(0,0,0,0.55)] backdrop-blur-md ${
+        isMobileUi
+          ? "w-[94vw] max-w-[420px] p-3 max-h-[90vh] overflow-y-auto"
+          : "w-full max-w-[760px] p-5"
       }`}
     >
       <div
-        className={`grid grid-cols-3 items-start ${
-          isMobileUi ? "gap-3" : "gap-4"
+        className={`grid grid-cols-3 items-center ${
+          isMobileUi ? "gap-2 mb-2" : "gap-4 mb-4"
         }`}
       >
         <div />
         <div className="text-center">
           {winnerReveal.resultLabel ? (
             <div
-              className={`font-extrabold tracking-tight ${
-                isMobileUi ? "text-xl" : "text-3xl"
+              className={`font-black tracking-tight ${
+                isMobileUi ? "text-lg" : "text-3xl"
               } ${
                 winnerReveal.resultLabel === "You Win"
-                  ? "text-emerald-200"
-                  : "text-rose-200"
+                  ? "text-emerald-400"
+                  : "text-rose-400"
               }`}
             >
               {winnerReveal.resultLabel === "You Win"
@@ -3362,45 +3393,52 @@ function WinnerRevealModal({
                 : winnerReveal.resultLabel}
             </div>
           ) : null}
-          <div className="mt-1 text-sm text-amber-100/90">
+          <div
+            className={`text-amber-100/90 font-medium ${isMobileUi ? "text-[10px]" : "text-sm"}`}
+          >
             {winnerReveal.winnerName}
           </div>
-          {winnerReveal.winType && (
-            <div
-              className={`mt-2 inline-block rounded-full bg-amber-500/20 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-amber-200 border border-amber-500/30 shadow-[0_0_12px_rgba(245,158,11,0.2)] ${
-                isMobileUi ? "scale-90" : ""
-              }`}
-            >
-              {(() => {
-                switch (winnerReveal.winType) {
-                  case "self-draw":
-                    return "自摸";
-                  case "left-discard":
-                    return "吃胡";
-                  case "shown-tile":
-                    return "杠开/明牌胡";
-                  default:
-                    return winnerReveal.winType;
-                }
-              })()}
-              {winnerReveal.isPure && " • 清一色"}
-            </div>
-          )}
         </div>
         <div className="flex justify-end">
           <button
             type="button"
             onClick={onClose}
-            className="rounded-xl border border-[#920d0d] bg-[#2c0202]/95 px-3 py-1.5 text-sm font-bold text-red-50 shadow-[0_12px_40px_rgba(0,0,0,0.6)] backdrop-blur-md hover:bg-[#3d0303] hover:border-[#b91111] hover:scale-105 active:scale-95 transition-all duration-200"
+            className={`rounded-xl border border-[#920d0d] bg-[#2c0202]/95 font-bold text-red-50 shadow-[0_12px_40px_rgba(0,0,0,0.6)] backdrop-blur-md hover:bg-[#3d0303] hover:border-[#b91111] hover:scale-105 active:scale-95 transition-all duration-200 ${
+              isMobileUi ? "px-2 py-1 text-[10px]" : "px-3 py-1.5 text-sm"
+            }`}
           >
             关闭
           </button>
         </div>
       </div>
 
+      <div className="text-center mb-3">
+        {winnerReveal.winType && (
+          <div
+            className={`inline-block rounded-full bg-amber-500/20 px-3 py-0.5 text-[10px] font-bold uppercase tracking-widest text-amber-200 border border-amber-500/30 shadow-[0_0_12px_rgba(245,158,11,0.2)] ${
+              isMobileUi ? "scale-90" : ""
+            }`}
+          >
+            {(() => {
+              switch (winnerReveal.winType) {
+                case "self-draw":
+                  return "自摸";
+                case "left-discard":
+                  return "吃胡";
+                case "shown-tile":
+                  return "杠开/明牌胡";
+                default:
+                  return winnerReveal.winType;
+              }
+            })()}
+            {winnerReveal.isPure && " • 清一色"}
+          </div>
+        )}
+      </div>
+
       <div
-        className={`${isMobileUi ? "mt-3" : "mt-4"} flex flex-wrap justify-center ${
-          isMobileUi ? "gap-1.5" : "gap-2"
+        className={`flex flex-wrap justify-center ${
+          isMobileUi ? "gap-1" : "gap-2"
         }`}
       >
         {winnerReveal.tiles.map((t, idx) => (
@@ -3412,8 +3450,8 @@ function WinnerRevealModal({
 
       {winnerReveal.melds.length > 0 ? (
         <div
-          className={`flex flex-wrap items-start ${
-            isMobileUi ? "mt-4 gap-4" : "mt-5 gap-8"
+          className={`flex flex-wrap justify-center items-start ${
+            isMobileUi ? "mt-3 gap-3" : "mt-5 gap-8"
           }`}
         >
           {(() => {
@@ -3430,20 +3468,17 @@ function WinnerRevealModal({
                 );
                 if (groups.length === 0) return null;
                 return (
-                  <div
-                    key={kind}
-                    className={isMobileUi ? "min-w-[140px]" : "min-w-[180px]"}
-                  >
-                    <div className="text-xs font-semibold uppercase tracking-wide text-amber-100/70">
+                  <div key={kind} className="flex flex-col items-center">
+                    <div className="text-[9px] font-bold uppercase tracking-tighter text-amber-100/40 mb-1">
                       {kind}
                     </div>
                     <div
-                      className={`mt-2 flex flex-wrap ${
-                        isMobileUi ? "gap-3" : "gap-6"
+                      className={`flex flex-wrap justify-center ${
+                        isMobileUi ? "gap-2" : "gap-4"
                       }`}
                     >
                       {groups.map((g, gi) => (
-                        <div key={`${kind}-${gi}`} className="flex gap-2">
+                        <div key={`${kind}-${gi}`} className="flex gap-1">
                           {g.tiles.map((tile, ti) => (
                             <MahjongTileCard
                               key={`${kind}-${gi}-${tile.suit}-${tile.rank}-${ti}`}
@@ -3464,28 +3499,36 @@ function WinnerRevealModal({
 
       {winnerReveal.payouts && winnerReveal.payouts.length > 0 && (
         <div
-          className={`mt-6 border-t border-amber-100/10 pt-4 ${
-            isMobileUi ? "px-2" : "px-4"
+          className={`mt-4 border-t border-amber-100/10 pt-3 ${
+            isMobileUi ? "px-1" : "px-4"
           }`}
         >
-          <div className="text-[10px] font-bold uppercase tracking-widest text-amber-100/50 mb-3">
+          <div className="text-[10px] font-bold uppercase tracking-widest text-amber-100/50 mb-2 text-center">
             结算
           </div>
-          <div className="flex flex-col gap-2">
+          <div
+            className={`grid ${
+              isMobileUi ? "grid-cols-1 gap-1.5" : "grid-cols-2 gap-3"
+            }`}
+          >
             {winnerReveal.payouts.map((p, idx) => (
               <div
                 key={idx}
-                className="flex items-center justify-between rounded-lg bg-white/5 px-3 py-2 border border-white/5"
+                className="flex items-center justify-between rounded-lg bg-white/5 px-2.5 py-1.5 border border-white/5"
               >
                 <div className="flex items-center gap-2">
-                  <div className="h-6 w-6 rounded-full bg-amber-500/20 flex items-center justify-center text-[10px] font-bold text-amber-200">
+                  <div className="h-5 w-5 rounded-full bg-amber-500/20 flex items-center justify-center text-[9px] font-bold text-amber-200">
                     {p.payerId}
                   </div>
-                  <span className="text-xs text-amber-100/80">
+                  <span
+                    className={`font-medium text-amber-100/80 ${isMobileUi ? "text-[10px]" : "text-xs"}`}
+                  >
                     玩家 {p.payerId}
                   </span>
                 </div>
-                <div className="font-mono text-sm font-bold text-emerald-400">
+                <div
+                  className={`font-mono font-black text-emerald-400 ${isMobileUi ? "text-xs" : "text-sm"}`}
+                >
                   +{p.amount}
                 </div>
               </div>
