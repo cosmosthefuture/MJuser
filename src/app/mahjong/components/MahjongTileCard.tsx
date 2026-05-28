@@ -14,11 +14,13 @@ export default function MahjongTileCard({
   size = "md",
 }: {
   tile: MahjongTile;
-  size?: "xs" | "sm" | "md";
+  size?: "xxs" | "xs" | "sm" | "md";
 }) {
   const dims =
-    size === "xs"
-      ? { tileW: 44, tileH: 60, offX: 6, offY: 12, sW: 12, sH: 18 }
+    size === "xxs"
+      ? { tileW: 34, tileH: 46, offX: 4, offY: 8, sW: 8, sH: 14 }
+      : size === "xs"
+        ? { tileW: 44, tileH: 60, offX: 6, offY: 12, sW: 12, sH: 18 }
       : size === "sm"
         ? { tileW: 56, tileH: 76, offX: 8, offY: 16, sW: 16, sH: 24 }
         : { tileW: 68, tileH: 94, offX: 10, offY: 20, sW: 20, sH: 32 };

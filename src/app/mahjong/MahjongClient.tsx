@@ -3438,12 +3438,12 @@ function WinnerRevealModal({
 
       <div
         className={`flex flex-wrap justify-center ${
-          isMobileUi ? "gap-0.5" : "gap-2"
+          isMobileUi ? "gap-0.5" : "gap-1"
         }`}
       >
         {winnerReveal.tiles.map((t, idx) => (
           <div key={`${t.suit}-${t.rank}-${idx}`}>
-            <MahjongTileCard tile={t} size={isMobileUi ? "xs" : "md"} />
+            <MahjongTileCard tile={t} size="xxs" />
           </div>
         ))}
       </div>
@@ -3451,7 +3451,7 @@ function WinnerRevealModal({
       {winnerReveal.melds.length > 0 ? (
         <div
           className={`flex flex-wrap justify-center items-start ${
-            isMobileUi ? "mt-2 gap-2" : "mt-5 gap-8"
+            isMobileUi ? "mt-2 gap-2" : "mt-3 gap-4"
           }`}
         >
           {(() => {
@@ -3474,7 +3474,7 @@ function WinnerRevealModal({
                     </div>
                     <div
                       className={`flex flex-wrap justify-center ${
-                        isMobileUi ? "gap-1.5" : "gap-4"
+                        isMobileUi ? "gap-1" : "gap-2"
                       }`}
                     >
                       {groups.map((g, gi) => (
@@ -3483,7 +3483,7 @@ function WinnerRevealModal({
                             <MahjongTileCard
                               key={`${kind}-${gi}-${tile.suit}-${tile.rank}-${ti}`}
                               tile={tile}
-                              size={isMobileUi ? "xs" : "md"}
+                              size="xxs"
                             />
                           ))}
                         </div>
