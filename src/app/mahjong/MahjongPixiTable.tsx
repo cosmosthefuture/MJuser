@@ -571,22 +571,37 @@ export default function MahjongPixiTable({
                       draw={(g) => {
                         g.clear();
                         // Center UI Container
-                        g.beginFill(0x0b6e62);
+
+                        // 1. Outer-most green border layer (the "Sorting Button" green)
+                        g.beginFill(0x0d9276);
+                        g.drawRoundedRect(-68, -68, 136, 136, 22);
+                        g.endFill();
+
+                        // 2. Black separator layer (made thinner)
+                        g.beginFill(0x011a14);
+                        g.drawRoundedRect(-65.5, -65.5, 131, 131, 20.5);
+                        g.endFill();
+
+                        // 3. Main green fill layer
+                        g.beginFill(0x022c22, 0.95);
                         g.drawRoundedRect(-64, -64, 128, 128, 20);
                         g.endFill();
 
-                        g.lineStyle(3, 0x6ee7d8, 0.32);
-                        g.drawRoundedRect(-63, -63, 126, 126, 19);
+                        // Top-left lighting highlight for realism
+                        g.lineStyle(2, 0xffffff, 0.12);
+                        g.moveTo(-40, -64);
+                        g.lineTo(40, -64);
+                        g.moveTo(-64, -40);
+                        g.lineTo(-64, 40);
 
-                        g.lineStyle(3, 0x012a23, 0.55);
-                        g.drawRoundedRect(-64, -64, 128, 128, 20);
-
+                        // Inner dark bevel for depth
                         g.lineStyle(0);
-                        g.beginFill(0x043a2d);
+                        g.beginFill(0x011a14, 0.6);
                         g.drawRoundedRect(-58, -58, 116, 116, 16);
                         g.endFill();
 
-                        g.lineStyle(2, 0x064e3b, 0.7);
+                        // Inner green rim highlight
+                        g.lineStyle(1.5, 0x0a5c4a, 0.6);
                         g.drawRoundedRect(-57, -57, 114, 114, 15);
 
                         g.lineStyle(0);
