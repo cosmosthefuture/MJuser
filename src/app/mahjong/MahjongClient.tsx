@@ -3523,9 +3523,9 @@ function WinnerRevealModal({
                   </span>
                 </div>
                 <div
-                  className={`font-mono font-black text-emerald-400 ${isMobileUi ? "text-[10px]" : "text-sm"}`}
+                  className={`font-mono font-black text-rose-400 ${isMobileUi ? "text-[10px]" : "text-sm"}`}
                 >
-                  +{p.amount}
+                  -{p.amount}X
                 </div>
               </div>
             ))}
