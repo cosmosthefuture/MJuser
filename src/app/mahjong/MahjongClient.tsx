@@ -2426,7 +2426,7 @@ export default function MahjongClient() {
           </div>
 
           <div className="pointer-events-none absolute inset-0 z-20">
-            {!!roomState ? (
+            {!!roomState && hand.length > 0 ? (
               <>
                 {isPortraitPhone ? (
                   <div
