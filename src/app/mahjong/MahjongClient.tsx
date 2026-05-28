@@ -2013,13 +2013,13 @@ export default function MahjongClient() {
   };
 
   const acceptButtonClass =
-    "rounded-full border border-emerald-200/40 bg-emerald-500/20 px-4 py-2 text-xs font-semibold text-emerald-50 shadow-[0_8px_32px_rgba(0,0,0,0.3)] backdrop-blur-md hover:bg-emerald-500/30 transition-all";
+    "rounded-full border border-emerald-200/40 bg-emerald-500/20 px-4 py-2 text-xs font-semibold text-emerald-50 shadow-[0_8px_32px_rgba(0,0,0,0.3)] backdrop-blur-md hover:bg-emerald-500/30 hover:scale-105 active:scale-95 transition-all duration-200";
   const cancelButtonClass =
-    "rounded-full border border-rose-200/35 bg-rose-500/15 px-4 py-2 text-xs font-semibold text-rose-50 shadow-[0_8px_32px_rgba(0,0,0,0.3)] backdrop-blur-md hover:bg-rose-500/25 transition-all";
+    "rounded-full border border-rose-200/35 bg-rose-500/15 px-4 py-2 text-xs font-semibold text-rose-50 shadow-[0_8px_32px_rgba(0,0,0,0.3)] backdrop-blur-md hover:bg-rose-500/25 hover:scale-105 active:scale-95 transition-all duration-200";
   const actionButtonClass =
-    "rounded-xl border border-[#0d9276] bg-[#022c22]/95 px-4 py-2 text-xs font-bold text-white shadow-[0_12px_40px_rgba(0,0,0,0.6)] backdrop-blur-md hover:bg-[#022c22] hover:border-[#0d9276] transition-all";
+    "rounded-xl border border-[#0d9276] bg-[#022c22]/95 px-4 py-2 text-xs font-bold text-white shadow-[0_12px_40px_rgba(0,0,0,0.6)] backdrop-blur-md hover:bg-[#022c22] hover:border-[#0d9276] hover:scale-105 active:scale-95 active:shadow-[0_4px_12px_rgba(0,0,0,0.5)] transition-all duration-200";
   const iconButtonClass =
-    "rounded-full border border-[#1d7b49]/60 bg-[#064e3b]/80 p-2 text-white shadow-[0_8px_32px_rgba(0,0,0,0.3)] backdrop-blur-md hover:bg-[#064e3b] transition-all";
+    "rounded-full border border-[#1d7b49]/60 bg-[#064e3b]/80 p-2 text-white shadow-[0_8px_32px_rgba(0,0,0,0.3)] backdrop-blur-md hover:bg-[#064e3b] hover:scale-110 active:scale-90 transition-all duration-200";
 
   return (
     <div className="fixed inset-0 overflow-hidden bg-[#00251b] text-amber-100">
