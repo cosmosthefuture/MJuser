@@ -51,6 +51,9 @@ type WinnerRevealPayload = {
   chow?: unknown;
   pong?: unknown;
   kong?: unknown;
+  winType?: string;
+  isPure?: boolean;
+  payouts?: Array<{ payerId: string; amount: number }>;
 };
 
 type CanKongPayload = {
@@ -77,6 +80,9 @@ type WinnerRevealState = {
     kind: "chow" | "pong" | "kong";
     tiles: MahjongTile[];
   }>;
+  winType?: string;
+  isPure?: boolean;
+  payouts?: Array<{ payerId: string; amount: number }>;
 };
 
 const MahjongPixiTable = dynamic(() => import("./MahjongPixiTable"), {
@@ -459,91 +465,70 @@ export default function MahjongClient() {
     ).__mj_triggerWinnerReveal = () => {
       const payload = {
         winner_user_id: authUserId ?? 2,
-        winner_user_name: "User Two",
+        winner_user_name: "Player 2",
         pair: [
-          { id: 23, type: "dot", number: 6, copy_no: 3 },
-          { id: 24, type: "dot", number: 6, copy_no: 4 },
+          { id: 70, type: "dot", number: 9, copy_no: 1 },
+          { id: 71, type: "dot", number: 9, copy_no: 2 },
         ],
         chow: [
           {
-            chow_key: "bamboo_3_4_5",
+            chow_key: "dot_1_2_3",
             tiles: [
-              { id: 46, type: "bamboo", number: 3, copy_no: 2 },
-              { id: 51, type: "bamboo", number: 4, copy_no: 3 },
-              { id: 55, type: "bamboo", number: 5, copy_no: 3 },
-            ],
-          },
-          {
-            chow_key: "bamboo_3_4_5",
-            tiles: [
-              { id: 48, type: "bamboo", number: 3, copy_no: 4 },
-              { id: 50, type: "bamboo", number: 4, copy_no: 2 },
-              { id: 53, type: "bamboo", number: 5, copy_no: 1 },
-            ],
-          },
-          {
-            chow_key: "bamboo_7_8_9",
-            tiles: [
-              { id: 63, type: "bamboo", number: 7, copy_no: 3 },
-              { id: 66, type: "bamboo", number: 8, copy_no: 2 },
-              { id: 72, type: "bamboo", number: 9, copy_no: 4 },
-            ],
-          },
-          {
-            chow_key: "dot_4_5_6",
-            tiles: [
-              { id: 15, type: "dot", number: 4, copy_no: 3 },
-              { id: 17, type: "dot", number: 5, copy_no: 1 },
-              { id: 22, type: "dot", number: 6, copy_no: 2 },
+              { id: 1, type: "dot", number: 1, copy_no: 1 },
+              { id: 2, type: "dot", number: 2, copy_no: 1 },
+              { id: 3, type: "dot", number: 3, copy_no: 1 },
             ],
           },
         ],
-        pong: [],
+        pong: [
+          {
+            pong_key: "dot_5",
+            tiles: [
+              { id: 20, type: "dot", number: 5, copy_no: 1 },
+              { id: 21, type: "dot", number: 5, copy_no: 2 },
+              { id: 22, type: "dot", number: 5, copy_no: 3 },
+            ],
+          },
+        ],
         kong: [],
+        winType: "self-draw",
+        isPure: true,
+        payouts: [
+          { payerId: "1", amount: 10 },
+          { payerId: "3", amount: 10 },
+        ],
       };
       console.log("[dev] trigger mahjong:winner_reveal", payload);
       setWinnerReveal({
         winnerUserId: authUserId ?? 2,
-        winnerName: "User Two",
-        resultLabel: authUserId != null ? "You Win" : "",
+        winnerName: "Player 2",
+        resultLabel:
+          authUserId != null ? (authUserId === 2 ? "You Win" : "You Lose") : "",
         tiles: [
-          { suit: "dots", rank: 6 },
-          { suit: "dots", rank: 6 },
+          { suit: "dots", rank: 9 },
+          { suit: "dots", rank: 9 },
         ],
         melds: [
           {
             kind: "chow",
             tiles: [
-              { suit: "bamboo", rank: 3 },
-              { suit: "bamboo", rank: 4 },
-              { suit: "bamboo", rank: 5 },
+              { suit: "dots", rank: 1 },
+              { suit: "dots", rank: 2 },
+              { suit: "dots", rank: 3 },
             ],
           },
           {
-            kind: "chow",
+            kind: "pong",
             tiles: [
-              { suit: "bamboo", rank: 3 },
-              { suit: "bamboo", rank: 4 },
-              { suit: "bamboo", rank: 5 },
-            ],
-          },
-          {
-            kind: "chow",
-            tiles: [
-              { suit: "bamboo", rank: 7 },
-              { suit: "bamboo", rank: 8 },
-              { suit: "bamboo", rank: 9 },
-            ],
-          },
-          {
-            kind: "chow",
-            tiles: [
-              { suit: "dots", rank: 4 },
               { suit: "dots", rank: 5 },
-              { suit: "dots", rank: 6 },
+              { suit: "dots", rank: 5 },
+              { suit: "dots", rank: 5 },
             ],
           },
         ],
+        winType: payload.winType,
+        isPure: payload.isPure,
+        payouts: payload.payouts,
       });
     };
 
@@ -1613,6 +1598,9 @@ export default function MahjongClient() {
           resultLabel,
           tiles,
           melds,
+          winType: p.winType,
+          isPure: p.isPure,
+          payouts: p.payouts,
         });
       };
 
@@ -3377,6 +3365,27 @@ function WinnerRevealModal({
           <div className="mt-1 text-sm text-amber-100/90">
             {winnerReveal.winnerName}
           </div>
+          {winnerReveal.winType && (
+            <div
+              className={`mt-2 inline-block rounded-full bg-amber-500/20 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-amber-200 border border-amber-500/30 shadow-[0_0_12px_rgba(245,158,11,0.2)] ${
+                isMobileUi ? "scale-90" : ""
+              }`}
+            >
+              {(() => {
+                switch (winnerReveal.winType) {
+                  case "self-draw":
+                    return "自摸";
+                  case "left-discard":
+                    return "吃胡";
+                  case "shown-tile":
+                    return "杠开/明牌胡";
+                  default:
+                    return winnerReveal.winType;
+                }
+              })()}
+              {winnerReveal.isPure && " • 清一色"}
+            </div>
+          )}
         </div>
         <div className="flex justify-end">
           <button
@@ -3452,6 +3461,38 @@ function WinnerRevealModal({
           })()}
         </div>
       ) : null}
+
+      {winnerReveal.payouts && winnerReveal.payouts.length > 0 && (
+        <div
+          className={`mt-6 border-t border-amber-100/10 pt-4 ${
+            isMobileUi ? "px-2" : "px-4"
+          }`}
+        >
+          <div className="text-[10px] font-bold uppercase tracking-widest text-amber-100/50 mb-3">
+            结算
+          </div>
+          <div className="flex flex-col gap-2">
+            {winnerReveal.payouts.map((p, idx) => (
+              <div
+                key={idx}
+                className="flex items-center justify-between rounded-lg bg-white/5 px-3 py-2 border border-white/5"
+              >
+                <div className="flex items-center gap-2">
+                  <div className="h-6 w-6 rounded-full bg-amber-500/20 flex items-center justify-center text-[10px] font-bold text-amber-200">
+                    {p.payerId}
+                  </div>
+                  <span className="text-xs text-amber-100/80">
+                    玩家 {p.payerId}
+                  </span>
+                </div>
+                <div className="font-mono text-sm font-bold text-emerald-400">
+                  +{p.amount}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
