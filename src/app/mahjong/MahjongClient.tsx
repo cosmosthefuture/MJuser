@@ -2185,43 +2185,49 @@ export default function MahjongClient() {
           </div>
 
           <div className="pointer-events-none absolute inset-0 z-20">
-            {isPortraitPhone ? (
-              <div
-                className="pointer-events-none absolute left-1/4 top-1/2"
-                style={portraitUiStyle ?? undefined}
-              >
-                <div className="pointer-events-auto absolute right-40 bottom-[200px]">
-                  <button
-                    type="button"
-                    onClick={emitSortHand}
-                    className={actionButtonClass}
+            {!!roomState ? (
+              <>
+                {isPortraitPhone ? (
+                  <div
+                    className="pointer-events-none absolute left-1/4 top-1/2"
+                    style={portraitUiStyle ?? undefined}
                   >
-                    理牌
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="pointer-events-auto absolute right-50 bottom-[200px]">
-                <button
-                  type="button"
-                  onClick={emitSortHand}
-                  className={actionButtonClass}
-                >
-                  理牌
-                </button>
-              </div>
-            )}
+                    <div className="pointer-events-auto absolute right-40 bottom-[200px]">
+                      <button
+                        type="button"
+                        onClick={emitSortHand}
+                        className={actionButtonClass}
+                      >
+                        理牌
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="pointer-events-auto absolute right-50 bottom-[200px]">
+                    <button
+                      type="button"
+                      onClick={emitSortHand}
+                      className={actionButtonClass}
+                    >
+                      理牌
+                    </button>
+                  </div>
+                )}
+              </>
+            ) : null}
           </div>
 
           {/* Overlays (HTML) */}
           <div className="pointer-events-none absolute inset-0 z-20">
-            <div
-              className={`pointer-events-auto absolute z-50 ${
-                isMobileUi ? "left-[60%] top-4" : "left-4 top-24"
-              } ${isMobileUi ? "rotate-90 scale-[0.55]" : ""}`}
-            >
-              <FlowerTilesPanel isMobile={isMobileUi} />
-            </div>
+            {!!roomState && (
+              <div
+                className={`pointer-events-auto absolute z-50 ${
+                  isMobileUi ? "left-[60%] top-4" : "left-4 top-24"
+                } ${isMobileUi ? "rotate-90 scale-[0.55]" : ""}`}
+              >
+                <FlowerTilesPanel isMobile={isMobileUi} />
+              </div>
+            )}
             {isPortraitPhone ? (
               <div
                 className="pointer-events-none absolute left-1/2 top-1/2"
