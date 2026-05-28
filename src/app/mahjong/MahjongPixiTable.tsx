@@ -572,12 +572,13 @@ export default function MahjongPixiTable({
                         g.clear();
                         // Center UI Container
 
-                        // 1. Outer-most green border layer (made much bigger)
+                        // 1. Outer-most green border layer (Large and smooth)
+                        g.lineStyle(0);
                         g.beginFill(0x0d9276);
                         g.drawRoundedRect(-70, -70, 140, 140, 24);
                         g.endFill();
 
-                        // 2. Black separator layer (made very small/thin)
+                        // 2. Small black border layer (thin recessed frame)
                         g.beginFill(0x011a14);
                         g.drawRoundedRect(-64.5, -64.5, 129, 129, 20.5);
                         g.endFill();
@@ -593,88 +594,89 @@ export default function MahjongPixiTable({
                         g.lineTo(40, -64);
                         g.moveTo(-64, -40);
                         g.lineTo(-64, 40);
-
-                        // Inner dark bevel for depth
                         g.lineStyle(0);
-                        g.beginFill(0x011a14, 0.6);
-                        g.drawRoundedRect(-58, -58, 116, 116, 16);
-                        g.endFill();
 
-                        // Inner green rim highlight
-                        g.lineStyle(1.5, 0x0a5c4a, 0.6);
-                        g.drawRoundedRect(-57, -57, 114, 114, 15);
-
-                        g.lineStyle(0);
-                        g.beginFill(0x064e3b);
-                        g.drawRoundedRect(-56, -56, 112, 112, 14);
-                        g.endFill();
-
-                        // 3D Sunken Center Face (the beveled trapezoids)
+                        // --- 3D FACES START ---
                         const amber = 0xd9a600;
                         const activeAlpha = 0.4 + pulse * 0.6;
 
-                        // Top face (lighter)
-                        g.lineStyle(0);
-                        g.beginFill(0xf5f5f5);
-                        g.drawPolygon([-50, -50, 50, -50, 24, -24, -24, -24]);
-                        g.endFill();
-                        if (activeTurnSide === "top") {
-                          g.beginFill(amber, activeAlpha);
-                          g.drawPolygon([-50, -50, 50, -50, 24, -24, -24, -24]);
-                          g.endFill();
-                        }
-
-                        // Bottom face (slightly darker)
-                        g.beginFill(0xdcdcdc);
-                        g.drawPolygon([-50, 50, 50, 50, 24, 24, -24, 24]);
-                        g.endFill();
-                        if (activeTurnSide === "bottom") {
-                          g.beginFill(amber, activeAlpha);
-                          g.drawPolygon([-50, 50, 50, 50, 24, 24, -24, 24]);
-                          g.endFill();
-                        }
-
-                        // Left face (medium)
+                        // Base white face color (rounded square)
                         g.beginFill(0xe5e5e5);
-                        g.drawPolygon([-50, -50, -50, 50, -24, 24, -24, -24]);
+                        g.drawRoundedRect(-52, -52, 104, 104, 12);
                         g.endFill();
-                        if (activeTurnSide === "left") {
-                          g.beginFill(amber, activeAlpha);
-                          g.drawPolygon([-50, -50, -50, 50, -24, 24, -24, -24]);
-                          g.endFill();
-                        }
 
-                        // Right face (medium)
-                        g.beginFill(0xe5e5e5);
-                        g.drawPolygon([50, -50, 50, 50, 24, 24, 24, -24]);
-                        g.endFill();
-                        if (activeTurnSide === "right") {
-                          g.beginFill(amber, activeAlpha);
-                          g.drawPolygon([50, -50, 50, 50, 24, 24, 24, -24]);
+                        // Helper for face polygons
+                        const drawFace = (
+                          pts: number[],
+                          color: number,
+                          active: boolean,
+                        ) => {
+                          g.beginFill(color, 0.3); // Layered shading
+                          g.drawPolygon(pts);
                           g.endFill();
-                        }
+                          if (active) {
+                            g.beginFill(amber, activeAlpha);
+                            g.drawPolygon(pts);
+                            g.endFill();
+                          }
+                        };
 
-                        // Diagonal lines for depth
-                        g.lineStyle(1, 0x999999, 0.5);
-                        g.moveTo(-50, -50);
+                        // Individual faces with their own base shading
+                        // Top (lighter)
+                        drawFace(
+                          [-52, -52, 52, -52, 24, -24, -24, -24],
+                          0xffffff,
+                          activeTurnSide === "top",
+                        );
+                        // Bottom (darker)
+                        drawFace(
+                          [-52, 52, 52, 52, 24, 24, -24, 24],
+                          0x333333,
+                          activeTurnSide === "bottom",
+                        );
+                        // Left/Right (medium)
+                        drawFace(
+                          [-52, -52, -52, 52, -24, 24, -24, -24],
+                          0x888888,
+                          activeTurnSide === "left",
+                        );
+                        drawFace(
+                          [52, -52, 52, 52, 24, 24, 24, -24],
+                          0x888888,
+                          activeTurnSide === "right",
+                        );
+
+                        // Divider Shadows (Recessed groove effect)
+                        // 1. Inner Shadow (Dark)
+                        g.lineStyle(1.5, 0x000000, 0.08);
+                        g.moveTo(-51, -51);
+                        g.lineTo(-23, -23);
+                        g.moveTo(51, -51);
+                        g.lineTo(23, -23);
+                        g.moveTo(-51, 51);
+                        g.lineTo(-23, 23);
+                        g.moveTo(51, 51);
+                        g.lineTo(23, 23);
+
+                        // 2. Main Divider Line (Highlight)
+                        g.lineStyle(1, 0x999999, 0.15);
+                        g.moveTo(-52, -52);
                         g.lineTo(-24, -24);
-                        g.moveTo(50, -50);
+                        g.moveTo(52, -52);
                         g.lineTo(24, -24);
-                        g.moveTo(-50, 50);
+                        g.moveTo(-52, 52);
                         g.lineTo(-24, 24);
-                        g.moveTo(50, 50);
+                        g.moveTo(52, 52);
                         g.lineTo(24, 24);
-
-                        // Recessed Green Display Area
-                        // Shadow for recess
                         g.lineStyle(0);
-                        g.beginFill(0x022c22);
-                        g.drawRoundedRect(-26, -26, 52, 52, 6);
+
+                        // Recessed Green Display Area (Timer) - this creates the center hole
+                        g.beginFill(0x011a14);
+                        g.drawRoundedRect(-26, -26, 52, 52, 8);
                         g.endFill();
 
-                        // Green display
                         g.beginFill(0x064e3b);
-                        g.drawRoundedRect(-24, -24, 48, 48, 4);
+                        g.drawRoundedRect(-24, -24, 48, 48, 6);
                         g.endFill();
                       }}
                     />
@@ -710,6 +712,7 @@ export default function MahjongPixiTable({
                         x={0}
                         y={-38}
                         anchor={0.5}
+                        rotation={Math.PI}
                         alpha={activeTurnSide === "top" ? 0.6 + pulse * 0.4 : 1}
                         style={
                           new TextStyle({
@@ -727,6 +730,7 @@ export default function MahjongPixiTable({
                         x={-38}
                         y={0}
                         anchor={0.5}
+                        rotation={Math.PI / 2}
                         alpha={
                           activeTurnSide === "left" ? 0.6 + pulse * 0.4 : 1
                         }
@@ -746,6 +750,7 @@ export default function MahjongPixiTable({
                         x={38}
                         y={0}
                         anchor={0.5}
+                        rotation={-Math.PI / 2}
                         alpha={
                           activeTurnSide === "right" ? 0.6 + pulse * 0.4 : 1
                         }
@@ -765,6 +770,7 @@ export default function MahjongPixiTable({
                         x={0}
                         y={38}
                         anchor={0.5}
+                        rotation={0}
                         alpha={
                           activeTurnSide === "bottom" ? 0.6 + pulse * 0.4 : 1
                         }
