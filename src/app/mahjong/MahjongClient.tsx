@@ -3367,13 +3367,13 @@ function WinnerRevealModal({
     <div
       className={`pointer-events-auto rounded-2xl border border-amber-100/15 bg-black/85 shadow-[0_25px_80px_rgba(0,0,0,0.55)] backdrop-blur-md ${
         isMobileUi
-          ? "w-[94vw] max-w-[420px] p-3 max-h-[90vh] overflow-y-auto"
-          : "w-full max-w-[760px] p-5"
+          ? "w-[98vw] p-2 max-h-[95vh] overflow-y-auto"
+          : "w-full max-w-[860px] p-5"
       }`}
     >
       <div
         className={`grid grid-cols-3 items-center ${
-          isMobileUi ? "gap-2 mb-2" : "gap-4 mb-4"
+          isMobileUi ? "gap-1 mb-1" : "gap-4 mb-4"
         }`}
       >
         <div />
@@ -3381,7 +3381,7 @@ function WinnerRevealModal({
           {winnerReveal.resultLabel ? (
             <div
               className={`font-black tracking-tight ${
-                isMobileUi ? "text-lg" : "text-3xl"
+                isMobileUi ? "text-base" : "text-3xl"
               } ${
                 winnerReveal.resultLabel === "You Win"
                   ? "text-emerald-400"
@@ -3394,7 +3394,7 @@ function WinnerRevealModal({
             </div>
           ) : null}
           <div
-            className={`text-amber-100/90 font-medium ${isMobileUi ? "text-[10px]" : "text-sm"}`}
+            className={`text-amber-100/90 font-medium ${isMobileUi ? "text-[9px]" : "text-sm"}`}
           >
             {winnerReveal.winnerName}
           </div>
@@ -3404,7 +3404,7 @@ function WinnerRevealModal({
             type="button"
             onClick={onClose}
             className={`rounded-xl border border-[#920d0d] bg-[#2c0202]/95 font-bold text-red-50 shadow-[0_12px_40px_rgba(0,0,0,0.6)] backdrop-blur-md hover:bg-[#3d0303] hover:border-[#b91111] hover:scale-105 active:scale-95 transition-all duration-200 ${
-              isMobileUi ? "px-2 py-1 text-[10px]" : "px-3 py-1.5 text-sm"
+              isMobileUi ? "px-1.5 py-0.5 text-[9px]" : "px-3 py-1.5 text-sm"
             }`}
           >
             关闭
@@ -3412,10 +3412,10 @@ function WinnerRevealModal({
         </div>
       </div>
 
-      <div className="text-center mb-3">
+      <div className={isMobileUi ? "text-center mb-1.5" : "text-center mb-3"}>
         {winnerReveal.winType && (
           <div
-            className={`inline-block rounded-full bg-amber-500/20 px-3 py-0.5 text-[10px] font-bold uppercase tracking-widest text-amber-200 border border-amber-500/30 shadow-[0_0_12px_rgba(245,158,11,0.2)] ${
+            className={`inline-block rounded-full bg-amber-500/20 px-2 py-0 text-[9px] font-bold uppercase tracking-widest text-amber-200 border border-amber-500/30 shadow-[0_0_12px_rgba(245,158,11,0.2)] ${
               isMobileUi ? "scale-90" : ""
             }`}
           >
@@ -3438,7 +3438,7 @@ function WinnerRevealModal({
 
       <div
         className={`flex flex-wrap justify-center ${
-          isMobileUi ? "gap-1" : "gap-2"
+          isMobileUi ? "gap-0.5" : "gap-2"
         }`}
       >
         {winnerReveal.tiles.map((t, idx) => (
@@ -3451,7 +3451,7 @@ function WinnerRevealModal({
       {winnerReveal.melds.length > 0 ? (
         <div
           className={`flex flex-wrap justify-center items-start ${
-            isMobileUi ? "mt-3 gap-3" : "mt-5 gap-8"
+            isMobileUi ? "mt-2 gap-2" : "mt-5 gap-8"
           }`}
         >
           {(() => {
@@ -3469,16 +3469,16 @@ function WinnerRevealModal({
                 if (groups.length === 0) return null;
                 return (
                   <div key={kind} className="flex flex-col items-center">
-                    <div className="text-[9px] font-bold uppercase tracking-tighter text-amber-100/40 mb-1">
+                    <div className="text-[8px] font-bold uppercase tracking-tighter text-amber-100/30 mb-0.5">
                       {kind}
                     </div>
                     <div
                       className={`flex flex-wrap justify-center ${
-                        isMobileUi ? "gap-2" : "gap-4"
+                        isMobileUi ? "gap-1.5" : "gap-4"
                       }`}
                     >
                       {groups.map((g, gi) => (
-                        <div key={`${kind}-${gi}`} className="flex gap-1">
+                        <div key={`${kind}-${gi}`} className="flex gap-0.5">
                           {g.tiles.map((tile, ti) => (
                             <MahjongTileCard
                               key={`${kind}-${gi}-${tile.suit}-${tile.rank}-${ti}`}
@@ -3499,22 +3499,18 @@ function WinnerRevealModal({
 
       {winnerReveal.payouts && winnerReveal.payouts.length > 0 && (
         <div
-          className={`mt-4 border-t border-amber-100/10 pt-3 ${
-            isMobileUi ? "px-1" : "px-4"
+          className={`mt-2 border-t border-amber-100/10 pt-2 ${
+            isMobileUi ? "px-0" : "px-4"
           }`}
         >
-          <div className="text-[10px] font-bold uppercase tracking-widest text-amber-100/50 mb-2 text-center">
+          <div className="text-[9px] font-bold uppercase tracking-widest text-amber-100/40 mb-1 text-center">
             结算
           </div>
-          <div
-            className={`grid ${
-              isMobileUi ? "grid-cols-1 gap-1.5" : "grid-cols-2 gap-3"
-            }`}
-          >
+          <div className="flex flex-col gap-1.5">
             {winnerReveal.payouts.map((p, idx) => (
               <div
                 key={idx}
-                className="flex items-center justify-between rounded-lg bg-white/5 px-2.5 py-1.5 border border-white/5"
+                className="flex items-center justify-between rounded-lg bg-white/5 px-3 py-1.5 border border-white/5"
               >
                 <div className="flex items-center gap-2">
                   <div className="h-5 w-5 rounded-full bg-amber-500/20 flex items-center justify-center text-[9px] font-bold text-amber-200">
@@ -3527,7 +3523,7 @@ function WinnerRevealModal({
                   </span>
                 </div>
                 <div
-                  className={`font-mono font-black text-emerald-400 ${isMobileUi ? "text-xs" : "text-sm"}`}
+                  className={`font-mono font-black text-emerald-400 ${isMobileUi ? "text-[10px]" : "text-sm"}`}
                 >
                   +{p.amount}
                 </div>
