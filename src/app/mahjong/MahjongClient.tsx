@@ -1119,6 +1119,21 @@ export default function MahjongClient() {
         tiles: Array<MahjongTile & { id: number }>;
       }> = [];
 
+      const kongRaw = self?.kong;
+      if (Array.isArray(kongRaw)) {
+        for (const g of kongRaw) {
+          if (typeof g !== "object" || g === null) continue;
+          const keyRaw =
+            (g as { kong_key?: unknown; kongKey?: unknown }).kong_key ??
+            (g as { kong_key?: unknown; kongKey?: unknown }).kongKey ??
+            (g as { tileKey?: unknown }).tileKey;
+          const meldKey = typeof keyRaw === "string" ? keyRaw : "";
+          const tiles = normalizeMeldTiles((g as { tiles?: unknown }).tiles);
+          if (meldKey && tiles.length > 0)
+            nextMelds.push({ kind: "kong", meldKey, tiles });
+        }
+      }
+
       const pongRaw = self?.pong;
       if (Array.isArray(pongRaw)) {
         for (const g of pongRaw) {
@@ -1146,21 +1161,6 @@ export default function MahjongClient() {
           const tiles = normalizeMeldTiles((g as { tiles?: unknown }).tiles);
           if (meldKey && tiles.length > 0)
             nextMelds.push({ kind: "chow", meldKey, tiles });
-        }
-      }
-
-      const kongRaw = self?.kong;
-      if (Array.isArray(kongRaw)) {
-        for (const g of kongRaw) {
-          if (typeof g !== "object" || g === null) continue;
-          const keyRaw =
-            (g as { kong_key?: unknown; kongKey?: unknown }).kong_key ??
-            (g as { kong_key?: unknown; kongKey?: unknown }).kongKey ??
-            (g as { tileKey?: unknown }).tileKey;
-          const meldKey = typeof keyRaw === "string" ? keyRaw : "";
-          const tiles = normalizeMeldTiles((g as { tiles?: unknown }).tiles);
-          if (meldKey && tiles.length > 0)
-            nextMelds.push({ kind: "kong", meldKey, tiles });
         }
       }
 

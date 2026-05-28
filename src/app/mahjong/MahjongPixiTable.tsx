@@ -1325,9 +1325,9 @@ export default function MahjongPixiTable({
               const orderedMeldGroups = (side: "right" | "top" | "left") => {
                 const raw = opponentMelds?.[side] ?? [];
                 return [
-                  ...raw.filter((m) => m.kind === "chow"),
-                  ...raw.filter((m) => m.kind === "pong"),
                   ...raw.filter((m) => m.kind === "kong"),
+                  ...raw.filter((m) => m.kind === "pong"),
+                  ...raw.filter((m) => m.kind === "chow"),
                 ].filter((g) => Array.isArray(g.tiles) && g.tiles.length > 0);
               };
 
