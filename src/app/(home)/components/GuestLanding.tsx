@@ -112,20 +112,16 @@ export default function GuestLanding() {
 
         <div className="relative z-10 flex h-full flex-col px-[3.8vw] py-[2.6vw]">
           {isMobileStage ? (
-            <div className="relative flex h-full flex-1 flex-col items-center justify-start pt-[19vw]">
-              <div className="w-full text-center">
-                <div className="inline-flex items-end gap-[0.15vw] leading-none tracking-[-0.09em]">
-                  <span className="text-[clamp(3.6rem,15vw,7.4rem)] font-black text-[#ffd257] [text-shadow:0_0.14em_0_#d1841d,0_0.24em_0_#9d4f13,0_0.34em_0.38em_rgba(85,34,9,0.34)]">
-                    开始
-                  </span>
-                  <span className="ml-[0.4vw] text-[clamp(3.8rem,15.6vw,7.6rem)] font-black text-[#55d43c] [text-shadow:0_0.14em_0_#3b9f20,0_0.24em_0_#276615,0_0.34em_0.38em_rgba(20,54,11,0.34)]">
-                    游戏
-                  </span>
-                </div>
-
-                <p className="mt-[2.2vw] text-[clamp(1.05rem,4.2vw,2rem)] font-bold text-[#ffe18a] [text-shadow:0_0.12em_0_#904510,0_0.22em_0.26em_rgba(61,24,4,0.26)]">
-                  专注缅甸游戏 8 年
-                </p>
+            <div className="relative flex h-full flex-1 flex-col items-center justify-start pt-[12vw]">
+              <div className="w-full flex justify-center">
+                <Image
+                  src="/images/playngo-icon.webp"
+                  alt="PlayGo"
+                  width={600}
+                  height={250}
+                  className="w-[95vw] max-w-[550px] h-auto object-contain drop-shadow-xl"
+                  priority
+                />
               </div>
 
               <div className="mt-[12vw] flex w-full items-center justify-center gap-[3.2vw]">
@@ -161,19 +157,15 @@ export default function GuestLanding() {
           ) : (
             <>
               <div className="relative flex flex-1 items-center justify-center">
-                <div className="absolute left-1/2 top-[42%] w-full max-w-[58vw] -translate-x-1/2 -translate-y-1/2 text-center">
-                  <div className="inline-flex items-end gap-[0.15vw] leading-none tracking-[-0.09em]">
-                    <span className="text-[clamp(4rem,9.2vw,8.4rem)] font-black text-[#ffd257] [text-shadow:0_0.14em_0_#d1841d,0_0.24em_0_#9d4f13,0_0.34em_0.38em_rgba(85,34,9,0.34)]">
-                      开始
-                    </span>
-                    <span className="ml-[0.4vw] text-[clamp(4.2rem,9.5vw,8.6rem)] font-black text-[#55d43c] [text-shadow:0_0.14em_0_#3b9f20,0_0.24em_0_#276615,0_0.34em_0.38em_rgba(20,54,11,0.34)]">
-                      游戏
-                    </span>
-                  </div>
-
-                  <p className="mt-[1vw] text-[clamp(1.2rem,2.25vw,1.95rem)] font-bold text-[#ffe18a] [text-shadow:0_0.12em_0_#904510,0_0.22em_0.26em_rgba(61,24,4,0.26)]">
-                    专注缅甸游戏 8 年
-                  </p>
+                <div className="absolute left-1/2 top-[35%] flex w-full -translate-x-1/2 -translate-y-1/2 justify-center">
+                  <Image
+                    src="/images/playngo-icon.webp"
+                    alt="PlayGo"
+                    width={800}
+                    height={333}
+                    className="w-[65vw] max-w-[850px] h-auto object-contain drop-shadow-2xl"
+                    priority
+                  />
                 </div>
 
                 <div className="absolute bottom-[13%] left-1/2 flex -translate-x-1/2 items-center gap-[1.5vw]">
