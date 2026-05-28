@@ -53,7 +53,12 @@ type WinnerRevealPayload = {
   kong?: unknown;
   winType?: string;
   isPure?: boolean;
-  payouts?: Array<{ payerId: string; amount: number }>;
+  payouts?: Array<{
+    winner?: { userId: number; name: string };
+    payer?: { userId: number; name: string };
+    payerId?: string;
+    amount: number;
+  }>;
 };
 
 type CanKongPayload = {
@@ -82,7 +87,11 @@ type WinnerRevealState = {
   }>;
   winType?: string;
   isPure?: boolean;
-  payouts?: Array<{ payerId: string; amount: number }>;
+  payouts?: Array<{
+    payerName?: string;
+    payerId?: string;
+    amount: number;
+  }>;
 };
 
 const MahjongPixiTable = dynamic(() => import("./MahjongPixiTable"), {
@@ -464,100 +473,122 @@ export default function MahjongClient() {
       globalThis as unknown as { __mj_triggerWinnerReveal?: () => void }
     ).__mj_triggerWinnerReveal = () => {
       const payload = {
-        winner_user_id: 1,
-        winner_user_name: "User One",
+        winner_user_id: 2,
+        winner_user_name: "User Two",
         pair: [
-          { id: 25, type: "dot", number: 7, copy_no: 1 },
-          { id: 28, type: "dot", number: 7, copy_no: 4 },
+          { id: 57, type: "bamboo", number: 6, copy_no: 1 },
+          { id: 59, type: "bamboo", number: 6, copy_no: 3 },
         ],
         chow: [
           {
-            chow_key: "dot_3_4_5",
+            chow_key: "dot_2_3_4",
             tiles: [
+              { id: 7, type: "dot", number: 2, copy_no: 3 },
               { id: 12, type: "dot", number: 3, copy_no: 4 },
-              { id: 13, type: "dot", number: 4, copy_no: 1 },
-              { id: 20, type: "dot", number: 5, copy_no: 4 },
-            ],
-          },
-          {
-            chow_key: "dot_7_8_9",
-            tiles: [
-              { id: 27, type: "dot", number: 7, copy_no: 3 },
-              { id: 31, type: "dot", number: 8, copy_no: 3 },
-              { id: 35, type: "dot", number: 9, copy_no: 3 },
+              { id: 15, type: "dot", number: 4, copy_no: 3 },
             ],
           },
         ],
         pong: [
           {
-            pong_key: "bamboo_7",
+            pong_key: "dot_9",
             tiles: [
-              { id: 63, type: "bamboo", number: 7, copy_no: 3 },
-              { id: 64, type: "bamboo", number: 7, copy_no: 4 },
-              { id: 62, type: "bamboo", number: 7, copy_no: 2 },
+              { id: 34, type: "dot", number: 9, copy_no: 2 },
+              { id: 35, type: "dot", number: 9, copy_no: 3 },
+              { id: 36, type: "dot", number: 9, copy_no: 4 },
             ],
           },
           {
-            pong_key: "bamboo_8",
+            pong_key: "dot_1",
             tiles: [
-              { id: 65, type: "bamboo", number: 8, copy_no: 1 },
-              { id: 67, type: "bamboo", number: 8, copy_no: 3 },
-              { id: 68, type: "bamboo", number: 8, copy_no: 4 },
+              { id: 2, type: "dot", number: 1, copy_no: 2 },
+              { id: 3, type: "dot", number: 1, copy_no: 3 },
+              { id: 4, type: "dot", number: 1, copy_no: 4 },
+            ],
+          },
+          {
+            pong_key: "bamboo_4",
+            tiles: [
+              { id: 49, type: "bamboo", number: 4, copy_no: 1 },
+              { id: 51, type: "bamboo", number: 4, copy_no: 3 },
+              { id: 50, type: "bamboo", number: 4, copy_no: 2 },
             ],
           },
         ],
         kong: [],
-        winType: "self-draw",
+        winType: "left-discard",
         isPure: false,
-        payouts: [{ payerId: "2", amount: 1 }],
+        payouts: [
+          {
+            winner: {
+              userId: 2,
+              name: "User Two",
+              seat: 2,
+              is_active: true,
+              is_auto: false,
+            },
+            payer: {
+              userId: 1,
+              name: "User One",
+              seat: 1,
+              is_active: true,
+              is_auto: false,
+            },
+            amount: 2,
+          },
+        ],
       };
       console.log("[dev] trigger mahjong:winner_reveal", payload);
       setWinnerReveal({
-        winnerUserId: 1,
-        winnerName: "User One",
+        winnerUserId: 2,
+        winnerName: "User Two",
         resultLabel:
-          authUserId != null ? (authUserId === 1 ? "You Win" : "You Lose") : "",
+          authUserId != null ? (authUserId === 2 ? "You Win" : "You Lose") : "",
         tiles: [
-          { suit: "dots", rank: 7 },
-          { suit: "dots", rank: 7 },
+          { suit: "bamboo", rank: 6 },
+          { suit: "bamboo", rank: 6 },
         ],
         melds: [
           {
             kind: "chow",
             tiles: [
+              { suit: "dots", rank: 2 },
               { suit: "dots", rank: 3 },
               { suit: "dots", rank: 4 },
-              { suit: "dots", rank: 5 },
             ],
           },
           {
-            kind: "chow",
+            kind: "pong",
             tiles: [
-              { suit: "dots", rank: 7 },
-              { suit: "dots", rank: 8 },
+              { suit: "dots", rank: 9 },
+              { suit: "dots", rank: 9 },
               { suit: "dots", rank: 9 },
             ],
           },
           {
             kind: "pong",
             tiles: [
-              { suit: "bamboo", rank: 7 },
-              { suit: "bamboo", rank: 7 },
-              { suit: "bamboo", rank: 7 },
+              { suit: "dots", rank: 1 },
+              { suit: "dots", rank: 1 },
+              { suit: "dots", rank: 1 },
             ],
           },
           {
             kind: "pong",
             tiles: [
-              { suit: "bamboo", rank: 8 },
-              { suit: "bamboo", rank: 8 },
-              { suit: "bamboo", rank: 8 },
+              { suit: "bamboo", rank: 4 },
+              { suit: "bamboo", rank: 4 },
+              { suit: "bamboo", rank: 4 },
             ],
           },
         ],
         winType: payload.winType,
         isPure: payload.isPure,
-        payouts: payload.payouts,
+        payouts: payload.payouts.map((pay) => ({
+          payerName: pay.payer.name,
+          payerId: String(pay.payer.userId),
+          amount: pay.amount,
+        })),
       });
     };
 
@@ -1653,7 +1684,11 @@ export default function MahjongClient() {
           melds,
           winType: p.winType,
           isPure: p.isPure,
-          payouts: p.payouts,
+          payouts: p.payouts?.map((pay) => ({
+            payerName: pay.payer?.name,
+            payerId: pay.payer?.userId ? String(pay.payer.userId) : pay.payerId,
+            amount: pay.amount,
+          })),
         });
       };
 
@@ -3543,7 +3578,7 @@ function WinnerRevealModal({
                   <span
                     className={`font-medium text-amber-100/80 ${isMobileUi ? "text-[10px]" : "text-xs"}`}
                   >
-                    玩家 {p.payerId}
+                    {p.payerName || `玩家 ${p.payerId}`}
                   </span>
                 </div>
                 <div
