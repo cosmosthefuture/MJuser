@@ -859,6 +859,14 @@ export default function MahjongClient() {
         setShownTiles(nextShownTiles);
       }
 
+      const wallCountRaw = (payload as { wallCount?: unknown })?.wallCount;
+      if (wallCountRaw !== undefined) {
+        const wallCount = Number(wallCountRaw);
+        if (Number.isFinite(wallCount) && wallCount >= 0) {
+          setDrawPileCount(wallCount);
+        }
+      }
+
       const isSortUpdate = sortHandInFlightRef.current;
       sortHandInFlightRef.current = false;
 
@@ -1346,7 +1354,7 @@ export default function MahjongClient() {
       if (!Number.isFinite(wallCount) || wallCount < 0) return;
       setDrawPileCount(wallCount);
 
-      applyInitialHandState((data as { handState?: unknown }).handState);
+      applyInitialHandState(data);
       applyUserToPlay(
         (data as { currentTurnPlayer?: unknown }).currentTurnPlayer,
       );
@@ -1984,9 +1992,6 @@ export default function MahjongClient() {
         if (cancelled) return;
         setCenterMessage("Round Over!");
         setShowEndRoundButton(false);
-        setTimeout(() => {
-          router.push("/game-rooms?rule_id=1");
-        }, 4000);
       };
 
       const handleShowStartRound = () => {
