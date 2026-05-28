@@ -1007,7 +1007,7 @@ export default function MahjongPixiTable({
                       const tileW = w;
                       const tileH = h;
                       const tileGapX = 10;
-                      const tileGapY = -12;
+                      const tileGapY = -10;
 
                       const cx = Math.floor(designWidth / 2);
                       const cy = Math.floor(tableY + tableH / 2);
