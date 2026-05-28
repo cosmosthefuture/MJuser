@@ -578,11 +578,6 @@ export default function MahjongPixiTable({
                         g.drawRoundedRect(-70, -70, 140, 140, 24);
                         g.endFill();
 
-                        // 2. Small black border layer (thin recessed frame)
-                        g.beginFill(0x011a14);
-                        g.drawRoundedRect(-64.5, -64.5, 129, 129, 20.5);
-                        g.endFill();
-
                         // 3. Main green fill layer
                         g.beginFill(0x022c22, 0.95);
                         g.drawRoundedRect(-64, -64, 128, 128, 20);
