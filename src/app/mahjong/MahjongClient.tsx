@@ -1767,9 +1767,9 @@ export default function MahjongClient() {
         if (cancelled) return;
         setCenterMessage("Round Over!");
         setShowEndRoundButton(false);
-        setTimeout(() => {
-          router.push("/game-rooms?rule_id=1");
-        }, 2000);
+        // setTimeout(() => {
+        //   router.push("/game-rooms?rule_id=1");
+        // }, 2000);
       };
 
       const handleShowStartRound = () => {
