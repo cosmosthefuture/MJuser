@@ -14,7 +14,7 @@ export default function FlowerTilesPanel({ isMobile, shownTiles = [] }: Props) {
       }`}
     >
       <div
-        className={`flex flex-col items-center justify-center font-black text-white tracking-tighter drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] ${
+        className={`flex flex-col items-center justify-center font-black text-[#ffd600] tracking-tighter drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] ${
           isMobile ? "text-[20px] leading-[1]" : "text-[32px] leading-[1]"
         }`}
       >

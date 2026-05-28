@@ -561,6 +561,30 @@ export default function MahjongClient() {
       });
     };
 
+    // Dev-only helper for testing the shown tiles update from the browser console:
+    // `globalThis.__mj_triggerShownTilesUpdated()`
+    (
+      globalThis as unknown as { __mj_triggerShownTilesUpdated?: () => void }
+    ).__mj_triggerShownTilesUpdated = () => {
+      const payload = {
+        shownTiles: [
+          { id: 45, type: "dot", number: 7, copy_no: 2 },
+          { id: 22, type: "bamboo", number: 3, copy_no: 1 },
+        ],
+      };
+      console.log("[dev] trigger mahjong:shown_tiles_updated", payload);
+      const nextShownTiles: MahjongTile[] = [];
+      for (const t of payload.shownTiles) {
+        const rank = Number(t.number);
+        const suit: MahjongTile["suit"] | null =
+          t.type === "bamboo" ? "bamboo" : t.type === "dot" ? "dots" : null;
+        if (suit && Number.isFinite(rank)) {
+          nextShownTiles.push({ suit, rank });
+        }
+      }
+      setShownTiles(nextShownTiles);
+    };
+
     // Dev-only helper for testing the kong modal from the browser console:
     // `globalThis.__mj_triggerCanKong()`
     (
@@ -2436,7 +2460,7 @@ export default function MahjongClient() {
 
           {/* Overlays (HTML) */}
           <div className="pointer-events-none absolute inset-0 z-20">
-            {!!roomState && (
+            {!!roomState && !centerMessage?.includes("等待") && (
               <div
                 className={`pointer-events-auto absolute z-50 ${
                   isMobileUi ? "left-[60%] top-4" : "left-4 top-24"
