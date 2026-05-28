@@ -1,6 +1,12 @@
+import { MahjongTile } from "@/lib/mahjong72";
 import MahjongTileCard from "./MahjongTileCard";
 
-export default function FlowerTilesPanel({ isMobile }: { isMobile?: boolean }) {
+type Props = {
+  isMobile?: boolean;
+  shownTiles?: MahjongTile[];
+};
+
+export default function FlowerTilesPanel({ isMobile, shownTiles = [] }: Props) {
   return (
     <div
       className={`flex items-center rounded-[8px] border border-[#0d9276] bg-[#022c22]/95 shadow-[0_12px_40px_rgba(0,0,0,0.6)] backdrop-blur-md transition-all hover:border-[#0d9276] ${
@@ -16,8 +22,28 @@ export default function FlowerTilesPanel({ isMobile }: { isMobile?: boolean }) {
         <span>牌</span>
       </div>
       <div className="flex items-center gap-3">
-        <MahjongTileCard tile={{ suit: "dots", rank: 7 }} size={isMobile ? "xs" : "sm"} />
-        <MahjongTileCard tile={{ suit: "dots", rank: 5 }} size={isMobile ? "xs" : "sm"} />
+        {shownTiles.length > 0 ? (
+          shownTiles.map((tile, idx) => (
+            <MahjongTileCard
+              key={`${tile.suit}-${tile.rank}-${idx}`}
+              tile={tile}
+              size={isMobile ? "xs" : "sm"}
+            />
+          ))
+        ) : (
+          <div className="flex items-center gap-3 opacity-20">
+            <div
+              className={`${
+                isMobile ? "h-[36px] w-[26px]" : "h-[48px] w-[36px]"
+              } rounded-[4px] bg-white/10`}
+            />
+            <div
+              className={`${
+                isMobile ? "h-[36px] w-[26px]" : "h-[48px] w-[36px]"
+              } rounded-[4px] bg-white/10`}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

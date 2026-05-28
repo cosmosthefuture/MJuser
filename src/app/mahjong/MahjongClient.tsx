@@ -146,6 +146,8 @@ export default function MahjongClient() {
     message: string;
   } | null>(null);
 
+  const [shownTiles, setShownTiles] = useState<MahjongTile[]>([]);
+
   const sortHandInFlightRef = useRef(false);
   const isDecisionModalOpen =
     kongDecision != null ||
@@ -711,6 +713,23 @@ export default function MahjongClient() {
         : (payload as { handState?: unknown })?.handState;
       if (!Array.isArray(handStateRaw)) return;
       const handState = handStateRaw as unknown[];
+
+      const shownTilesRawInPayload = (payload as { shownTiles?: unknown })
+        ?.shownTiles;
+      if (Array.isArray(shownTilesRawInPayload)) {
+        const nextShownTiles: MahjongTile[] = [];
+        for (const t of shownTilesRawInPayload) {
+          if (typeof t !== "object" || t === null) continue;
+          const rank = Number((t as { number?: unknown }).number);
+          const typeRaw = (t as { type?: unknown }).type;
+          const suit: MahjongTile["suit"] | null =
+            typeRaw === "bamboo" ? "bamboo" : typeRaw === "dot" ? "dots" : null;
+          if (suit && Number.isFinite(rank)) {
+            nextShownTiles.push({ suit, rank });
+          }
+        }
+        setShownTiles(nextShownTiles);
+      }
 
       const isSortUpdate = sortHandInFlightRef.current;
       sortHandInFlightRef.current = false;
@@ -1354,6 +1373,25 @@ export default function MahjongClient() {
         setDrawPileCount(wallCount);
       };
 
+      const handleShownTilesUpdated = (payload: unknown) => {
+        if (cancelled) return;
+        if (typeof payload !== "object" || payload === null) return;
+        const shownTilesRaw = (payload as { shownTiles?: unknown }).shownTiles;
+        if (!Array.isArray(shownTilesRaw)) return;
+
+        const nextShownTiles: MahjongTile[] = [];
+        for (const t of shownTilesRaw) {
+          if (typeof t !== "object" || t === null) continue;
+          const rank = Number(t.number);
+          const suit: MahjongTile["suit"] | null =
+            t.type === "bamboo" ? "bamboo" : t.type === "dot" ? "dots" : null;
+          if (suit && Number.isFinite(rank)) {
+            nextShownTiles.push({ suit, rank });
+          }
+        }
+        setShownTiles(nextShownTiles);
+      };
+
       const handleTurnCountdownStarted = (payload: unknown) => {
         if (cancelled) return;
         if (typeof payload !== "object" || payload === null) return;
@@ -1766,6 +1804,9 @@ export default function MahjongClient() {
 
       socket.off("mahjong:wall_count_updated", handleWallCountUpdated);
       socket.on("mahjong:wall_count_updated", handleWallCountUpdated);
+
+      socket.off("mahjong:shown_tiles_updated", handleShownTilesUpdated);
+      socket.on("mahjong:shown_tiles_updated", handleShownTilesUpdated);
 
       socket.off("mahjong:turn_countdown_started", handleTurnCountdownStarted);
       socket.on("mahjong:turn_countdown_started", handleTurnCountdownStarted);
@@ -2225,7 +2266,10 @@ export default function MahjongClient() {
                   isMobileUi ? "left-[60%] top-4" : "left-4 top-24"
                 } ${isMobileUi ? "rotate-90 scale-[0.55]" : ""}`}
               >
-                <FlowerTilesPanel isMobile={isMobileUi} />
+                <FlowerTilesPanel
+                  isMobile={isMobileUi}
+                  shownTiles={shownTiles}
+                />
               </div>
             )}
             {isPortraitPhone ? (
