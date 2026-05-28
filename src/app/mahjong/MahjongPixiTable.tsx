@@ -1343,13 +1343,13 @@ export default function MahjongPixiTable({
               const smallH = tileStyle.mini.h;
               const topY = tableY + 18;
 
-              const topCount = counts.top ?? 7;
+              const topCount = counts.top ?? 13;
               const topStartX = Math.floor(
                 designWidth / 2 - (topCount * smallW + (topCount - 1) * 1) / 2,
               );
 
-              const sideCountLeft = counts.left ?? 7;
-              const sideCountRight = counts.right ?? 7;
+              const sideCountLeft = counts.left ?? 13;
+              const sideCountRight = counts.right ?? 13;
               const sideXLeft = tableX + 130;
               const sideXRight = tableX + tableW - 18 - smallH - 116;
 
