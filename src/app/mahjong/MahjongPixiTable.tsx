@@ -1323,8 +1323,8 @@ export default function MahjongPixiTable({
               const leftGroups = orderedMeldGroups("left");
               const rightGroups = orderedMeldGroups("right");
 
-              const smallW = 30;
-              const smallH = 40;
+              const smallW = tileStyle.mini.w;
+              const smallH = tileStyle.mini.h;
               const topY = tableY + 18;
 
               const topCount = counts.top ?? 7;
