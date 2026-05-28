@@ -2216,9 +2216,11 @@ export default function MahjongClient() {
           {/* Overlays (HTML) */}
           <div className="pointer-events-none absolute inset-0 z-20">
             <div
-              className={`pointer-events-auto absolute left-4 top-24 ${
-                isMobileUi ? "scale-[0.8] origin-top-left" : ""
-              }`}
+              className={`pointer-events-auto absolute ${
+                isMobileUi
+                  ? "left-[45%] -translate-x-1/2 -top-2"
+                  : "left-4 top-24"
+              } ${isMobileUi ? "rotate-90 scale-[0.55]" : ""}`}
             >
               <FlowerTilesPanel isMobile={isMobileUi} />
             </div>
