@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Image from "next/image";
 import dynamic from "next/dynamic";
 import { ArrowLeft } from "lucide-react";
 import { useSelector } from "react-redux";
@@ -146,6 +147,16 @@ export default function MahjongClient() {
     message: string;
   } | null>(null);
 
+  const [canTakeShownTileDecision, setCanTakeShownTileDecision] = useState<{
+    shownTiles: Array<{
+      id: number;
+      type: "dot" | "bamboo";
+      number: number;
+      copy_no: number;
+      tile: MahjongTile;
+    }>;
+  } | null>(null);
+
   const [shownTiles, setShownTiles] = useState<MahjongTile[]>([]);
 
   const sortHandInFlightRef = useRef(false);
@@ -153,7 +164,8 @@ export default function MahjongClient() {
     kongDecision != null ||
     pongDecision != null ||
     chowDecision != null ||
-    winDecision != null;
+    winDecision != null ||
+    canTakeShownTileDecision != null;
 
   useEffect(() => {
     const updateViewport = () => {
@@ -419,6 +431,24 @@ export default function MahjongClient() {
     });
   };
 
+  const emitAcceptShownTile = (tileId: number, tileIndex: number) => {
+    const socket = getSocket();
+    if (!socket) return;
+    if (roomId == null || authUserId == null) return;
+    console.log("[ws] emit mahjong:accept_shown_tile", {
+      roomId: String(roomId),
+      userId: authUserId,
+      tileId,
+      tileIndex,
+    });
+    socket.emit("mahjong:accept_shown_tile", {
+      roomId: String(roomId),
+      userId: authUserId,
+      tileId,
+      tileIndex,
+    });
+  };
+
   useEffect(() => {
     if (process.env.NODE_ENV === "production") return;
 
@@ -634,6 +664,32 @@ export default function MahjongClient() {
       setWinDecision({ userId: authUserId ?? 0, message });
     };
 
+    // Dev-only helper for testing the can take shown tile modal from the browser console:
+    // `globalThis.__mj_triggerCanTakeShownTile()`
+    (
+      globalThis as unknown as { __mj_triggerCanTakeShownTile?: () => void }
+    ).__mj_triggerCanTakeShownTile = () => {
+      const payload = {
+        shownTiles: [
+          { id: 45, type: "dot", number: 7, copy_no: 2 },
+          { id: 22, type: "bamboo", number: 3, copy_no: 1 },
+        ],
+      };
+      console.log("[dev] trigger mahjong:can_take_shown_tile", payload);
+      setCanTakeShownTileDecision({
+        shownTiles: payload.shownTiles.map((t) => ({
+          id: t.id,
+          type: t.type as "dot" | "bamboo",
+          number: t.number,
+          copy_no: t.copy_no,
+          tile: {
+            suit: t.type === "bamboo" ? "bamboo" : "dots",
+            rank: t.number,
+          },
+        })),
+      });
+    };
+
     return () => {
       delete (
         globalThis as unknown as { __mj_triggerWinnerReveal?: () => void }
@@ -648,6 +704,9 @@ export default function MahjongClient() {
       ).__mj_triggerCanNormalChow;
       delete (globalThis as unknown as { __mj_triggerWinDecision?: () => void })
         .__mj_triggerWinDecision;
+      delete (
+        globalThis as unknown as { __mj_triggerCanTakeShownTile?: () => void }
+      ).__mj_triggerCanTakeShownTile;
     };
   }, [authUserId]);
   const [roundPlayers, setRoundPlayers] = useState<RoundPlayer[]>([]);
@@ -1701,6 +1760,88 @@ export default function MahjongClient() {
         setWinDecision(null);
       };
 
+      const handleCanTakeShownTile = (payload: unknown) => {
+        if (cancelled) return;
+        if (typeof payload !== "object" || payload === null) return;
+
+        const shownTilesRaw = (payload as { shownTiles?: unknown }).shownTiles;
+        if (!Array.isArray(shownTilesRaw)) return;
+
+        const shownTilesData: Array<{
+          id: number;
+          type: "dot" | "bamboo";
+          number: number;
+          copy_no: number;
+          tile: MahjongTile;
+        }> = [];
+
+        for (const t of shownTilesRaw) {
+          if (typeof t !== "object" || t === null) continue;
+
+          const id = Number((t as { id?: unknown }).id);
+          const typeRaw = (t as { type?: unknown }).type;
+          const number = Number((t as { number?: unknown }).number);
+          const copy_no = Number((t as { copy_no?: unknown }).copy_no);
+
+          if (
+            !Number.isFinite(id) ||
+            !Number.isFinite(number) ||
+            !Number.isFinite(copy_no)
+          )
+            continue;
+          if (typeof typeRaw !== "string") continue;
+
+          const type =
+            typeRaw === "dot" || typeRaw === "bamboo" ? typeRaw : null;
+          if (!type) continue;
+
+          const suit: MahjongTile["suit"] =
+            type === "bamboo" ? "bamboo" : "dots";
+          const rank = number;
+
+          if (rank < 1 || rank > 9) continue;
+
+          shownTilesData.push({
+            id,
+            type,
+            number: rank,
+            copy_no,
+            tile: { suit, rank },
+          });
+        }
+
+        if (shownTilesData.length === 0) return;
+
+        console.log("⛔ Can Take Shown Tile", shownTilesData);
+        setCanTakeShownTileDecision({ shownTiles: shownTilesData });
+      };
+
+      const handleRemoveCanTakeShownTileDecision = () => {
+        if (cancelled) return;
+        setCanTakeShownTileDecision(null);
+      };
+
+      const handleShownTileTaken = (payload: unknown) => {
+        if (cancelled) return;
+        if (typeof payload !== "object" || payload === null) return;
+
+        const userId = Number((payload as { userId?: unknown }).userId);
+        const tile = (payload as { tile?: unknown }).tile;
+        const tileIndex = Number(
+          (payload as { tileIndex?: unknown }).tileIndex,
+        );
+
+        console.log(
+          "📢 Shown tile taken by user",
+          userId,
+          "tile:",
+          tile,
+          "index:",
+          tileIndex,
+        );
+        // This is a broadcast event, no UI update needed
+      };
+
       const applyCanChow = (payload: unknown) => {
         if (cancelled) return;
         if (typeof payload !== "object" || payload === null) return;
@@ -1844,6 +1985,9 @@ export default function MahjongClient() {
       socket.off("mahjong:can_normal_chow", applyCanChow);
       socket.on("mahjong:can_normal_chow", applyCanChow);
 
+      socket.off("mahjong:can_take_shown_tile", handleCanTakeShownTile);
+      socket.on("mahjong:can_take_shown_tile", handleCanTakeShownTile);
+
       socket.off("mahjong:remove_kong_decision", handleRemoveKongDecision);
       socket.on("mahjong:remove_kong_decision", handleRemoveKongDecision);
 
@@ -1852,6 +1996,15 @@ export default function MahjongClient() {
 
       socket.off("mahjong:remove_chow_decision", handleRemoveChowDecision);
       socket.on("mahjong:remove_chow_decision", handleRemoveChowDecision);
+
+      socket.off(
+        "mahjong:remove_can_take_shown_tile_decision",
+        handleRemoveCanTakeShownTileDecision,
+      );
+      socket.on(
+        "mahjong:remove_can_take_shown_tile_decision",
+        handleRemoveCanTakeShownTileDecision,
+      );
 
       socket.off("mahjong:ask_win_decision", handleAskWinDecision);
       socket.on("mahjong:ask_win_decision", handleAskWinDecision);
@@ -1873,6 +2026,9 @@ export default function MahjongClient() {
 
       socket.off("mahjong:show_start_round", handleShowStartRound);
       socket.on("mahjong:show_start_round", handleShowStartRound);
+
+      socket.off("mahjong:shown_tile_taken", handleShownTileTaken);
+      socket.on("mahjong:shown_tile_taken", handleShownTileTaken);
 
       if (socket.connected) {
         void doJoin(socket);
@@ -1907,9 +2063,11 @@ export default function MahjongClient() {
       socket?.off("mahjong:can_interrupt_pong");
       socket?.off("mahjong:can_normal_pong");
       socket?.off("mahjong:can_normal_chow");
+      socket?.off("mahjong:can_take_shown_tile");
       socket?.off("mahjong:remove_kong_decision");
       socket?.off("mahjong:remove_pong_decision");
       socket?.off("mahjong:remove_chow_decision");
+      socket?.off("mahjong:remove_can_take_shown_tile_decision");
       socket?.off("mahjong:ask_win_decision");
       socket?.off("mahjong:remove_win_decision");
       socket?.off("mahjong:initial_hand_state");
@@ -1917,6 +2075,7 @@ export default function MahjongClient() {
       socket?.off("mahjong:user_to_play");
       socket?.off("mahjong:round_end");
       socket?.off("mahjong:show_start_round");
+      socket?.off("mahjong:shown_tile_taken");
     };
   }, [token, roomId, authUserId]);
 
@@ -2419,9 +2578,11 @@ export default function MahjongClient() {
                             className="relative overflow-hidden rounded-[14px] bg-[#064e3b]/60 shadow-[0_24px_80px_rgba(0,0,0,0.6)] backdrop-blur-md"
                             style={{ width: imgSize, height: imgSize }}
                           >
-                            <img
+                            <Image
                               src={avatarSrc}
                               alt={name}
+                              width={imgSize}
+                              height={imgSize}
                               className="h-full w-full object-cover"
                             />
                             {!avatarSrc && (
@@ -2591,9 +2752,11 @@ export default function MahjongClient() {
                           className="relative overflow-hidden rounded-[14px] bg-[#064e3b]/60 shadow-[0_24px_80px_rgba(0,0,0,0.6)] backdrop-blur-md"
                           style={{ width: imgSize, height: imgSize }}
                         >
-                          <img
+                          <Image
                             src={avatarSrc}
                             alt={name}
+                            width={imgSize}
+                            height={imgSize}
                             className="h-full w-full object-cover"
                           />
                           {!avatarSrc && (
@@ -2991,6 +3154,74 @@ export default function MahjongClient() {
                         跳过
                       </button>
                     </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : null}
+
+          {canTakeShownTileDecision ? (
+            <div className="pointer-events-none absolute inset-0 z-30">
+              <div
+                className={`pointer-events-none absolute flex items-center justify-center gap-3 ${
+                  isPortraitPhone
+                    ? "left-1/2 top-1/2"
+                    : "left-1/2 bottom-[118px] -translate-x-1/2"
+                }`}
+                style={
+                  isPortraitPhone ? (portraitUiStyle ?? undefined) : undefined
+                }
+              >
+                <div
+                  className={
+                    isPortraitPhone && isMobileUi
+                      ? "-translate-x-0 translate-y-10"
+                      : undefined
+                  }
+                >
+                  <div
+                    className={`pointer-events-auto flex flex-col items-center gap-3 rounded-2xl border border-[#1d7b49]/60 bg-[#064e3b]/85 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-md ${
+                      isMobileUi ? "px-3 py-2" : "px-4 py-3"
+                    }`}
+                    role="dialog"
+                    aria-modal="true"
+                  >
+                    <div className="text-center font-bold text-amber-100 mb-2">
+                      选择要拿的牌
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      {canTakeShownTileDecision.shownTiles.map(
+                        (tileData, index) => (
+                          <div
+                            key={`${tileData.id}-${index}`}
+                            className="flex items-center gap-3"
+                          >
+                            <div
+                              className={`flex items-center gap-2 ${
+                                isMobileUi ? "scale-90 origin-left" : ""
+                              }`}
+                            >
+                              <MahjongTileCard
+                                key={`${tileData.tile.suit}-${tileData.tile.rank}-${index}`}
+                                tile={tileData.tile}
+                                size="xs"
+                              />
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                emitAcceptShownTile(tileData.id, index);
+                                setCanTakeShownTileDecision(null);
+                              }}
+                              className={acceptButtonClass}
+                            >
+                              接受
+                            </button>
+                          </div>
+                        ),
+                      )}
+                    </div>
+                    {/* Note: According to requirements, no pass button needed for now */}
                   </div>
                 </div>
               </div>
