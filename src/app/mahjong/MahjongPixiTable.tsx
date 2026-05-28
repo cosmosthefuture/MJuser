@@ -1350,13 +1350,45 @@ export default function MahjongPixiTable({
 
               const sideCountLeft = counts.left ?? 7;
               const sideCountRight = counts.right ?? 7;
-              const sideCount = Math.max(sideCountLeft, sideCountRight);
               const sideXLeft = tableX + 130;
               const sideXRight = tableX + tableW - 18 - smallH - 116;
-              const sideStartY = Math.floor(
-                tableY +
-                  tableH / 2 -
-                  (sideCount * smallW + (sideCount - 1) * 1) / 2,
+
+              const groupGap = 1;
+              const opponentSmallGap = 1;
+
+              const getSideTotalHeight = (
+                handCount: number,
+                groups: Array<{ tiles: MahjongTile[] }>,
+              ) => {
+                const handH = handCount > 0 ? handCount * (smallW + 1) : 0;
+                let meldH = 0;
+                if (groups.length > 0) {
+                  const totalTiles = groups.reduce(
+                    (acc, g) => acc + (g.tiles?.length ?? 0),
+                    0,
+                  );
+                  meldH =
+                    totalTiles * (tileStyle.mini.w + opponentSmallGap) +
+                    (groups.length - 1) * groupGap;
+                  if (handH > 0) meldH += Math.max(22, gap);
+                }
+                return handH + meldH;
+              };
+
+              const leftTotalHeight = getSideTotalHeight(
+                sideCountLeft,
+                leftGroups,
+              );
+              const rightTotalHeight = getSideTotalHeight(
+                sideCountRight,
+                rightGroups,
+              );
+
+              const leftStartY = Math.floor(
+                tableY + tableH / 2 - leftTotalHeight / 2,
+              );
+              const rightStartY = Math.floor(
+                tableY + tableH / 2 - rightTotalHeight / 2,
               );
 
               const renderMiniTile = (
@@ -1460,13 +1492,13 @@ export default function MahjongPixiTable({
                     );
                   }
                 }
-                for (let i = 0; i < sideCount; i++) {
-                  if (showLeft && i < sideCountLeft) {
+                for (let i = 0; i < sideCountLeft; i++) {
+                  if (showLeft) {
                     out.push(
                       <pixiContainer
                         key={`back-left-${i}`}
                         x={sideXLeft}
-                        y={sideStartY + i * (smallW + 1)}
+                        y={leftStartY + i * (smallW + 1)}
                       >
                         {renderTileShadow(
                           smallH,
@@ -1494,12 +1526,14 @@ export default function MahjongPixiTable({
                       </pixiContainer>,
                     );
                   }
-                  if (showRight && i < sideCountRight) {
+                }
+                for (let i = 0; i < sideCountRight; i++) {
+                  if (showRight) {
                     out.push(
                       <pixiContainer
                         key={`back-right-${i}`}
                         x={sideXRight}
-                        y={sideStartY + i * (smallW + 1)}
+                        y={rightStartY + i * (smallW + 1)}
                       >
                         {renderTileShadow(
                           smallH,
@@ -1531,9 +1565,6 @@ export default function MahjongPixiTable({
               }
 
               // 2. Add Inline Melds
-              const groupGap = 1;
-              const opponentSmallGap = 1;
-
               if (showTop && topGroups.length > 0) {
                 const startX =
                   topStartX + topCount * (smallW + 1) + Math.max(22, gap);
@@ -1556,11 +1587,14 @@ export default function MahjongPixiTable({
               }
 
               if (showLeft && leftGroups.length > 0) {
-                const startY =
-                  sideStartY + sideCountLeft * (smallW + 1) + Math.max(22, gap);
+                const meldStartY =
+                  leftStartY +
+                  (sideCountLeft > 0
+                    ? sideCountLeft * (smallW + 1) + Math.max(22, gap)
+                    : 0);
                 const x = sideXLeft + smallH / 2;
 
-                let cursor = startY;
+                let cursor = meldStartY;
                 leftGroups.forEach((g, gi) => {
                   (g.tiles ?? []).forEach((t, ti) => {
                     const cy =
@@ -1583,13 +1617,14 @@ export default function MahjongPixiTable({
               }
 
               if (showRight && rightGroups.length > 0) {
-                const startY =
-                  sideStartY +
-                  sideCountRight * (smallW + 1) +
-                  Math.max(22, gap);
+                const meldStartY =
+                  rightStartY +
+                  (sideCountRight > 0
+                    ? sideCountRight * (smallW + 1) + Math.max(22, gap)
+                    : 0);
                 const x = sideXRight + smallH / 2;
 
-                let cursor = startY;
+                let cursor = meldStartY;
                 rightGroups.forEach((g, gi) => {
                   (g.tiles ?? []).forEach((t, ti) => {
                     const cy =
