@@ -2460,7 +2460,7 @@ export default function MahjongClient() {
 
           {/* Overlays (HTML) */}
           <div className="pointer-events-none absolute inset-0 z-20">
-            {!!roomState && !centerMessage?.includes("等待") && (
+            {!!roomState && hand.length > 0 && (
               <div
                 className={`pointer-events-auto absolute z-50 ${
                   isMobileUi ? "left-[60%] top-4" : "left-4 top-24"
