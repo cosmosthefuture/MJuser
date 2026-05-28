@@ -572,14 +572,14 @@ export default function MahjongPixiTable({
                         g.clear();
                         // Center UI Container
 
-                        // 1. Outer-most green border layer (the "Sorting Button" green)
+                        // 1. Outer-most green border layer (made much bigger)
                         g.beginFill(0x0d9276);
-                        g.drawRoundedRect(-68, -68, 136, 136, 22);
+                        g.drawRoundedRect(-70, -70, 140, 140, 24);
                         g.endFill();
 
-                        // 2. Black separator layer (made thinner)
+                        // 2. Black separator layer (made very small/thin)
                         g.beginFill(0x011a14);
-                        g.drawRoundedRect(-65.5, -65.5, 131, 131, 20.5);
+                        g.drawRoundedRect(-64.5, -64.5, 129, 129, 20.5);
                         g.endFill();
 
                         // 3. Main green fill layer
