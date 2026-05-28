@@ -2340,7 +2340,7 @@ export default function MahjongClient() {
                               : "right-[35%] -translate-x-1/2 top-6"
                             : position === "left"
                               ? isMobileUi
-                                ? "left-[5%] -translate-x-1/2 top-16"
+                                ? "left-[5%] -translate-x-1/2 top-28"
                                 : "left-[2%] top-[16px] -translate-y-1/2"
                               : isMobileUi
                                 ? "right-2 bottom-16"
@@ -2562,6 +2562,13 @@ export default function MahjongClient() {
                           }}
                         >
                           {name}
+                        </div>
+                        <div
+                          className={`mt-0.5 text-center font-medium opacity-90 ${
+                            isMobileUi ? "text-[8px]" : "text-[10px]"
+                          } text-[#EFA02C]`}
+                        >
+                          {position.charAt(0).toUpperCase() + position.slice(1)}
                         </div>
                       </div>
                     );

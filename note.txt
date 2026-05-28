@@ -68,4 +68,4 @@ right user’s hand
 const sideDiscardCols = 5;
 
 flower tile position
-                isMobileUi ? "left-50  top-2" : "left-4 top-24"
+                isMobileUi ? "left-[60%] top-4" : "left-4 top-24"
