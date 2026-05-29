@@ -2006,6 +2006,13 @@ export default function MahjongClient() {
         if (cancelled) return;
         setCenterMessage("Round Over!");
         setShowEndRoundButton(false);
+
+        // Redirect to game rooms after a short delay
+        setTimeout(() => {
+          if (!cancelled) {
+            router.push("/game-rooms");
+          }
+        }, 3000);
       };
 
       const handleShowStartRound = () => {
