@@ -450,13 +450,13 @@ export default function MahjongClient() {
     const socket = getSocket();
     if (!socket) return;
     if (roomId == null || authUserId == null) return;
-    console.log("[ws] emit mahjong:accept_shown_tile", {
+    console.log("[ws] emit mahjong:take_shown_tile", {
       roomId: String(roomId),
       userId: authUserId,
       tileId,
       tileIndex,
     });
-    socket.emit("mahjong:accept_shown_tile", {
+    socket.emit("mahjong:take_shown_tile", {
       roomId: String(roomId),
       userId: authUserId,
       tileId,
