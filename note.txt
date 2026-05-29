@@ -74,3 +74,5 @@ flower tile position
 
 
 clear room from admim
+
+when countdwwon image flick ,

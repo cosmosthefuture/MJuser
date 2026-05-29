@@ -2017,9 +2017,9 @@ export default function MahjongClient() {
 
         setTimeout(() => {
           if (!cancelled) {
-            router.push("/game-rooms");
+            router.push("/game-rooms?rule_id=1");
           }
-        }, 3000);
+        }, 5000);
       };
 
       const handleShowStartRound = () => {
