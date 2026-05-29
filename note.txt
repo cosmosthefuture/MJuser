@@ -73,5 +73,4 @@ flower tile position
 
 
 kong ကို နောက် တစ် round မှ kong လုပ်ချင်ရင်ကော
-sorting လုပ်ပြိး နောက်ဆုံးဖဲ discard မှားနေ
 pass show tile 2 tiles 
