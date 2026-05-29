@@ -2963,10 +2963,15 @@ export default function MahjongClient() {
             </div>
           ) : null}
 
-          {kongDecision ? (
+          {/* Decision Modals */}
+          {kongDecision ||
+          pongDecision ||
+          chowDecision ||
+          winDecision ||
+          canTakeShownTileDecision ? (
             <div className="pointer-events-none absolute inset-0 z-30">
               <div
-                className={`pointer-events-none absolute flex items-center justify-center gap-3 ${
+                className={`pointer-events-none absolute flex flex-col items-center justify-center gap-3 ${
                   isPortraitPhone
                     ? "left-1/2 top-1/2"
                     : "left-1/2 bottom-[118px] -translate-x-1/2"
@@ -2976,326 +2981,149 @@ export default function MahjongClient() {
                 }
               >
                 <div
-                  className={
+                  className={`flex flex-col items-center gap-3 ${
                     isPortraitPhone && isMobileUi
                       ? "-translate-x-0 translate-y-10"
-                      : undefined
-                  }
+                      : ""
+                  }`}
                 >
-                  <div
-                    className={`pointer-events-auto flex items-center gap-3 rounded-2xl border border-[#1d7b49]/60 bg-[#064e3b]/85 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-md ${
-                      isMobileUi ? "px-3 py-2" : "px-4 py-3"
-                    }`}
-                  >
-                    {(() => {
-                      const g = kongDecision.groups[0];
-                      if (!g) return null;
-                      return (
-                        <>
-                          <div
-                            className={`flex items-center gap-2 ${
-                              isMobileUi ? "scale-90 origin-left" : ""
-                            }`}
-                          >
-                            {g.tiles.slice(0, 4).map((t, ti) => (
-                              <MahjongTileCard
-                                key={`${t.suit}-${t.rank}-${ti}`}
-                                tile={t}
-                                size="xs"
-                              />
-                            ))}
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <button
-                              type="button"
-                              onClick={() => {
-                                if (kongDecision.kind === "interrupt_kong") {
-                                  emitAcceptInterruptKong(g.kongKey);
-                                } else if (
-                                  kongDecision.kind === "normal_kong"
-                                ) {
-                                  emitAcceptNormalKong(g.kongKey);
-                                } else {
-                                  emitAcceptKong(g.kongKey);
-                                }
-                                setKongDecision(null);
-                              }}
-                              className={acceptButtonClass}
-                            >
-                              接受
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                if (kongDecision.kind === "kong") {
-                                  emitPassKong();
-                                } else if (
-                                  kongDecision.kind === "normal_kong"
-                                ) {
-                                  emitPassNormalKong();
-                                }
-                                setKongDecision(null);
-                              }}
-                              className={cancelButtonClass}
-                            >
-                              跳过
-                            </button>
-                          </div>
-                        </>
-                      );
-                    })()}
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : null}
-
-          {pongDecision ? (
-            <div className="pointer-events-none absolute inset-0 z-30">
-              <div
-                className={`pointer-events-none absolute flex items-center justify-center gap-3 ${
-                  isPortraitPhone
-                    ? "left-1/2 top-1/2"
-                    : "left-1/2 bottom-[118px] -translate-x-1/2"
-                }`}
-                style={
-                  isPortraitPhone ? (portraitUiStyle ?? undefined) : undefined
-                }
-              >
-                <div
-                  className={
-                    isPortraitPhone && isMobileUi
-                      ? "-translate-x-0 translate-y-10"
-                      : undefined
-                  }
-                >
-                  <div
-                    className={`pointer-events-auto flex items-center gap-3 rounded-2xl border border-[#1d7b49]/60 bg-[#064e3b]/85 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-md ${
-                      isMobileUi ? "px-3 py-2" : "px-4 py-3"
-                    }`}
-                  >
-                    {(() => {
-                      const g = pongDecision.groups[0];
-                      if (!g) return null;
-                      return (
-                        <>
-                          <div
-                            className={`flex items-center gap-2 ${
-                              isMobileUi ? "scale-90 origin-left" : ""
-                            }`}
-                          >
-                            {g.tiles.slice(0, 3).map((t, ti) => (
-                              <MahjongTileCard
-                                key={`${t.suit}-${t.rank}-${ti}`}
-                                tile={t}
-                                size="xs"
-                              />
-                            ))}
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <button
-                              type="button"
-                              onClick={() => {
-                                if (pongDecision.kind === "normal_pong") {
-                                  emitAcceptNormalPong(g.pongKey);
-                                } else {
-                                  emitAcceptInterruptPong(g.pongKey);
-                                }
-                                setPongDecision(null);
-                              }}
-                              className={acceptButtonClass}
-                            >
-                              接受
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                if (pongDecision.kind === "normal_pong") {
-                                  emitPassNormalPong();
-                                }
-                                setPongDecision(null);
-                              }}
-                              className={cancelButtonClass}
-                            >
-                              跳过
-                            </button>
-                          </div>
-                        </>
-                      );
-                    })()}
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : null}
-
-          {chowDecision ? (
-            <div className="pointer-events-none absolute inset-0 z-30">
-              <div
-                className={`pointer-events-none absolute flex items-center justify-center gap-3 ${
-                  isPortraitPhone
-                    ? "left-1/2 top-1/2"
-                    : "left-1/2 bottom-[118px] -translate-x-1/2"
-                }`}
-                style={
-                  isPortraitPhone ? (portraitUiStyle ?? undefined) : undefined
-                }
-              >
-                <div
-                  className={
-                    isPortraitPhone && isMobileUi
-                      ? "-translate-x-0 translate-y-10"
-                      : undefined
-                  }
-                >
-                  <div
-                    className={`pointer-events-auto flex items-center gap-3 rounded-2xl border border-[#1d7b49]/60 bg-[#064e3b]/85 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-md ${
-                      isMobileUi ? "px-3 py-2" : "px-4 py-3"
-                    }`}
-                  >
-                    <div className="flex flex-col gap-2">
-                      {chowDecision.groups.map((g, gi) => (
-                        <div
-                          key={`${g.chowKey}-${gi}`}
-                          className="flex items-center gap-3"
-                        >
-                          <div
-                            className={`flex items-center gap-2 ${
-                              isMobileUi ? "scale-90 origin-left" : ""
-                            }`}
-                          >
-                            {g.tiles.slice(0, 3).map((t, ti) => (
-                              <MahjongTileCard
-                                key={`${t.suit}-${t.rank}-${gi}-${ti}`}
-                                tile={t}
-                                size="xs"
-                              />
-                            ))}
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              emitAcceptNormalChow(g.chowKey);
-                              setChowDecision(null);
-                            }}
-                            className={acceptButtonClass}
-                          >
-                            接受
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        emitPassNormalChow();
-                        setChowDecision(null);
-                      }}
-                      className={cancelButtonClass}
-                    >
-                      跳过
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : null}
-
-          {winDecision ? (
-            <div className="pointer-events-none absolute inset-0 z-30">
-              <div
-                className={`pointer-events-none absolute flex items-center justify-center gap-3 ${
-                  isPortraitPhone
-                    ? "left-1/2 top-1/2"
-                    : "left-1/2 bottom-[118px] -translate-x-1/2"
-                }`}
-                style={
-                  isPortraitPhone ? (portraitUiStyle ?? undefined) : undefined
-                }
-              >
-                <div
-                  className={
-                    isPortraitPhone && isMobileUi
-                      ? "-translate-x-0 translate-y-10"
-                      : undefined
-                  }
-                >
-                  <div
-                    className={`pointer-events-auto flex items-center gap-3 rounded-2xl border border-[#1d7b49]/60 bg-[#064e3b]/85 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-md ${
-                      isMobileUi ? "px-3 py-2" : "px-4 py-3"
-                    }`}
-                    role="dialog"
-                    aria-modal="true"
-                  >
+                  {/* Kong Decision */}
+                  {kongDecision && (
                     <div
-                      className={`max-w-[240px] text-center font-extrabold tracking-wide text-amber-100 ${
-                        isMobileUi ? "text-xs" : "text-sm"
+                      className={`pointer-events-auto flex items-center gap-3 rounded-2xl border border-[#1d7b49]/60 bg-[#064e3b]/85 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-md ${
+                        isMobileUi ? "px-3 py-2" : "px-4 py-3"
                       }`}
                     >
-                      {winDecision.message}
+                      {(() => {
+                        const g = kongDecision.groups[0];
+                        if (!g) return null;
+                        return (
+                          <>
+                            <div
+                              className={`flex items-center gap-2 ${
+                                isMobileUi ? "scale-90 origin-left" : ""
+                              }`}
+                            >
+                              {g.tiles.slice(0, 4).map((t, ti) => (
+                                <MahjongTileCard
+                                  key={`${t.suit}-${t.rank}-${ti}`}
+                                  tile={t}
+                                  size="xs"
+                                />
+                              ))}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (kongDecision.kind === "interrupt_kong") {
+                                    emitAcceptInterruptKong(g.kongKey);
+                                  } else if (
+                                    kongDecision.kind === "normal_kong"
+                                  ) {
+                                    emitAcceptNormalKong(g.kongKey);
+                                  } else {
+                                    emitAcceptKong(g.kongKey);
+                                  }
+                                  setKongDecision(null);
+                                }}
+                                className={acceptButtonClass}
+                              >
+                                接受
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (kongDecision.kind === "kong") {
+                                    emitPassKong();
+                                  } else if (
+                                    kongDecision.kind === "normal_kong"
+                                  ) {
+                                    emitPassNormalKong();
+                                  }
+                                  setKongDecision(null);
+                                }}
+                                className={cancelButtonClass}
+                              >
+                                跳过
+                              </button>
+                            </div>
+                          </>
+                        );
+                      })()}
                     </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          emitAcceptWin(winDecision.userId);
-                          setWinDecision(null);
-                        }}
-                        className={acceptButtonClass}
-                      >
-                        接受
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          emitPassWin(winDecision.userId);
-                          setWinDecision(null);
-                        }}
-                        className={cancelButtonClass}
-                      >
-                        跳过
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : null}
+                  )}
 
-          {canTakeShownTileDecision ? (
-            <div className="pointer-events-none absolute inset-0 z-30">
-              <div
-                className={`pointer-events-none absolute flex items-center justify-center gap-3 ${
-                  isPortraitPhone
-                    ? "left-1/2 top-1/2"
-                    : "left-1/2 bottom-[118px] -translate-x-1/2"
-                }`}
-                style={
-                  isPortraitPhone ? (portraitUiStyle ?? undefined) : undefined
-                }
-              >
-                <div
-                  className={
-                    isPortraitPhone && isMobileUi
-                      ? "-translate-x-0 translate-y-10"
-                      : undefined
-                  }
-                >
-                  <div
-                    className={`pointer-events-auto flex items-center gap-3 rounded-2xl border border-[#1d7b49]/60 bg-[#064e3b]/85 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-md ${
-                      isMobileUi ? "px-3 py-2" : "px-4 py-3"
-                    }`}
-                    role="dialog"
-                    aria-modal="true"
-                  >
-                    <div className="flex flex-col gap-2">
-                      <div className="text-center font-bold text-amber-100 mb-1">
-                        选择要拿的牌
-                      </div>
-                      {canTakeShownTileDecision.shownTiles.map(
-                        (tileData, index) => (
+                  {/* Pong Decision */}
+                  {pongDecision && (
+                    <div
+                      className={`pointer-events-auto flex items-center gap-3 rounded-2xl border border-[#1d7b49]/60 bg-[#064e3b]/85 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-md ${
+                        isMobileUi ? "px-3 py-2" : "px-4 py-3"
+                      }`}
+                    >
+                      {(() => {
+                        const g = pongDecision.groups[0];
+                        if (!g) return null;
+                        return (
+                          <>
+                            <div
+                              className={`flex items-center gap-2 ${
+                                isMobileUi ? "scale-90 origin-left" : ""
+                              }`}
+                            >
+                              {g.tiles.slice(0, 3).map((t, ti) => (
+                                <MahjongTileCard
+                                  key={`${t.suit}-${t.rank}-${ti}`}
+                                  tile={t}
+                                  size="xs"
+                                />
+                              ))}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (pongDecision.kind === "normal_pong") {
+                                    emitAcceptNormalPong(g.pongKey);
+                                  } else {
+                                    emitAcceptInterruptPong(g.pongKey);
+                                  }
+                                  setPongDecision(null);
+                                }}
+                                className={acceptButtonClass}
+                              >
+                                接受
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (pongDecision.kind === "normal_pong") {
+                                    emitPassNormalPong();
+                                  }
+                                  setPongDecision(null);
+                                }}
+                                className={cancelButtonClass}
+                              >
+                                跳过
+                              </button>
+                            </div>
+                          </>
+                        );
+                      })()}
+                    </div>
+                  )}
+
+                  {/* Chow Decision */}
+                  {chowDecision && (
+                    <div
+                      className={`pointer-events-auto flex items-center gap-3 rounded-2xl border border-[#1d7b49]/60 bg-[#064e3b]/85 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-md ${
+                        isMobileUi ? "px-3 py-2" : "px-4 py-3"
+                      }`}
+                    >
+                      <div className="flex flex-col gap-2">
+                        {chowDecision.groups.map((g, gi) => (
                           <div
-                            key={`${tileData.id}-${index}`}
+                            key={`${g.chowKey}-${gi}`}
                             className="flex items-center gap-3"
                           >
                             <div
@@ -3303,37 +3131,137 @@ export default function MahjongClient() {
                                 isMobileUi ? "scale-90 origin-left" : ""
                               }`}
                             >
-                              <MahjongTileCard
-                                key={`${tileData.tile.suit}-${tileData.tile.rank}-${index}`}
-                                tile={tileData.tile}
-                                size="xs"
-                              />
+                              {g.tiles.slice(0, 3).map((t, ti) => (
+                                <MahjongTileCard
+                                  key={`${t.suit}-${t.rank}-${gi}-${ti}`}
+                                  tile={t}
+                                  size="xs"
+                                />
+                              ))}
                             </div>
                             <button
                               type="button"
                               onClick={() => {
-                                emitAcceptShownTile(tileData.id, index);
-                                setCanTakeShownTileDecision(null);
+                                emitAcceptNormalChow(g.chowKey);
+                                setChowDecision(null);
                               }}
                               className={acceptButtonClass}
                             >
                               接受
                             </button>
                           </div>
-                        ),
-                      )}
+                        ))}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          emitPassNormalChow();
+                          setChowDecision(null);
+                        }}
+                        className={cancelButtonClass}
+                      >
+                        跳过
+                      </button>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        emitPassShownTile();
-                        setCanTakeShownTileDecision(null);
-                      }}
-                      className={cancelButtonClass}
+                  )}
+
+                  {/* Win Decision */}
+                  {winDecision && (
+                    <div
+                      className={`pointer-events-auto flex items-center gap-3 rounded-2xl border border-[#1d7b49]/60 bg-[#064e3b]/85 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-md ${
+                        isMobileUi ? "px-3 py-2" : "px-4 py-3"
+                      }`}
+                      role="dialog"
+                      aria-modal="true"
                     >
-                      跳过
-                    </button>
-                  </div>
+                      <div
+                        className={`max-w-[240px] text-center font-extrabold tracking-wide text-amber-100 ${
+                          isMobileUi ? "text-xs" : "text-sm"
+                        }`}
+                      >
+                        {winDecision.message}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            emitAcceptWin(winDecision.userId);
+                            setWinDecision(null);
+                          }}
+                          className={acceptButtonClass}
+                        >
+                          接受
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            emitPassWin(winDecision.userId);
+                            setWinDecision(null);
+                          }}
+                          className={cancelButtonClass}
+                        >
+                          跳过
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Can Take Shown Tile Decision */}
+                  {canTakeShownTileDecision && (
+                    <div
+                      className={`pointer-events-auto flex items-center gap-3 rounded-2xl border border-[#1d7b49]/60 bg-[#064e3b]/85 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-md ${
+                        isMobileUi ? "px-3 py-2" : "px-4 py-3"
+                      }`}
+                      role="dialog"
+                      aria-modal="true"
+                    >
+                      <div className="flex flex-col gap-2">
+                        <div className="text-center font-bold text-amber-100 mb-1">
+                          选择要拿的牌
+                        </div>
+                        {canTakeShownTileDecision.shownTiles.map(
+                          (tileData, index) => (
+                            <div
+                              key={`${tileData.id}-${index}`}
+                              className="flex items-center gap-3"
+                            >
+                              <div
+                                className={`flex items-center gap-2 ${
+                                  isMobileUi ? "scale-90 origin-left" : ""
+                                }`}
+                              >
+                                <MahjongTileCard
+                                  key={`${tileData.tile.suit}-${tileData.tile.rank}-${index}`}
+                                  tile={tileData.tile}
+                                  size="xs"
+                                />
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  emitAcceptShownTile(tileData.id, index);
+                                  setCanTakeShownTileDecision(null);
+                                }}
+                                className={acceptButtonClass}
+                              >
+                                接受
+                              </button>
+                            </div>
+                          ),
+                        )}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          emitPassShownTile();
+                          setCanTakeShownTileDecision(null);
+                        }}
+                        className={cancelButtonClass}
+                      >
+                        跳过
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

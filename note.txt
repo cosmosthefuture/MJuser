@@ -69,8 +69,8 @@ const sideDiscardCols = 5;
 
 flower tile position
                 isMobileUi ? "left-[60%] top-4" : "left-4 top-24"
+#kong ကို နောက် တစ် round မှ kong လုပ်ချင်ရင်ကော
 
 
 
-kong ကို နောက် တစ် round မှ kong လုပ်ချင်ရင်ကော
-pass show tile 2 tiles 
+clear room from admim
