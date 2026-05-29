@@ -1476,6 +1476,33 @@ export default function MahjongClient() {
         setShowEndRoundButton(true);
       };
 
+      const handleUpdatePlayers = (payload: unknown) => {
+        if (cancelled) return;
+        if (!Array.isArray(payload)) return;
+        const players = payload
+          .map((p) => {
+            if (typeof p !== "object" || p === null) return null;
+            const userIdRaw =
+              (p as { user_id?: unknown; userId?: unknown }).user_id ??
+              (p as { user_id?: unknown; userId?: unknown }).userId;
+            const nameRaw = (p as { name?: unknown }).name;
+            const userId = Number(userIdRaw);
+            const name = typeof nameRaw === "string" ? nameRaw : "";
+            if (!Number.isFinite(userId)) return null;
+            return { userId, name };
+          })
+          .filter((p): p is { userId: number; name: string } => !!p);
+
+        // Pre-round: show sample tiles / walls only for the number of players in the room.
+        // Don't override seat-based layout once hands are dealt.
+        if (hand.length > 0 || selfSeatPosition != null) return;
+        const sides: Array<"bottom" | "right" | "top" | "left"> = ["bottom"];
+        if (players.length >= 2) sides.push("right");
+        if (players.length >= 3) sides.push("top");
+        if (players.length >= 4) sides.push("left");
+        setActiveSides(sides);
+      };
+
       const handleStartRollingDice = () => {
         if (cancelled) return;
         setShowDrawPile(false);
@@ -2046,6 +2073,9 @@ export default function MahjongClient() {
       socket.off("mahjong:update_round_players", handleUpdateRoundPlayers);
       socket.on("mahjong:update_round_players", handleUpdateRoundPlayers);
 
+      socket.off("mahjong:update_players", handleUpdatePlayers);
+      socket.on("mahjong:update_players", handleUpdatePlayers);
+
       socket.off("mahjong:start_rolling_dice", handleStartRollingDice);
       socket.on("mahjong:start_rolling_dice", handleStartRollingDice);
 
@@ -2158,6 +2188,7 @@ export default function MahjongClient() {
       socket?.off("mahjong:countdown");
       socket?.off("mahjong:round_started");
       socket?.off("mahjong:update_round_players");
+      socket?.off("mahjong:update_players");
       socket?.off("mahjong:start_rolling_dice");
       socket?.off("mahjong:dice_rolled");
       socket?.off("mahjong:wall_count_updated");

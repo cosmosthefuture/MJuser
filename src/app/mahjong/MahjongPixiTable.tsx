@@ -459,6 +459,17 @@ export default function MahjongPixiTable({
   const rackInnerWidth = Math.max(0, rackInnerRight - rackInnerLeft);
   const handWidth =
     hand.length * handTileW + Math.max(0, hand.length - 1) * gap;
+  const bottomSampleGap = 1;
+  const bottomSampleCount = Math.max(
+    1,
+    Math.min(
+      13,
+      Math.floor(
+        (rackInnerWidth + bottomSampleGap) /
+          Math.max(1, tileStyle.mini.w + bottomSampleGap),
+      ),
+    ),
+  );
 
   const meldGroupGap = 10;
   const meldsWidth = useMemo(() => {
@@ -1648,6 +1659,63 @@ export default function MahjongPixiTable({
 
               return <>{out}</>;
             })()}
+
+            {hand.length === 0 ? (
+              (() => {
+                const count = bottomSampleCount;
+                const w = tileStyle.mini.w;
+                const h = tileStyle.mini.h;
+                const totalW =
+                  count * w + Math.max(0, count - 1) * bottomSampleGap;
+                const startX = Math.floor(designWidth / 2 - totalW / 2);
+                const y = Math.floor(rackY + (rackH - h) / 2);
+                const out: Array<React.ReactNode> = [];
+                for (let i = 0; i < count; i++) {
+                  const x = startX + i * (w + bottomSampleGap);
+                  out.push(
+                    <pixiContainer key={`sample-bottom-${i}`} x={x} y={y}>
+                      {renderTileShadow(
+                        w,
+                        h,
+                        0,
+                        0,
+                        tileShadow.radiusMini,
+                      )}
+                      {tileBgTex && (
+                        <pixiSprite
+                          texture={tileBgTex}
+                          x={0}
+                          y={0}
+                          width={w}
+                          height={h}
+                        />
+                      )}
+                      {tileBackTex && (
+                        <pixiSprite
+                          texture={tileBackTex}
+                          x={0}
+                          y={0}
+                          width={w}
+                          height={h}
+                          alpha={0.98}
+                        />
+                      )}
+                      <pixiGraphics
+                        draw={(g) => {
+                          g.clear();
+                          g.beginFill(0xffffff, 0.08);
+                          g.moveTo(0, 0);
+                          g.lineTo(w, 0);
+                          g.lineTo(0, h);
+                          g.endFill();
+                        }}
+                      />
+                    </pixiContainer>,
+                  );
+                }
+                return <>{out}</>;
+              })()
+            ) : null}
 
             {hand.map((t, idx) => {
               const x = handStartX + idx * (handTileW + gap);
