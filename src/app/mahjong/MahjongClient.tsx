@@ -2008,11 +2008,11 @@ export default function MahjongClient() {
         setShowEndRoundButton(false);
 
         // Redirect to game rooms after a short delay
-        setTimeout(() => {
-          if (!cancelled) {
-            router.push("/game-rooms");
-          }
-        }, 3000);
+        // setTimeout(() => {
+        //   if (!cancelled) {
+        //     router.push("/game-rooms");
+        //   }
+        // }, 3000);
       };
 
       const handleShowStartRound = () => {
@@ -3282,16 +3282,16 @@ export default function MahjongClient() {
                   }
                 >
                   <div
-                    className={`pointer-events-auto flex flex-col items-center gap-3 rounded-2xl border border-[#1d7b49]/60 bg-[#064e3b]/85 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-md ${
+                    className={`pointer-events-auto flex items-center gap-3 rounded-2xl border border-[#1d7b49]/60 bg-[#064e3b]/85 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-md ${
                       isMobileUi ? "px-3 py-2" : "px-4 py-3"
                     }`}
                     role="dialog"
                     aria-modal="true"
                   >
-                    <div className="text-center font-bold text-amber-100 mb-2">
-                      选择要拿的牌
-                    </div>
                     <div className="flex flex-col gap-2">
+                      <div className="text-center font-bold text-amber-100 mb-1">
+                        选择要拿的牌
+                      </div>
                       {canTakeShownTileDecision.shownTiles.map(
                         (tileData, index) => (
                           <div
