@@ -464,6 +464,20 @@ export default function MahjongClient() {
     });
   };
 
+  const emitPassShownTile = () => {
+    const socket = getSocket();
+    if (!socket) return;
+    if (roomId == null || authUserId == null) return;
+    console.log("[ws] emit mahjong:pass_shown_tile", {
+      roomId: String(roomId),
+      userId: authUserId,
+    });
+    socket.emit("mahjong:pass_shown_tile", {
+      roomId: String(roomId),
+      userId: authUserId,
+    });
+  };
+
   useEffect(() => {
     if (process.env.NODE_ENV === "production") return;
 
@@ -3302,7 +3316,16 @@ export default function MahjongClient() {
                         ),
                       )}
                     </div>
-                    {/* Note: According to requirements, no pass button needed for now */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        emitPassShownTile();
+                        setCanTakeShownTileDecision(null);
+                      }}
+                      className={cancelButtonClass}
+                    >
+                      跳过
+                    </button>
                   </div>
                 </div>
               </div>
