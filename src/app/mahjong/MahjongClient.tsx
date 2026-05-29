@@ -1602,6 +1602,14 @@ export default function MahjongClient() {
 
       const handleWinnerReveal = (payload: unknown) => {
         if (cancelled) return;
+
+        // Close all decision modals
+        setKongDecision(null);
+        setPongDecision(null);
+        setChowDecision(null);
+        setWinDecision(null);
+        setCanTakeShownTileDecision(null);
+
         const p: WinnerRevealPayload | null = Array.isArray(payload)
           ? payload.length > 0 &&
             typeof payload[0] === "object" &&
