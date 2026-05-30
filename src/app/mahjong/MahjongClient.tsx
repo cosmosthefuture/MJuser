@@ -2145,6 +2145,15 @@ export default function MahjongClient() {
         handleRemoveCanTakeShownTileDecision,
       );
 
+      socket.off(
+        "mahjong:remove_shown_tile_decision",
+        handleRemoveCanTakeShownTileDecision,
+      );
+      socket.on(
+        "mahjong:remove_shown_tile_decision",
+        handleRemoveCanTakeShownTileDecision,
+      );
+
       socket.off("mahjong:ask_win_decision", handleAskWinDecision);
       socket.on("mahjong:ask_win_decision", handleAskWinDecision);
 
@@ -2208,6 +2217,7 @@ export default function MahjongClient() {
       socket?.off("mahjong:remove_pong_decision");
       socket?.off("mahjong:remove_chow_decision");
       socket?.off("mahjong:remove_can_take_shown_tile_decision");
+      socket?.off("mahjong:remove_shown_tile_decision");
       socket?.off("mahjong:ask_win_decision");
       socket?.off("mahjong:remove_win_decision");
       socket?.off("mahjong:initial_hand_state");
